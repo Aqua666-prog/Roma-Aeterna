@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "2.70.0-opes-imperii"
+GAME_VERSION = "2.70.1-siege-damage-hotfix"
 
 import random
 import ast
@@ -2481,6 +2481,158 @@ normalize_province_city_data()
 def ensure_city_campaigns(player):
     if not hasattr(player, "city_campaigns") or not isinstance(player.city_campaigns, dict):
         player.city_campaigns = {}
+
+
+# ─── v2.70.1: ПРОЦЕНТНЫЕ ПОВРЕЖДЕНИЯ ГОРОДОВ ───────────────────────────────
+# Город имеет 100% обороны. Артиллерия и легионы постепенно наносят ей урон,
+# однако присоединить город может только успешный штурм легиона.
+CITY_SIEGE_MAX_DAMAGE = 100
+CITY_SIEGE_GAME_DAMAGE_MULT = {
+    "easy": 1.30,
+    "normal": 1.00,
+    "hard": 0.86,
+    "hardcore": 0.78,
+    "madness": 0.62,
+}
+
+
+def ensure_city_siege_damage(player) -> dict[str, dict[str, int]]:
+    state = getattr(player, "city_siege_damage", None)
+    if not isinstance(state, dict):
+        state = {}
+        setattr(player, "city_siege_damage", state)
+
+    clean: dict[str, dict[str, int]] = {}
+    for province_name, cities in state.items():
+        if not isinstance(cities, dict):
+            continue
+        province_key = str(province_name)
+        clean_cities: dict[str, int] = {}
+        for city_name, damage in cities.items():
+            value = safe_int(damage, 0, 0, CITY_SIEGE_MAX_DAMAGE)
+            if value > 0:
+                clean_cities[str(city_name)] = value
+        if clean_cities:
+            clean[province_key] = clean_cities
+
+    player.city_siege_damage = clean
+    return clean
+
+
+def city_siege_damage(player, province_name: str, city_name: str) -> int:
+    state = ensure_city_siege_damage(player)
+    return safe_int(
+        state.get(str(province_name), {}).get(str(city_name), 0),
+        0,
+        0,
+        CITY_SIEGE_MAX_DAMAGE,
+    )
+
+
+def city_siege_remaining(player, province_name: str, city_name: str) -> int:
+    return max(0, CITY_SIEGE_MAX_DAMAGE - city_siege_damage(player, province_name, city_name))
+
+
+def apply_city_siege_damage(
+    player,
+    province_name: str,
+    city_name: str,
+    amount: int,
+) -> tuple[int, int, int]:
+    """Добавляет урон и возвращает (фактический урон, общий урон, остаток обороны)."""
+    state = ensure_city_siege_damage(player)
+    province_key = str(province_name)
+    city_key = str(city_name)
+    old = safe_int(
+        state.get(province_key, {}).get(city_key, 0),
+        0,
+        0,
+        CITY_SIEGE_MAX_DAMAGE,
+    )
+    requested = max(0, safe_int(amount, 0))
+    new = min(CITY_SIEGE_MAX_DAMAGE, old + requested)
+    actual = new - old
+    if new > 0:
+        state.setdefault(province_key, {})[city_key] = new
+    return actual, new, max(0, CITY_SIEGE_MAX_DAMAGE - new)
+
+
+def clear_city_siege_damage(player, province_name: str, city_name: str | None = None) -> None:
+    state = ensure_city_siege_damage(player)
+    province_key = str(province_name)
+    if city_name is None:
+        state.pop(province_key, None)
+        return
+    cities = state.get(province_key)
+    if not isinstance(cities, dict):
+        return
+    cities.pop(str(city_name), None)
+    if not cities:
+        state.pop(province_key, None)
+
+
+def city_damage_game_multiplier(player) -> float:
+    difficulty = str(getattr(player, "difficulty", "normal"))
+    return float(CITY_SIEGE_GAME_DAMAGE_MULT.get(difficulty, 1.0))
+
+
+def city_local_defense_multiplier(city: dict | None) -> float:
+    difficulty = safe_int((city or {}).get("difficulty", 3), 3, 1, 10)
+    return max(0.55, 1.08 - 0.055 * difficulty)
+
+
+def city_effective_strength(base_strength: int, accumulated_damage: int) -> int:
+    """Повреждённая оборона ослабляет гарнизон, но не удаляет его полностью."""
+    damage = safe_int(accumulated_damage, 0, 0, CITY_SIEGE_MAX_DAMAGE)
+    factor = 1.0 - 0.70 * (damage / CITY_SIEGE_MAX_DAMAGE)
+    return max(1, int(round(max(1, base_strength) * factor)))
+
+
+def calculate_legion_city_damage(player, legion, city: dict, won: bool) -> int:
+    """Главный источник урона — уровень качества легиона 1–10."""
+    quality = safe_int(getattr(legion, "quality", 1), 1, 1, 10)
+    strength = safe_int(getattr(legion, "strength", quality * 10), quality * 10, 1, 100)
+    morale = safe_int(getattr(legion, "morale", 70), 70, 0, 100)
+
+    base = 6.0 + quality * 4.0
+    condition = 0.65 + strength / 400.0 + morale / 500.0
+    experience = 1.0
+    if bool(getattr(legion, "veterans", False)):
+        experience += 0.10
+    if bool(getattr(legion, "elite", False)):
+        experience += 0.10
+
+    battle_result = 1.0 if won else 0.38
+    variance = random.uniform(0.90, 1.10)
+    damage = round(
+        base
+        * condition
+        * experience
+        * city_local_defense_multiplier(city)
+        * city_damage_game_multiplier(player)
+        * battle_result
+        * variance
+    )
+    if won:
+        return max(4, min(58, damage))
+    return max(1, min(22, damage))
+
+
+def calculate_artillery_city_damage(player, city: dict) -> int:
+    """Артиллерия наносит только процентный урон и никогда не захватывает город."""
+    siege = artillery_role_power(player, "siege")
+    breach = artillery_role_power(player, "breach")
+    support = artillery_role_power(player, "support")
+    raw = 4.0 + siege * 0.55 + breach * 0.30 + support * 0.10
+    variance = random.uniform(0.85, 1.15)
+    damage = round(
+        raw
+        * city_local_defense_multiplier(city)
+        * city_damage_game_multiplier(player)
+        * variance
+    )
+    return max(2, min(50, damage))
+
 
 def captured_city_names(player, province_name: str) -> set:
     ensure_city_campaigns(player)
@@ -8564,6 +8716,7 @@ def ensure_all_states(player):
         return None
     for fn_name in (
         "ensure_city_campaigns",
+        "ensure_city_siege_damage",
         "ensure_province_details",
         "ensure_expansion_state",
         "ensure_wonders_state",
@@ -9924,6 +10077,7 @@ class Player:
     legions: list[Legion]
     provinces: list[dict[str, Any]]
     city_campaigns: dict[str, list[str]]
+    city_siege_damage: dict[str, dict[str, int]]
     governors: dict[str, Governor]
     laws_passed: list[str]
     year: int
@@ -9959,6 +10113,7 @@ class Player:
         self.legions     : list[Legion] = []
         self.provinces   : list[dict]   = []   # полностью завоёванные провинции
         self.city_campaigns : dict[str, list[str]] = {}   # частично взятые города в незавоёванных провинциях
+        self.city_siege_damage : dict[str, dict[str, int]] = {}  # процент повреждения обороны незахваченных городов
         self.governors   : dict[str, Governor] = {}   # наместники по имени провинции
         self.province_revolt_warnings: dict[str, int] = {}  # 1=предупреждение, 2=открытый кризис
         self.armyless_turns = 0  # сколько ходов Республика остаётся без единого легиона
@@ -12097,6 +12252,7 @@ def annex_province_after_campaign(player, target: dict):
             unlocked_now.append(unit["name"])
     register_province_conquest(player, target_copy, target, captured_ratio)
     player.city_campaigns.pop(target["name"], None)
+    clear_city_siege_damage(player, target["name"])
     configure_conquered_province_economy(player, target_copy, initial=True)
     return target_copy, unlocked_now
 
@@ -12840,7 +12996,15 @@ def province_menu(player: Player):
                 enemy_name = enemy["name"] if enemy else "Местные племена"
                 done, total = city_campaign_progress(player, p["name"])
                 next_city = next_city_to_attack(player, p)
-                city_note = f"след.: {next_city['name']} ({CITY_DIFFICULTY_LABELS.get(next_city.get('difficulty', 3), 'обычный')}, ур.{next_city.get('difficulty', 3)})" if next_city else "все города взяты"
+                if next_city:
+                    siege_damage = city_siege_damage(player, p["name"], next_city["name"])
+                    city_note = (
+                        f"след.: {next_city['name']} "
+                        f"({CITY_DIFFICULTY_LABELS.get(next_city.get('difficulty', 3), 'обычный')}, "
+                        f"ур.{next_city.get('difficulty', 3)}, оборона {CITY_SIEGE_MAX_DAMAGE - siege_damage}%)"
+                    )
+                else:
+                    city_note = "все города взяты"
                 if RICH_AVAILABLE:
                     rows.append((str(i + 1), f"[cyan]{p['name']}[/]", str(p["wealth"]), f"{done}/{total}", city_note, f"[red]{enemy_name}[/] ~{shown_str}"))
                 else:
@@ -12955,6 +13119,12 @@ def province_menu(player: Player):
 
         print(clr(f"\n  Цель атаки: {target_city['name']} ({target_city.get('type', 'город')}) в {target['name']}", C.BOLD + C.GOLD))
         print(f"  Сложность города: {target_city.get('difficulty', 3)}/10 — {CITY_DIFFICULTY_LABELS.get(target_city.get('difficulty', 3), 'обычный')}")
+        current_damage = city_siege_damage(player, target["name"], target_city["name"])
+        current_remaining = CITY_SIEGE_MAX_DAMAGE - current_damage
+        print(clr(
+            f"  Оборона города: {current_remaining}%  •  накопленный урон: {current_damage}%",
+            C.RED if current_remaining <= 25 else C.GOLD if current_remaining <= 60 else C.CYAN,
+        ))
 
         ensure_artillery_state(player)
         attack_options = []
@@ -12963,9 +13133,11 @@ def province_menu(player: Player):
             attack_options.append("1")
         else:
             print(clr("  1. Штурм легионом [нет легионов]", C.GRAY))
-        if artillery_role_power(player, "siege") > 0:
+        if artillery_role_power(player, "siege") > 0 and current_damage < CITY_SIEGE_MAX_DAMAGE:
             print(f"  2. Атака артиллерией (осада {artillery_role_power(player, 'siege')}, боезапас {player.artillery_supplies})")
             attack_options.append("2")
+        elif current_damage >= CITY_SIEGE_MAX_DAMAGE:
+            print(clr("  2. Атака артиллерией [оборона уже разрушена]", C.GRAY))
         else:
             print(clr("  2. Атака артиллерией [нет осадной артиллерии]", C.GRAY))
         print("  Q. Отмена")
@@ -12975,19 +13147,24 @@ def province_menu(player: Player):
 
         if method == "2":
             artillery_direct_province_attack(player, target, target_city, enemy_def, mult)
-            print(clr("\n  Артиллерия не занимает город сама: для захвата нужен следующий штурм легионом.", C.GRAY))
+            print(clr("\n  Артиллерия нанесла процентный урон, но занять город может только легион.", C.GRAY))
             pause(); continue
 
         print(f"\n{clr('  Выберите легион для похода:', C.GOLD)}")
         for i, l in enumerate(player.legions):
-            print(f"  {i+1}. {l.name} (сила {l.strength}, генерал {l.general.name})")
+            print(
+                f"  {i+1}. {l.name} "
+                f"(уровень {l.quality}/10, сила {l.strength}, мораль {l.morale}, генерал {l.general.name})"
+            )
         li_valid = [str(i + 1) for i in range(len(player.legions))] + ["Q"]
         li = read_choice(f"{clr('  Легион (или Q — отменить): ', C.CYAN)}", li_valid)
         if li == "Q":
             continue
 
         legion = player.legions[int(li) - 1]
-        city_strength = city_strength_for_attack(target_city, target, enemy_def, mult)
+        base_city_strength = city_strength_for_attack(target_city, target, enemy_def, mult)
+        damage_before = city_siege_damage(player, target["name"], target_city["name"])
+        city_strength = city_effective_strength(base_city_strength, damage_before)
         enemy_name = enemy_def["name"] if enemy_def else "Местные племена"
         enemy = {
             "name": f"{enemy_name}: гарнизон {target_city['name']}",
@@ -13000,16 +13177,34 @@ def province_menu(player: Player):
             pause()
             continue
 
+        print(clr(
+            f"  Повреждения ослабили расчётную силу гарнизона: {base_city_strength} → {city_strength}.",
+            C.GRAY,
+        ))
         won = resolve_battle(player, legion, enemy)
         action_cost = city_action_cost(target_city)
         spend_legion_attack_action(legion, target_city)
         legion.location = target_city["name"]
         print(clr(f"  Логистика: {legion.name} потратил {action_cost} ОД; осталось {legion.action_points}. Усталость: {legion.fatigue}/100.", C.CYAN))
-        if won:
+
+        rolled_damage = calculate_legion_city_damage(player, legion, target_city, won)
+        actual_damage, total_damage, remaining = apply_city_siege_damage(
+            player, target["name"], target_city["name"], rolled_damage
+        )
+        damage_color = C.GREEN if won else C.GOLD
+        print(clr(
+            f"  🏰 {legion.name} наносит городу {actual_damage}% урона. "
+            f"Повреждение {total_damage}%, оборона {remaining}%.",
+            C.BOLD + damage_color,
+        ))
+
+        captured_now = bool(won and total_damage >= CITY_SIEGE_MAX_DAMAGE)
+        if captured_now:
             ensure_city_campaigns(player)
             taken = player.city_campaigns.setdefault(target["name"], [])
             if target_city["name"] not in taken:
                 taken.append(target_city["name"])
+            clear_city_siege_damage(player, target["name"], target_city["name"])
             city_conquest_reward(player, target, target_city, source="assault", announce=True)
             done, total = city_campaign_progress(player, target["name"])
             print(clr(f"\n  Город {target_city['name']} взят! Прогресс завоевания {target['name']}: {done}/{total}.", C.BOLD + C.GREEN))
@@ -13028,9 +13223,36 @@ def province_menu(player: Player):
                     print(clr("  🏹 Открыты местные части: " + ", ".join(unlocked_now), C.CYAN))
                 log_event(player, f"{target['name']} присоединена к Республике после покорения {total} городов")
             pause(); continue
+
+        if won:
+            print(clr(
+                "  Легион выиграл бой у стен, но город ещё держится. "
+                "Для захвата нужно довести повреждение до 100% успешным штурмом.",
+                C.GOLD,
+            ))
+            log_event(
+                player,
+                f"Штурм {target_city['name']}: победа в бою, урон +{actual_damage}%, "
+                f"всего {total_damage}%",
+            )
         else:
-            log_event(player, f"Поход на город {target_city['name']} в {target['name']} закончился поражением")
-            pause(); continue
+            if total_damage >= CITY_SIEGE_MAX_DAMAGE:
+                print(clr(
+                    "  Оборона города разрушена, но штурм отбит. "
+                    "Следующий успешный удар легиона завершит захват.",
+                    C.RED,
+                ))
+            else:
+                print(clr(
+                    f"  Штурм отбит, однако легион успел нанести {actual_damage}% урона укреплениям.",
+                    C.GOLD,
+                ))
+            log_event(
+                player,
+                f"Неудачный штурм {target_city['name']}: урон +{actual_damage}%, "
+                f"всего {total_damage}%",
+            )
+        pause(); continue
 
 
 def train_legion_multiple_levels(player: Player, legion: Legion, levels: int) -> int:
@@ -15618,27 +15840,52 @@ def guard_trade_routes(player):
 
 
 def try_legion_breakthrough(player, legion: Legion, target: dict, mult: float) -> tuple[bool, str]:
-    """После победного штурма легион иногда берёт второй город рывком."""
+    """После победы легион может повредить следующий город и взять его лишь при 100% урона."""
     next_city = next_city_to_attack(player, target)
     if not next_city:
         return False, ""
     can_attack, reason = can_legion_attack_city(legion, next_city)
     if not can_attack:
         return False, reason
+
     chance = 14 + max(0, safe_int(getattr(player, "morale", 70), 70) - 60) // 2 + max(0, legion.quality - 5) * 3
-    if getattr(legion, "veterans", False): chance += 7
+    if getattr(legion, "veterans", False):
+        chance += 7
     chance = max(5, min(45, chance))
     if random.randint(1, 100) > chance:
         return False, f"прорыв не удался ({chance}%)"
+
     spend_legion_attack_action(legion, next_city)
     legion.location = next_city["name"]
+    raw_damage = calculate_legion_city_damage(player, legion, next_city, True)
+    breakthrough_damage = max(4, int(round(raw_damage * 0.75)))
+    actual, total_damage, remaining = apply_city_siege_damage(
+        player, target["name"], next_city["name"], breakthrough_damage
+    )
+
+    if total_damage < CITY_SIEGE_MAX_DAMAGE:
+        log_event(
+            player,
+            f"Прорыв: {legion.name} повредил оборону {next_city['name']} "
+            f"на {actual}% (всего {total_damage}%)",
+        )
+        return False, (
+            f"⚡ Прорыв! {legion.name} атаковал следующий город {next_city['name']}: "
+            f"+{actual}% урона, оборона {remaining}%."
+        )
+
     taken = player.city_campaigns.setdefault(target["name"], [])
     if next_city["name"] not in taken:
         taken.append(next_city["name"])
+    clear_city_siege_damage(player, target["name"], next_city["name"])
     reward = city_conquest_reward(player, target, next_city, source="breakthrough", announce=False)
     player.glory += 8 + safe_int(next_city.get("difficulty", 3), 3)
     log_event(player, f"Прорыв: {legion.name} взял второй город {next_city['name']} в {target['name']}")
-    return True, f"⚡ Прорыв! {legion.name} развил успех и взял второй город: {next_city['name']} (шанс {chance}%). Трофеи: +{reward['gold']} золота, +{reward['grain']} зерна."
+    return True, (
+        f"⚡ Прорыв! {legion.name} добил оборону и взял второй город: {next_city['name']} "
+        f"(шанс {chance}%). Трофеи: +{reward['gold']} золота, +{reward['grain']} зерна."
+    )
+
 
 def show_politics_menu(player):
     ensure_republic_overhaul_state(player)
@@ -18723,6 +18970,7 @@ def ensure_all_states(player):
 
     for fn_name in (
         "ensure_city_campaigns",
+        "ensure_city_siege_damage",
         "ensure_province_details",
         "ensure_expansion_state",
         "ensure_wonders_state",
@@ -21566,7 +21814,27 @@ def ensure_artillery_state(player) -> dict:
     player.artillery_supplies = safe_int(getattr(player, "artillery_supplies", 0), 0, 0, 9999)
     if not hasattr(player, "artillery_prepared_bombardments") or not isinstance(player.artillery_prepared_bombardments, list):
         player.artillery_prepared_bombardments = []
-    player.artillery_prepared_bombardments = [x for x in player.artillery_prepared_bombardments if isinstance(x, dict)][-12:]
+
+    # Миграция старой системы "пролом + поддержка" в единый процентный урон.
+    legacy_bombardments = [
+        x for x in player.artillery_prepared_bombardments
+        if isinstance(x, dict)
+    ][-12:]
+    if legacy_bombardments:
+        for item in legacy_bombardments:
+            province_name = str(item.get("province", ""))
+            city_name = str(item.get("city", ""))
+            if province_name and city_name:
+                legacy_damage = max(
+                    1,
+                    min(
+                        45,
+                        safe_int(item.get("breach", 0), 0)
+                        + safe_int(item.get("support", 0), 0) // 4,
+                    ),
+                )
+                apply_city_siege_damage(player, province_name, city_name, legacy_damage)
+        player.artillery_prepared_bombardments = []
     return player.artillery_inventory
 
 
@@ -21667,7 +21935,9 @@ def _artillery_summary_lines(player) -> list[str]:
 
 
 def artillery_prepare_bombardment(player) -> None:
+    """Наносит выбранному городу процентный урон без возможности захвата."""
     ensure_artillery_state(player)
+    ensure_city_siege_damage(player)
     power = artillery_role_power(player, "siege")
     if power <= 0:
         print(clr("  Нет осадной артиллерии.", C.RED))
@@ -21676,18 +21946,23 @@ def artillery_prepare_bombardment(player) -> None:
     valid_targets: list[tuple[dict, dict]] = []
     for prov in frontier_provinces(player):
         city = next_city_to_attack(player, prov)
-        if city:
+        if city and city_siege_damage(player, prov["name"], city["name"]) < CITY_SIEGE_MAX_DAMAGE:
             valid_targets.append((prov, city))
 
     if not valid_targets:
         print(clr("  Нет городов, требующих обстрела.", C.GRAY))
         return
 
-    print(clr("\n  🎯 Выберите провинцию для подготовки штурма:", C.BOLD + C.GOLD))
+    print(clr("\n  🎯 Выберите город для артиллерийского обстрела:", C.BOLD + C.GOLD))
     valid = []
     for i, (prov, city) in enumerate(valid_targets, 1):
         done, total = city_campaign_progress(player, prov["name"])
-        print(f"  {i}. {prov['name']} — цель {city['name']} ({done}/{total}), сложность {city.get('difficulty', 3)}/10")
+        damage = city_siege_damage(player, prov["name"], city["name"])
+        remaining = CITY_SIEGE_MAX_DAMAGE - damage
+        print(
+            f"  {i}. {prov['name']} — {city['name']} ({done}/{total}), "
+            f"оборона {remaining}%, повреждение {damage}%, сложность {city.get('difficulty', 3)}/10"
+        )
         valid.append(str(i))
 
     ch = read_choice(clr("  Цель (или Q): ", C.CYAN), valid + ["Q"])
@@ -21695,26 +21970,33 @@ def artillery_prepare_bombardment(player) -> None:
         return
 
     prov, city = valid_targets[int(ch) - 1]
-    supply_cost = max(4, min(30, power // 12))
+    supply_cost = max(4, min(35, power // 10 + safe_int(city.get("difficulty", 3), 3)))
     if not _artillery_spend_supplies(player, supply_cost):
         return
 
-    breach = max(5, min(38, artillery_role_power(player, "breach") // 4 + random.randint(2, 8)))
-    support = max(3, min(28, artillery_role_power(player, "support") // 6 + random.randint(1, 5)))
-    item = {
-        "province": prov["name"],
-        "city": city["name"],
-        "breach": breach,
-        "support": support,
-        "turn": safe_int(getattr(player, "turn", 1), 1),
-    }
-    player.artillery_prepared_bombardments.append(item)
-    print(clr(f"  ☄ Обстрел подготовлен: {city['name']} в {prov['name']}. Вражеская сила -{breach}, бонус легиону +{support}. Боезапас -{supply_cost}.", C.GREEN))
-    log_event(player, f"Артиллерия подготовила штурм {city['name']} в {prov['name']}: пролом {breach}, поддержка {support}")
+    rolled_damage = calculate_artillery_city_damage(player, city)
+    actual, total_damage, remaining = apply_city_siege_damage(
+        player, prov["name"], city["name"], rolled_damage
+    )
+    print(clr(
+        f"  ☄ {city['name']}: артиллерия наносит {actual}% урона. "
+        f"Повреждение {total_damage}%, оборона {remaining}%. Боезапас -{supply_cost}.",
+        C.BOLD + C.GREEN,
+    ))
+    if total_damage >= CITY_SIEGE_MAX_DAMAGE:
+        print(clr(
+            "  Стены и оборонительные сооружения уничтожены, но город не занят: "
+            "для захвата нужен успешный штурм легиона.",
+            C.GOLD,
+        ))
+    log_event(
+        player,
+        f"Артиллерия обстреляла {city['name']} в {prov['name']}: "
+        f"+{actual}% урона, всего {total_damage}%",
+    )
 
 
 _resolve_battle_v242_original = _legacy_resolve_battle_aux_gate_v225
-
 
 
 def bombard_barbarian_tribe(player, tribe_key: str) -> None:
@@ -22600,58 +22882,63 @@ def resolve_battle(player: Player, legion: Legion, enemy: dict, is_civil_war: bo
 
 
 def artillery_direct_province_attack(player, target: dict, target_city: dict, enemy_def: dict | None, mult: float) -> bool | None:
-    """Артиллерия готовит штурм, но больше не может сама брать города.
-
-    Удачный залп даёт большой пролом и славу, однако город остаётся незанятым,
-    пока туда не войдёт легион или ауксилия. Так осада становится поддержкой
-    манёвра, а не автозахватом территории.
-    """
+    """Прямой обстрел наносит процентный урон; артиллерия город не захватывает."""
     ensure_artillery_state(player)
+    ensure_city_siege_damage(player)
     power = artillery_role_power(player, "siege")
-    support = artillery_role_power(player, "support")
-    breach_power = artillery_role_power(player, "breach")
     if power <= 0:
         print(clr("  Нет осадной артиллерии. Купите орудия в магазине артиллерии.", C.RED))
         return None
 
-    city_strength = city_strength_for_attack(target_city, target, enemy_def, mult)
-    difficulty = safe_int(target_city.get("difficulty", 3), 3)
-    supply_cost = max(5, min(45, city_strength // 4 + difficulty + max(0, power // 24)))
+    old_damage = city_siege_damage(player, target["name"], target_city["name"])
+    if old_damage >= CITY_SIEGE_MAX_DAMAGE:
+        print(clr(
+            "  Оборона города уже полностью разрушена. Дальнейший обстрел бесполезен; "
+            "нужен штурм легиона.",
+            C.GOLD,
+        ))
+        return False
+
+    difficulty = safe_int(target_city.get("difficulty", 3), 3, 1, 10)
+    supply_cost = max(5, min(45, power // 9 + difficulty * 2))
     if not _artillery_spend_supplies(player, supply_cost):
         return None
 
-    attacker_mod = power // 8 + support // 16 + breach_power // 18
-    defender_mod = city_strength // 6 + difficulty
-    chance = combat_probability(attacker_mod, defender_mod)
+    rolled_damage = calculate_artillery_city_damage(player, target_city)
+    actual, total_damage, remaining = apply_city_siege_damage(
+        player, target["name"], target_city["name"], rolled_damage
+    )
 
-    print(clr(f"\n  ☄ АРТИЛЛЕРИЙСКАЯ ПОДГОТОВКА: {target_city['name']} в {target['name']}", C.BOLD + C.GOLD))
-    print(f"  Прогноз мощного пролома: {chance}% — {combat_quality_label(chance)}.")
-    print(f"  Осада {power}, поддержка {support}, пролом {breach_power}. Гарнизон ~{city_strength}. Боезапас -{supply_cost}.")
-
-    a_roll, a_dice = combat_roll_3d6()
-    d_roll, d_dice = combat_roll_3d6()
-    roman_total = a_roll + attacker_mod
-    enemy_total = d_roll + defender_mod
-    success_margin = roman_total - enemy_total
-    print(f"  Залп: {a_dice[0]}+{a_dice[1]}+{a_dice[2]}={a_roll}, итог {roman_total}. Защита: {d_roll}, итог {enemy_total}.")
-
-    if success_margin >= 0:
-        breach = max(12, min(55, breach_power // 4 + power // 10 + random.randint(6, 14) + success_margin // 2))
-        support_bonus = max(6, min(32, support // 6 + random.randint(3, 8)))
-        glory = max(4, 4 + difficulty * 2 + success_margin // 2)
-        player.glory += glory
-        player.morale = min(100, safe_int(getattr(player, "morale", 70), 70) + 1)
-        player.artillery_prepared_bombardments.append({"province": target["name"], "city": target_city["name"], "breach": breach, "support": support_bonus, "turn": safe_int(getattr(player, "turn", 1), 1)})
-        print(clr(f"  ✓ Стены проломлены, но город не занят. Следующий штурм получит пролом -{breach} и поддержку +{support_bonus}. Слава +{glory}.", C.BOLD + C.GREEN))
-        log_event(player, f"Артиллерия подготовила штурм {target_city['name']} в {target['name']}: пролом {breach}")
-        return False
-
-    partial = max(4, min(40, breach_power // 5 + power // 14 + random.randint(2, 8) + max(0, -success_margin // 3)))
-    support_bonus = max(2, min(26, support // 8 + random.randint(1, 5)))
-    player.artillery_prepared_bombardments.append({"province": target["name"], "city": target_city["name"], "breach": partial, "support": support_bonus, "turn": safe_int(getattr(player, "turn", 1), 1)})
-    player.morale = max(10, safe_int(getattr(player, "morale", 70), 70) - 1)
-    print(clr(f"  ✗ Город не взят. Артиллерия всё же подготовила слабый пролом -{partial} и поддержку +{support_bonus}.", C.GOLD))
-    log_event(player, f"Артиллерия подготовила слабый пролом у {target_city['name']}")
+    glory = max(1, actual // 4)
+    player.glory += glory
+    print(clr(
+        f"\n  ☄ АРТИЛЛЕРИЙСКИЙ ОБСТРЕЛ: {target_city['name']} в {target['name']}",
+        C.BOLD + C.GOLD,
+    ))
+    print(
+        f"  До залпа: повреждение {old_damage}%, оборона {CITY_SIEGE_MAX_DAMAGE - old_damage}%."
+    )
+    print(clr(
+        f"  Урон +{actual}%. Теперь повреждение {total_damage}%, оборона {remaining}%. "
+        f"Боезапас -{supply_cost}, слава +{glory}.",
+        C.BOLD + C.GREEN,
+    ))
+    if total_damage >= CITY_SIEGE_MAX_DAMAGE:
+        print(clr(
+            "  Оборона города полностью разрушена. Артиллерия не может занять город: "
+            "последний штурм должен провести легион.",
+            C.GOLD,
+        ))
+    else:
+        print(clr(
+            "  Город продолжает сопротивление. Следующий обстрел или штурм продолжит накапливать урон.",
+            C.GRAY,
+        ))
+    log_event(
+        player,
+        f"Артиллерия нанесла {actual}% урона городу {target_city['name']} "
+        f"в {target['name']} (всего {total_damage}%)",
+    )
     return False
 
 
@@ -26487,6 +26774,56 @@ def run_internal_self_tests(verbose: bool = False) -> tuple[bool, list[str], lis
                 fail(f"Opes Imperii: {message}")
     except Exception as exc:
         fail(f"Проверка Opes Imperii упала: {type(exc).__name__}: {exc}")
+
+    # Регрессии v2.70.1: накопительный урон городам и роль сложности.
+    try:
+        random_state = random.getstate()
+        siege_city = {"name": "Testopolis", "difficulty": 4, "type": "город"}
+        test_legion = Legion("Legio Test", quality=6)
+        test_legion.strength = 60
+        test_legion.morale = 80
+
+        easy_player = Player("Easy", "optimates", "easy")
+        normal_player = Player("Normal", "optimates", "normal")
+        madness_player = Player("Mad", "optimates", "madness")
+        random.seed(2701)
+        easy_damage = calculate_legion_city_damage(easy_player, test_legion, siege_city, True)
+        random.seed(2701)
+        normal_damage = calculate_legion_city_damage(normal_player, test_legion, siege_city, True)
+        random.seed(2701)
+        madness_damage = calculate_legion_city_damage(madness_player, test_legion, siege_city, True)
+        if not (easy_damage > normal_damage > madness_damage):
+            fail(
+                f"Сложность не масштабирует урон города: "
+                f"easy={easy_damage}, normal={normal_damage}, madness={madness_damage}."
+            )
+
+        actual, total_damage, remaining = apply_city_siege_damage(
+            normal_player, "Test Province", "Testopolis", 37
+        )
+        if (actual, total_damage, remaining) != (37, 37, 63):
+            fail(
+                "Накопительный урон города работает неверно: "
+                f"{(actual, total_damage, remaining)}."
+            )
+        actual2, total2, remaining2 = apply_city_siege_damage(
+            normal_player, "Test Province", "Testopolis", 90
+        )
+        if (actual2, total2, remaining2) != (63, 100, 0):
+            fail(
+                "Урон города не ограничивается 100%: "
+                f"{(actual2, total2, remaining2)}."
+            )
+        clear_city_siege_damage(normal_player, "Test Province", "Testopolis")
+        if city_siege_damage(normal_player, "Test Province", "Testopolis") != 0:
+            fail("Повреждение захваченного города не очищается.")
+        random.setstate(random_state)
+    except Exception as exc:
+        try:
+            random.setstate(random_state)
+        except Exception:
+            pass
+        fail(f"Проверка осадного урона v2.70.1 упала: {type(exc).__name__}: {exc}")
 
     if verbose:
         print(clr("\n  SELF-TEST ROMA AETERNA", C.BOLD + C.GOLD))
