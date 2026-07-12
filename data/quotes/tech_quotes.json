@@ -1,0 +1,752 @@
+[
+  {
+    "id": "gladius_hispaniensis",
+    "name": "Gladius Hispaniensis",
+    "quote": "«Римляне переняли у кельтиберов меч, который разил лучше всех прочих: клинок сужался к острию, и им можно было как колоть, так и рубить.»",
+    "source": "— Тит Ливий, «История Рима от основания города», XXII.46",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "manipular_drill",
+    "name": "Манипулярная муштра",
+    "quote": "«Легионеры упражнялись в строю так, что каждая манипула поворачивалась и перестраивалась, словно единое живое существо.»",
+    "source": "— Полибий, «Всеобщая история», VI.41",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "testudo",
+    "name": "Testudo (черепаха)",
+    "quote": "«Они поставили щиты ребром, а сверху накрыли других — получился подобие крыши, и стрелы, скользя по панцирю, не причиняли вреда.»",
+    "source": "— Дион Кассий, «Римская история», XLIX.30",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "siege_engines",
+    "name": "Осадные машины",
+    "quote": "«Ни один город не берётся без машин: ни тараном, ни черепахой, ни башнями — всё это изобретение искусства, а не ярости.»",
+    "source": "— Вегеций, «О военном деле», IV.14",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "castra_aestiva",
+    "name": "Летние лагеря",
+    "quote": "«Каждый вечер легион возводит лагерь: ров, вал, частокол — так, словно строит город на одну ночь. В этом — половина победы.»",
+    "source": "— Иосиф Флавий, «Иудейская война», III.76",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "professional_centurions",
+    "name": "Профессиональные центурионы",
+    "quote": "«Центурионы отбирались не по богатству, а по доблести: они были скорее мужами, чем просто начальниками.»",
+    "source": "— Полибий, «Всеобщая история», VI.24",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "eagle_standards",
+    "name": "Орлиные штандарты",
+    "quote": "«Орла потерять — величайший позор для легиона; орла вернуть — величайшая слава.»",
+    "source": "— Тацит, «Анналы», I.40",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "marian_reform",
+    "name": "Марианская реформа",
+    "quote": "«Марий открыл легионы для беднейших: теперь каждый, у кого не было имущества, нёс на плечах своё состояние — и звался „мулом Мария\".»",
+    "source": "— Саллюстий, «Югуртинская война», 86",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "ballista_corps",
+    "name": "Корпуса баллист",
+    "quote": "«Баллисты метали камни такой тяжести, что ни стена, ни щит не могли устоять перед ударом.»",
+    "source": "— Аммиан Марцеллин, «Деяния», XXIII.4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "frontier_limes",
+    "name": "Limes Romanus",
+    "quote": "«Варвары не могут пересечь границу незамеченными: повсюду стоят башни, сигнальные огни и конные дозоры.»",
+    "source": "— Геродиан, «История от Марка», VII.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "via_appia",
+    "name": "Via Appia",
+    "quote": "«Аппиева дорога — царица дорог, проложенная цензором Аппием Клавдием, соединила Рим с Капуей и далее с Брундизием.»",
+    "source": "— Стаций, «Сильвы», I.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "currency_reform",
+    "name": "Денежная реформа",
+    "quote": "«Денарий стал единой мерой стоимости: от Британии до Сирии монета несёт один образ и один вес.»",
+    "source": "— Плиний Старший, «Естественная история», XXXIII.46",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "tax_census",
+    "name": "Ценз и налоговые списки",
+    "quote": "«Цензоры переписывают имущество граждан, чтобы каждый платил по справедливости, а не по произволу.»",
+    "source": "— Цицерон, «О законах», III.7",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "banking",
+    "name": "Банковское дело",
+    "quote": "«Банкиры ведут дела по всему миру: их кредиты и переводы связывают народы крепче, чем дороги.»",
+    "source": "— Цицерон, «В защиту Флакка», 19",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "latifundia",
+    "name": "Латифундии",
+    "quote": "«Латифундии поглотили мелкие хозяйства: богатые владеют землёй, а бедные — только голодом.»",
+    "source": "— Плиний Старший, «Естественная история», XVIII.35",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_collegia",
+    "name": "Коллегии торговцев",
+    "quote": "«Коллегии торговцев и ремесленников объединяют людей по роду занятий, укрепляя город изнутри.»",
+    "source": "— Ульпиан, «Дигесты», XLVII.22",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "customs_posts",
+    "name": "Таможенные посты",
+    "quote": "«Кесарево отдавайте кесарю, а Божие — Богу.»",
+    "source": "— Евангелие от Матфея, 22:21",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "state_mints",
+    "name": "Государственные монетные дворы",
+    "quote": "«Монетный двор на Капитолии чеканит монету с образом императора — знак власти Рима над миром.»",
+    "source": "— Светоний, «Жизнь Нерона», 25",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "grain_contracts",
+    "name": "Зерновые контракты",
+    "quote": "«Египетский хлеб кормит Рим: зерновые корабли приходят из Александрии, и плебс не знает голода.»",
+    "source": "— Иосиф Флавий, «Иудейская война», II.383",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_treasury",
+    "name": "Fiscus Imperialis",
+    "quote": "«Фиск — имперская казна, куда стекаются доходы со всех провинций мира; без неё нет ни мира, ни войны.»",
+    "source": "— Тацит, «Анналы», VI.15",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "aqueduct",
+    "name": "Aqua Marcia (акведук)",
+    "quote": "«Водопроводы Рима — чудо инженерной мысли: вода течёт по аркам через долины и холмы, словно реки, подвешенные в воздухе.»",
+    "source": "— Секст Юлий Фронтин, «О водопроводах города Рима», I.16",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "concrete",
+    "name": "Opus Caementicium",
+    "quote": "«Римский бетон (opus caementicium) позволяет строить стены, которые простоят века: ни дождь, ни время не разрушат их.»",
+    "source": "— Витрувий, «Десять книг об архитектуре», II.5",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "public_baths",
+    "name": "Общественные термы",
+    "quote": "«Термы — не просто место для омовения, но центр общественной жизни Рима: здесь философы спорят, купцы торгуют, граждане отдыхают.»",
+    "source": "— Сенека, «Нравственные письма к Луцилию», 86",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "forum_maximum",
+    "name": "Forum Maximum",
+    "quote": "«Форум — сердце Рима: здесь суды, торговля, речи и встречи граждан; без форума город — не город, а толпа.»",
+    "source": "— Цицерон, «Против Катилины», I.7",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "granaries",
+    "name": "Государственные амбары",
+    "quote": "«Государственные амбары хранят зерно на случай голода, чтобы народ не бунтовал и не голодал.»",
+    "source": "— Тацит, «Анналы», XII.43",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "stone_roads",
+    "name": "Каменные дороги",
+    "quote": "«Римские дороги проложены так прямо, что кажутся начерченными по линейке: от Рима до края мира.»",
+    "source": "— Страбон, «География», V.3",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "harbor_cranes",
+    "name": "Портовые краны",
+    "quote": "«В портах стоят краны, поднимающие тяжести с кораблей на берег с помощью блоков и рычагов — сила искусства побеждает природу.»",
+    "source": "— Витрувий, «Десять книг об архитектуре», X.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "military_roads",
+    "name": "Военные дороги",
+    "quote": "«Военные дороги позволяют легионам быстро перемещаться от границы к границе: скорость решает то, чего не решила сила.»",
+    "source": "— Юлий Цезарь, «Записки о Галльской войне», I.10",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "provincial_archives",
+    "name": "Провинциальные архивы",
+    "quote": "«В архивах провинций хранятся указы, договоры и кадастры — память римской власти, которую нельзя стереть.»",
+    "source": "— Светоний, «Жизнь Августа», 89",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "great_building_program",
+    "name": "Великая строительная программа",
+    "quote": "«Август говорил: „Я нашёл Рим кирпичным, оставляю его мраморным\" — и слово стало делом.»",
+    "source": "— Светоний, «Жизнь Августа», 28",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "naval_quinquereme",
+    "name": "Квинкверема",
+    "quote": "«Квинкверема — крупнейший военный корабль, имеющий пять рядов вёсел: на ней сражался Рим с Карфагеном.»",
+    "source": "— Полибий, «Всеобщая история», I.26",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "corvus_bridge",
+    "name": "Corvus",
+    "quote": "«Дуилий изобрёл „ворон\" — абордажный мост, превративший морскую битву в сухопутную: римляне сражались на палубе, как на земле.»",
+    "source": "— Полибий, «Всеобщая история», I.22",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "naval_supply",
+    "name": "Морское снабжение",
+    "quote": "«Без снабжения флот бесполезен: корабли должны иметь зерно и воду на борту, иначе храбрость быстро становится голодом.»",
+    "source": "— Вегеций, «О военном деле», IV.35",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiralty",
+    "name": "Адмиралтейство",
+    "quote": "«Префект флота командует эскадрами и следит за порядком на морях Империи: кормчий спасает корабль знанием ветров.»",
+    "source": "— Тацит, «Анналы», IV.5",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "pirate_suppression",
+    "name": "Подавление пиратов",
+    "quote": "«Помпей очистил Средиземное море от пиратов за три месяца, разделив флот на эскадры: беззаконие на море есть война против всех берегов.»",
+    "source": "— Плутарх, «Помпей», 28",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "mare_nostrum",
+    "name": "Mare Nostrum",
+    "quote": "«Средиземное море стало нашим морем — Mare Nostrum, где римский закон сильнее бурь, а торговля безопаснее, чем на суше.»",
+    "source": "— Вергилий, «Энеида», I.37",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "fleet_bases",
+    "name": "Военно-морские базы",
+    "quote": "«Мизен и Равенна — главные военно-морские базы Рима, охраняющие запад и восток: кораблю нужен порт, как воину — лагерь.»",
+    "source": "— Тацит, «История», III.12",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "grain_fleet",
+    "name": "Annona — зерновой флот",
+    "quote": "«Аннона — зерновое снабжение Рима: флот из Александрии привозит хлеб для плебса, и город не знает голода.»",
+    "source": "— Светоний, «Жизнь Августа», 42",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "lighthouse_network",
+    "name": "Сеть маяков",
+    "quote": "«Фарос Александрийский освещает путь кораблям, видимый за тридцать миль: свет во тьме указывает путь идущим.»",
+    "source": "— Страбон, «География», XVII.1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "deepwater_harbors",
+    "name": "Глубоководные гавани",
+    "quote": "«Глубоководные гавани позволяют принимать крупнейшие торговые корабли мира: в тихой гавани богатство народов сходит на берег.»",
+    "source": "— Иезекииль, 27:3–4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "twelve_tables",
+    "name": "Законы XII таблиц",
+    "quote": "«Законы Двенадцати таблиц — основа римского права, начертанная на бронзовых досках: закон есть немой магистрат, магистрат — говорящий закон.»",
+    "source": "— Цицерон, «О законах», I.15",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "provincial_law",
+    "name": "Провинциальное право",
+    "quote": "«Наместник провинции вершит суд по римскому праву, но уважает местные обычаи: один закон для гражданина и пришельца.»",
+    "source": "— Цицерон, «В защиту Флакка», 29",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "citizenship_grants",
+    "name": "Дарование гражданства",
+    "quote": "«Римское гражданство — величайший дар: оно даёт защиту закона и право голоса; согласие делает малое государство великим.»",
+    "source": "— Цицерон, «В защиту Бальба», 11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "governor_audits",
+    "name": "Проверки наместников",
+    "quote": "«Сенат проверяет отчёты наместников: кто крал — будет судим, кто честен — прославлен; кто управляет, пусть сперва управит собой.»",
+    "source": "— Тацит, «Агрикола», 45",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_couriers",
+    "name": "Cursus Publicus",
+    "quote": "«Cursus publicus — имперская почта: курьеры мчатся по дорогам, неся волю princeps; слово царя скоро доходит до края земли.»",
+    "source": "— Светоний, «Жизнь Августа», 49",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "roman_schools",
+    "name": "Римские школы",
+    "quote": "«В школах Рима юноши учат грамматику, риторику и философию у греческих и латинских учителей: начало мудрости — приобретай мудрость.»",
+    "source": "— Квинтилиан, «Наставления оратору», I.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "senatorial_commissions",
+    "name": "Сенатские комиссии",
+    "quote": "«Сенатские комиссии расследуют злоупотребления и управляют делами республики: без совета предприятия рассыпаются.»",
+    "source": "— Тацит, «Анналы», III.60",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_cult",
+    "name": "Имперский культ",
+    "quote": "«Культ императора объединяет народы: алтари Августа стоят от Галлии до Азии; Рим дал народам общий алтарь порядка.»",
+    "source": "— Тацит, «Анналы», IV.37",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "universal_citizenship",
+    "name": "Всеобщее гражданство",
+    "quote": "«Каракалла даровал гражданство всем свободным жителям Империи эдиктом 212 года: „Я римский гражданин\" — теперь говорят все.»",
+    "source": "— Дион Кассий, «Римская история», LXXVIII.9",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "pax_romana",
+    "name": "Pax Romana",
+    "quote": "«Pax Romana — мир, дарованный Римом: от столпов Геркулеса до Евфрата нет войны; перекуют мечи свои на орала.»",
+    "source": "— Плутарх, «Жизнь Нумы», 20",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "iron_armories",
+    "name": "Государственные оружейные",
+    "quote": "«Государственные оружейные мастерские снабжают легионы мечами и доспехами: оружие полезно лишь тому, кто имеет порядок в мастерских.»",
+    "source": "— Вегеций, «О военном деле», II.17",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "pila_mass_production",
+    "name": "Массовое производство пилумов",
+    "quote": "«Пилумы — тяжёлые метательные копья, пробивающие щиты перед рукопашной: метательное копьё открывает битву прежде, чем меч завершит её.»",
+    "source": "— Цезарь, «Записки о Галльской войне», I.25",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "cohort_tactics",
+    "name": "Когортная тактика",
+    "quote": "«Когорты — основное тактическое подразделение легиона, сильнее манипул: дисциплина делает многих одним телом.»",
+    "source": "— Вегеций, «О военном деле», II.13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "field_medicine",
+    "name": "Полевая медицина",
+    "quote": "«В каждом лагере есть врачи и перевязочные пункты: раненых спасают, а не бросают; спасённый воин — это завтрашняя победа.»",
+    "source": "— Цельс, «О медицине», VI.19",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "veteran_colonies",
+    "name": "Ветеранские колонии",
+    "quote": "«Ветераны получают землю в колониях, становясь опорой Рима на окраинах: где ветеран пашет землю, там граница становится Римом.»",
+    "source": "— Аппиан, «Гражданские войны», I.45",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "auxiliary_recruitment",
+    "name": "Штатная вербовка ауксилий",
+    "quote": "«Вспомогательные войска набираются из провинциалов: конница из Фракии, лучники из Сирии; Империя сильна, когда чужие народы служат её порядку.»",
+    "source": "— Тацит, «Агрикола», 35",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "siege_doctrine",
+    "name": "Осадная доктрина",
+    "quote": "«Осадное искусство требует машин, терпения и дисциплины — не только ярости: стены падают не от ярости, но от расчёта.»",
+    "source": "— Витрувий, «Десять книг об архитектуре», X.16",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "torsion_artillery",
+    "name": "Торсионная артиллерия",
+    "quote": "«Торсионные машины работают на скрученных жилах: баллисты, онагры, скорпионы; натянутая жила хранит в себе силу железа.»",
+    "source": "— Витрувий, «Десять книг об архитектуре», X.11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "legionary_workshops",
+    "name": "Легионные мастерские",
+    "quote": "«Каждый легион имеет своих мастеров (fabri), чинящих оружие и машины в походе: войско несёт с собой не только мечи, но и мастерскую победы.»",
+    "source": "— Вегеций, «О военном деле», II.11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "counterweight_engines",
+    "name": "Противовесные машины",
+    "quote": "«Противовесные метатели бросают камни огромной массы, разрушая крепостные стены: малое движение рычага потрясает большую стену.»",
+    "source": "— Аммиан Марцеллин, «Деяния», XXIII.4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "incendiary_munitions",
+    "name": "Зажигательные боеприпасы",
+    "quote": "«Огненные снаряды с серой и смолой поджигают деревянные башни и осадные машины: огонь есть самый нетерпеливый союзник осады.»",
+    "source": "— Псевдо-Аполлодор, «Осадные традиции»",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "mobile_field_artillery",
+    "name": "Мобильная полевая артиллерия",
+    "quote": "«Полевые скорпионы перевозят на повозках, чтобы быстро разворачивать их в бою: скорость без порядка — бегство; порядок со скоростью — победа.»",
+    "source": "— Вегеций, «О военном деле», III.24",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "repeating_artillery",
+    "name": "Повторяющаяся артиллерия",
+    "quote": "«Полиболы стреляют сериями, как современные пулемёты: механизм Герона Александрийского; там, где рука устала бы, механизм продолжает бой.»",
+    "source": "— Герон Александрийский, «Белопоика», 61",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "naval_artillery",
+    "name": "Корабельная артиллерия",
+    "quote": "«На кораблях устанавливают катапульты для обстрела вражеских палуб: море принимает войну, когда корабль становится крепостью.»",
+    "source": "— Вегеций, «О военном деле», IV.44",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "scribal_bureau",
+    "name": "Писцовые бюро",
+    "quote": "«Писцы ведут государственные записи: без них империя погрузится в хаос; напиши это в книгу для памяти.»",
+    "source": "— Светоний, «Жизнь Августа», 89",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "latin_libraries",
+    "name": "Латинские библиотеки",
+    "quote": "«Библиотеки Рима хранят свитки греческих и латинских авторов — сокровищница мудрости; книги — это сосуды памяти государства.»",
+    "source": "— Светоний, «Жизнь Августа», 29",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "greek_tutors",
+    "name": "Греческие наставники",
+    "quote": "«Греция, побеждённая, покорила своего дикого победителя и принесла искусства в Латий.»",
+    "source": "— Гораций, «Послания», II.1.156",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "alexandrian_mechanics",
+    "name": "Александрийская механика",
+    "quote": "«Александрийские механики создают чудеса: паровые машины, автоматы, подъёмные краны; дайте мне точку опоры, и я сдвину землю.»",
+    "source": "— Герон Александрийский, «Пневматика», I.1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_academies",
+    "name": "Имперские академии",
+    "quote": "«Академии империи обучают философии, медицине и праву — кузницы элиты; мудрость строит дом свой.»",
+    "source": "— Светоний, «Жизнь Веспасиана», 18",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurists_chancery",
+    "name": "Канцелярия юристов",
+    "quote": "«Юристы дают ответы (responsa), толкующие законы: их мнения становятся правом; закон есть разум, свободный от страсти.»",
+    "source": "— Гай, «Институции», I.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "augural_colleges",
+    "name": "Авгурские коллегии",
+    "quote": "«Авгуры наблюдают за полётом птиц и толкуют волю богов перед важными делами: римляне начинали великое дело с вопроса к богам.»",
+    "source": "— Цицерон, «О дивинации», I.1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "sacred_calendar",
+    "name": "Священный календарь",
+    "quote": "«Священный календарь (fasti) определяет дни для судов, праздников и сражений: для всего есть время и срок всякой вещи под небом.»",
+    "source": "— Овидий, «Фасты», I.1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "monument_commissions",
+    "name": "Монументальные комиссии",
+    "quote": "«Комиссии по строительству возводят храмы, арки и колонны во славу Рима: я нашёл Рим кирпичным, оставляю его мраморным.»",
+    "source": "— Светоний, «Жизнь Тита», 7",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "marble_quarries",
+    "name": "Мраморные карьеры",
+    "quote": "«Каррарский мрамор белее снега: из него строят храмы и статуи императоров; камень становится памятью, когда его касается государственная воля.»",
+    "source": "— Страбон, «География», V.2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "urban_prefecture",
+    "name": "Городская префектура",
+    "quote": "«Префект города охраняет Рим: следит за порядком, хлебом и водоснабжением; город держится не стенами одними, но порядком.»",
+    "source": "— Тацит, «Анналы», VI.11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  }
+]

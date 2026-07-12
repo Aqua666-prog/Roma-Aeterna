@@ -1,0 +1,752 @@
+[
+  {
+    "id": "pyramids_giza",
+    "name": "Пирамиды Гизы",
+    "quote": "«И пирамиды — дела многих и тяжких трудов» — Антипатр Сидонский, эпиграмма о семи чудесах света",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "great_lighthouse",
+    "name": "Великий маяк Александрии",
+    "quote": "«Плыть необходимо, жить — нет необходимости» — Помпей перед бурей, по свидетельству Плутарха",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "library_alexandria",
+    "name": "Александрийская библиотека",
+    "quote": "«Знание есть память о вещах божественных и человеческих» — Ульпиан, Дигесты",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "colossus_rhodes",
+    "name": "Колосс Родосский",
+    "quote": "«Audentes fortuna iuvat» («Смелым помогает судьба») — Вергилий, Энеида, X.284",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "hanging_gardens",
+    "name": "Висячие сады",
+    "quote": "«Чудо висячих садов Вавилона» — Антипатр Сидонский, эпиграмма о семи чудесах света",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_artemis",
+    "name": "Храм Артемиды в Эфесе",
+    "quote": "«Кровлю вознёсший до туч — всё остальное померкло пред ним» — Антипатр Сидонский о храме Артемиды",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "mausoleum_halicarnassus",
+    "name": "Мавзолей в Галикарнасе",
+    "quote": "«Знаю Мавсола гробницу огромную» — Антипатр Сидонский, эпиграмма о семи чудесах света",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statue_zeus",
+    "name": "Статуя Зевса Олимпийского",
+    "quote": "«Видал Зевса в Олимпии я» — Антипатр Сидонский, эпиграмма о семи чудесах света",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "colosseum",
+    "name": "Колизей",
+    "quote": "«Panem et circenses» («Хлеба и зрелищ») — Ювенал, Сатиры, X",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "pantheon",
+    "name": "Пантеон",
+    "quote": "«Всё полно богов» — Фалес Милетский, по свидетельству Аристотеля",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "circus_maximus",
+    "name": "Большой цирк",
+    "quote": "«Этот народ... о двух лишь вещах беспокойно мечтает: хлеба и зрелищ» — Ювенал, Сатиры, X",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "aqua_appia",
+    "name": "Акведук Аппия",
+    "quote": "Забота о водопроводах касается «не только удобства, но здоровья и даже безопасности Города» — Фронтин, О водопроводах города Рима",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "via_appia",
+    "name": "Аппиева дорога",
+    "quote": "«Appia... regina viarum» («Аппиева — царица дорог») — Стаций, Сильвы, II",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "forum_romanum",
+    "name": "Форум Романум",
+    "quote": "«Salus populi suprema lex esto» («Благо народа да будет высшим законом») — Цицерон, О законах, III",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "curia_julia",
+    "name": "Курия Юлия",
+    "quote": "«Согласием малые государства возрастают, раздором — гибнут даже великие» — Саллюстий, Югуртинская война",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "ara_pacis",
+    "name": "Алтарь Мира",
+    "quote": "«Храм Януса Квирина запирают только тогда, когда во всей державе народа римского — и на суше, и на море — стоит мир, добытый победами» — Август, Деяния божественного Августа, XIII",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "trajan_column",
+    "name": "Колонна Траяна",
+    "quote": "«О дружбе судят по делам, а не по словам» — слова Траяна, по свидетельству Кассия Диона, Римская история, LXVIII",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "baths_caracalla",
+    "name": "Термы Каракаллы",
+    "quote": "«Хочешь мира — готовься к войне» (Si vis pacem, para bellum) — Корнелий Непот / Вегеций",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "hadrian_wall",
+    "name": "Вал Адриана",
+    "quote": "«Адриан первым построил стену длиной в восемьдесят миль, чтобы отделить римлян от варваров» — Властелины Августейшего Дома, Жизнь Адриана, 11.2",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "porta_nigra",
+    "name": "Порта Нигра",
+    "quote": "«Необдуманность в битвах... не в обычае римлян... мы же выигрываем сражения своей опытностью и дисциплиной» — Иосиф Флавий, Иудейская война, IV",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "pont_du_gard",
+    "name": "Пон-дю-Гар",
+    "quote": "Должность смотрителя водопроводов касается «не только удобства, но здоровья и даже безопасности Города» — Фронтин, О водопроводах города Рима",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_jupiter",
+    "name": "Храм Юпитера Капитолийского",
+    "quote": "«Caput mundi» («Глава мира») — античное обозначение Рима и его Капитолия",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "servian_wall",
+    "name": "Сервиева стена",
+    "quote": "«Нельзя считать город неукреплённым, если его оборона зиждется на мужах, а не на кирпичах» — Плутарх приводит слова Ликурга, цит. у Тита Ливия",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "ostia_harbor",
+    "name": "Порт Остии",
+    "quote": "«Плыть необходимо, жить — нет необходимости» — Помпей перед бурей, по свидетельству Плутарха",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "capitoline_mint",
+    "name": "Капитолийский монетный двор",
+    "quote": "«Nervus belli pecunia» («Деньги — нерв войны») — Цицерон, Филиппики",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_archives",
+    "name": "Имперские архивы",
+    "quote": "«История — свидетельница времён, свет истины, жизнь памяти» — Цицерон, Об ораторе, II.9.36",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "school_rhetoric",
+    "name": "Школа риторов",
+    "quote": "«В детях редко недостаёт природных способностей; чаще недостаёт попечения об них» — Квинтилиан, Наставления оратору, I.1",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "castra_praetoria",
+    "name": "Кастра претория",
+    "quote": "«Римский народ подчинил себе вселенную благодаря военным упражнениям и выучке» — Вегеций, Краткое изложение военного дела",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "arsenal_misenum",
+    "name": "Арсенал Мизена",
+    "quote": "«Плыть необходимо, жить — нет необходимости» — Помпей перед бурей, по свидетельству Плутарха",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "granaries_egypt",
+    "name": "Египетские зернохранилища",
+    "quote": "«Сицилия — кормилица и казначей римского народа» — Цицерон, Вторая речь против Верреса",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_mars_ultor",
+    "name": "Храм Марса Мстителя",
+    "quote": "«Хочешь победы — старательно обучай воинов» — Вегеций, Краткое изложение военного дела, III",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "basilica_aemilia",
+    "name": "Базилика Эмилия",
+    "quote": "«Justitia est constans et perpetua voluntas ius suum cuique tribuendi» («Справедливость — постоянное и неизменное желание воздавать каждому своё») — Ульпиан, Дигесты",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "tabularium",
+    "name": "Табуларий",
+    "quote": "«Iuris praecepta sunt haec: honeste vivere, alterum non laedere, suum cuique tribuere» («Предписания права суть: честно жить, не вредить другому, каждому воздавать своё») — Ульпиан, Дигесты",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_vesta",
+    "name": "Храм Весты",
+    "quote": "Храм Весты, «где горит вечный огонь, а во внутреннем покое хранится залог римской власти» — Тит Ливий, История Рима, XXVI.27",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "aqueduct_segovia",
+    "name": "Акведук Сеговии",
+    "quote": "«Главное, что пространство вокруг акведука... они занимают постройками или деревьями» — Фронтин, О водопроводах города Рима",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "amphitheatre_pompeii",
+    "name": "Амфитеатр Помпей",
+    "quote": "«Panem et circenses» («Хлеба и зрелищ») — Ювенал, Сатиры, X",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "limes_germanicus",
+    "name": "Германский лимес",
+    "quote": "«Igitur qui desiderat pacem, praeparet bellum» («Кто желает мира, пусть готовит войну») — Вегеций, Краткое изложение военного дела, III",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "alexandria_museum",
+    "name": "Мусейон Александрии",
+    "quote": "Мусей «имеет место для прогулок, экседру и большой дом, где находится общая столовая для учёных» — Страбон, География, XVII.1.8",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "palatine_palace",
+    "name": "Палатинский дворец",
+    "quote": "«Я нашёл Рим кирпичным, оставляю его вам мраморным» — слова Августа, по свидетельству Светония, Жизнь двенадцати цезарей",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "constantine_arch",
+    "name": "Арка Константина",
+    "quote": "«Сим знаменем победишь» (ст.-слав. «Сим побѣдиши») — видение Константина, по свидетельству Евсевия Кесарийского, Жизнь Константина, I.28",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "theatre_marcellus",
+    "name": "Театр Марцелла",
+    "quote": "«Август… построил театр Марцелла во имя своего зятя Марцелла» — Светоний, «Божественный Август», 29",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "porticus_octaviae",
+    "name": "Портик Октавии",
+    "quote": "«Он построил… портик Октавии и библиотеку при храме Аполлона» — Светоний, «Божественный Август», 29",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "basilica_ulpia",
+    "name": "Базилика Ульпия",
+    "quote": "«Форум Траяна — сооружение единственное под небом» — Аммиан Марцеллин, «Деяния», XVI.10.15",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "markets_trajan",
+    "name": "Рынки Траяна",
+    "quote": "«Траян построил форум, названный его именем» — Дион Кассий, «Римская история», LXVIII.16",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "campus_martius",
+    "name": "Марсово поле",
+    "quote": "«Поле, посвящённое Марсу, было общим достоянием римского народа» — Тит Ливий, «История Рима», II.5",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_apollo_palatine",
+    "name": "Храм Аполлона Палатинского",
+    "quote": "«Он посвятил храм Аполлону на Палатине и устроил при нём библиотеки» — Светоний, «Божественный Август», 29",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_concordia",
+    "name": "Храм Согласия",
+    "quote": "«Камилл воздвиг храм Согласия, чтобы смягчить распрю между сословиями» — Плутарх, «Камилл», 42",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_saturn_treasury",
+    "name": "Храм Сатурна и Эрарий",
+    "quote": "«Эрарий находится в храме Сатурна» — Варрон, «О латинском языке», V.42",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "horrea_galbae",
+    "name": "Склады Гальбы",
+    "quote": "«Horrea Galbae» — «Склады Гальбы», перечень памятников XIII района Рима — Notitia Urbis Romae, Regio XIII",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "navalia_rome",
+    "name": "Navalia — верфи Рима",
+    "quote": "«Navalia названы от navis, корабля» — Варрон, «О латинском языке», V.154",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "ravenna_fleet_harbor",
+    "name": "Гавань флота Равенны",
+    "quote": "«Флот он разместил при Мизене и Равенне, чтобы охранять Верхнее и Нижнее море» — Светоний, «Божественный Август», 49",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "forum_iulium",
+    "name": "Форум Юлия",
+    "quote": "«Цезарь построил форум, украсив его храмом Венеры Прародительницы» — Дион Кассий, «Римская история», XLIII.22",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "temple_venus_genetrix",
+    "name": "Храм Венеры Прародительницы",
+    "quote": "«Он посвятил храм Венере Прародительнице» — Дион Кассий, «Римская история», XLIII.22",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "forum_augustum",
+    "name": "Форум Августа",
+    "quote": "«Форум Августа с храмом Марса Мстителя был построен для судов и жеребьёвки провинций» — Светоний, «Божественный Август», 29",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "macellum_magnum",
+    "name": "Большой рынок — Macellum Magnum",
+    "quote": "«Нерон посвятил народу большой рынок — Macellum Magnum» — Дион Кассий, «Римская история», LXI.18",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "insulae_regulated",
+    "name": "Регулируемые инсулы",
+    "quote": "«Дома велено было строить отдельно, без общих стен, с открытыми дворами и портиками» — Тацит, «Анналы», XV.43",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "cloaca_maxima",
+    "name": "Клоака Максима",
+    "quote": "«Тарквиний отвёл низины города подземными клоаками» — Тит Ливий, «История Рима», I.56",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "aqua_claudia",
+    "name": "Аква Клавдия",
+    "quote": "«Аква Клавдия начата Калигулой и завершена Клавдием» — Фронтин, «О водопроводах города Рима», I.13",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "aqua_marcia",
+    "name": "Аква Марция",
+    "quote": "«Вода Марция славится холодом и чистотой» — Фронтин, «О водопроводах города Рима», I.7",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "library_palatine",
+    "name": "Палатинская библиотека",
+    "quote": "«Он устроил латинскую и греческую библиотеки при храме Аполлона Палатинского» — Светоний, «Божественный Август», 29",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "athenaeum_hadrian",
+    "name": "Атеней Адриана",
+    "quote": "«В Риме Адриан учредил Атеней для свободных искусств» — Аврелий Виктор, «О цезарях», XIV.2",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "archimedes_workshop",
+    "name": "Мастерская Архимеда",
+    "quote": "«Машины Архимеда поражали римлян огромными камнями и стрелами» — Плутарх, «Марцелл», 14–17",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "hero_automata_school",
+    "name": "Школа автоматов Герона",
+    "quote": "«Мы излагаем устройства, приводимые в движение воздухом, водой и огнём» — Герон Александрийский, «Пневматика», I, предисловие",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "vitruvian_architects_college",
+    "name": "Коллегия архитекторов Витрувия",
+    "quote": "«В архитектуре должны быть прочность, польза и красота» — Витрувий, «Десять книг об архитектуре», I.3.2",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_scriptorium",
+    "name": "Имперский скрипторий",
+    "quote": "«Август приказал собрать и привести в порядок древние пророческие книги» — Светоний, «Божественный Август», 31",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "praetorium_chancery",
+    "name": "Преторская канцелярия",
+    "quote": "«Право есть искусство доброго и справедливого» — Ульпиан, «Дигесты», I.1.1",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "augurs_house",
+    "name": "Дом авгуров",
+    "quote": "«У римлян ни одно общественное дело не совершалось без ауспиций» — Цицерон, «О дивинации», I.2",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "fasti_capitolini",
+    "name": "Капитолийские фасты",
+    "quote": "«Времена и причины, распределённые по латинскому году, я воспою» — Овидий, «Фасты», I.1",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "marble_forum_complex",
+    "name": "Мраморный форум",
+    "quote": "«Я принял Рим кирпичным, а оставляю мраморным» — Светоний, «Божественный Август», 28",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "carrara_imperial_quarries",
+    "name": "Имперские карьеры Каррары",
+    "quote": "«В Луне добывают камень белизны и красоты, из которого строят в Риме» — Страбон, «География», V.2.5",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prefecture_urbs",
+    "name": "Префектура Города",
+    "quote": "«Август поставил префекта Города, чтобы сдерживать рабов и беспокойных граждан» — Тацит, «Анналы», VI.11",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "fire_brigades_vigiles",
+    "name": "Когорты вигилов",
+    "quote": "«Он поставил ночные караулы против пожаров» — Светоний, «Божественный Август», 30",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "milestone_network",
+    "name": "Сеть мильных камней",
+    "quote": "«Гай Гракх провёл дороги и поставил камни, отмечающие расстояния» — Плутарх, «Гай Гракх», 7",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "imperial_post_stations",
+    "name": "Станции cursus publicus",
+    "quote": "«На военных дорогах он расставил молодых гонцов, а затем повозки, чтобы быстро получать вести» — Светоний, «Божественный Август», 49",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "universal_citizenship_tablets",
+    "name": "Таблицы гражданства Каракаллы",
+    "quote": "«Антонин сделал всех жителей своей державы римскими гражданами» — Дион Кассий, «Римская история», LXXVIII.9",
+    "source": "",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  }
+]
