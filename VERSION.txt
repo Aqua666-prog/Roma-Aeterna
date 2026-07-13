@@ -1,0 +1,7 @@
+Roma Aeterna 3.0.1
+Codename: Imperium Vivum — Mare Nostrum Stability Fix
+Core: 3.0.1-mare-nostrum-fix
+Mare Nostrum Core: 3.0.1-mare-nostrum-core
+Exercitus: 3.0.0-exercitus
+Civitates Artificiales: 3.0.0-civitates-artificiales
+Bellum Universale: 3.0.0-bellum-universale

@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "statesman_augustus",
+    "name": "Октавиан Август",
+    "quote": "«Пусть я сыграл комедию жизни достойно; рукоплещите и проводите меня с радостью.»",
+    "source": "Светоний, «Божественный Август», 99",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_cicero",
+    "name": "Марк Туллий Цицерон",
+    "quote": "«Благо народа да будет высшим законом.»",
+    "source": "Цицерон, «О законах», III, 3, 8",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_cato_elder",
+    "name": "Марк Порций Катон Старший",
+    "quote": "«Карфаген должен быть разрушен.»",
+    "source": "Плутарх, «Катон Старший», 27",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_pericles",
+    "name": "Перикл",
+    "quote": "«Наш государственный строй называется демократией, потому что он держится не на меньшинстве, а на большинстве.»",
+    "source": "Фукидид, «История Пелопоннесской войны», II, 37",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_solon",
+    "name": "Солон",
+    "quote": "«Я дал народу столько чести, сколько ему довольно, не отняв и не прибавив лишнего.»",
+    "source": "Плутарх, «Солон», 18",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_themistocles",
+    "name": "Фемистокл",
+    "quote": "«Город — это люди, а не стены и корабли без людей.»",
+    "source": "Фукидид, «История Пелопоннесской войны», I, 143",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_licinius_crassus",
+    "name": "Марк Лициний Красс",
+    "quote": "«Никто не богат, если не может содержать войско на свои средства.»",
+    "source": "Плутарх, «Красс», 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_agrippa",
+    "name": "Марк Випсаний Агриппа",
+    "quote": "«Он строил здания общественного пользования и украсил город многими сооружениями.»",
+    "source": "Дион Кассий, «Римская история», LIII, 27",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_nerva",
+    "name": "Марк Кокцей Нерва",
+    "quote": "«Он усыновил Траяна и тем самым поставил общее благо выше кровного наследования.»",
+    "source": "Дион Кассий, «Римская история», LXVIII, 3",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_trajan",
+    "name": "Траян",
+    "quote": "«Бери этот меч; если я буду править хорошо — за меня, если дурно — против меня.»",
+    "source": "Дион Кассий, «Римская история», LXVIII, 16",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_hadrian",
+    "name": "Адриан",
+    "quote": "«Государь должен быть подобен солнцу: смотреть на всё.»",
+    "source": "Элий Спартиан, «Жизнь Адриана», 20",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "statesman_marcus_aurelius",
+    "name": "Марк Аврелий",
+    "quote": "«Делай всё, говори и помышляй так, как человек, который уже может уйти из жизни.»",
+    "source": "Марк Аврелий, «Размышления», II, 11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_caesar",
+    "name": "Гай Юлий Цезарь",
+    "quote": "«Люди охотно верят тому, чего желают.»",
+    "source": "Цезарь, «Записки о Галльской войне», III, 18",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_scipio",
+    "name": "Сципион Африканский",
+    "quote": "«В тот день Сципион был признан спасителем Рима.»",
+    "source": "Ливий, «История Рима от основания города», XXVI, 19",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_hannibal",
+    "name": "Ганнибал Барка",
+    "quote": "«Мы или найдём путь, или проложим его.»",
+    "source": "Ливий, «История Рима от основания города», XXI, 30",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_alexander",
+    "name": "Александр Македонский",
+    "quote": "«Нет ничего невозможного для того, кто решается.»",
+    "source": "Плутарх, «Александр», 58",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_pyrrhus",
+    "name": "Пирр Эпирский",
+    "quote": "«Ещё одна такая победа над римлянами — и мы погибли.»",
+    "source": "Плутарх, «Пирр», 21",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_marius",
+    "name": "Гай Марий",
+    "quote": "«Я не получил от предков ни изображений, ни триумфов; но имею военные награды и шрамы.»",
+    "source": "Саллюстий, «Югуртинская война», 85",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_sulla",
+    "name": "Луций Корнелий Сулла",
+    "quote": "«Никто не сделал друзьям больше добра, а врагам больше зла.»",
+    "source": "Плутарх, «Сулла», 38",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_pompey",
+    "name": "Гней Помпей Великий",
+    "quote": "«Плыть необходимо, жить — не необходимо.»",
+    "source": "Плутарх, «Помпей», 50",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_germanicus",
+    "name": "Германик",
+    "quote": "«Он обращался к легионам не как повелитель, а как товарищ по опасности.»",
+    "source": "Тацит, «Анналы», I, 34",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_belisarius",
+    "name": "Велизарий",
+    "quote": "«Велизарий победил скорее искусством и дисциплиной, чем числом войска.»",
+    "source": "Прокопий Кесарийский, «Войны», III, 12",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_constantine",
+    "name": "Константин Великий",
+    "quote": "«Этим знаменем победишь.»",
+    "source": "Евсевий Кесарийский, «Жизнь Константина», I, 28",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "general_agrippa_general",
+    "name": "Марк Випсаний Агриппа",
+    "quote": "«Агриппа одержал победу при Акции благодаря флоту и подготовке моряков.»",
+    "source": "Дион Кассий, «Римская история», L, 14",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_socrates",
+    "name": "Сократ",
+    "quote": "«Неисследованная жизнь не стоит того, чтобы жить.»",
+    "source": "Платон, «Апология Сократа», 38a",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_plato",
+    "name": "Платон",
+    "quote": "«Пока философы не станут царями, государствам не избавиться от зол.»",
+    "source": "Платон, «Государство», V, 473c-d",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_aristotle",
+    "name": "Аристотель",
+    "quote": "«Государство возникает ради жизни, но существует ради благой жизни.»",
+    "source": "Аристотель, «Политика», I, 2, 1252b",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_zeno",
+    "name": "Зенон Китийский",
+    "quote": "«Конечная цель — жить согласно природе.»",
+    "source": "Диоген Лаэртский, «О жизни, учениях и изречениях знаменитых философов», VII, 87",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_epictetus",
+    "name": "Эпиктет",
+    "quote": "«Людей тревожат не вещи, а мнения о вещах.»",
+    "source": "Эпиктет, «Энхиридион», 5",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_seneca",
+    "name": "Сенека",
+    "quote": "«Мы страдаем чаще в воображении, чем в действительности.»",
+    "source": "Сенека, «Нравственные письма к Луцилию», XIII, 4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_lucretius",
+    "name": "Лукреций",
+    "quote": "«Так страхи души и мрак должны рассеяться не лучами солнца, а видом и законом природы.»",
+    "source": "Лукреций, «О природе вещей», I, 146–148",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_heraclitus",
+    "name": "Гераклит",
+    "quote": "«Нельзя дважды войти в одну и ту же реку.»",
+    "source": "Платон, «Кратил», 402a; ср. фрагмент Гераклита DK B91",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_democritus",
+    "name": "Демокрит",
+    "quote": "«Лучше изобличать собственные ошибки, чем чужие.»",
+    "source": "Демокрит, фрагмент DK B60",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_pythagoras",
+    "name": "Пифагор",
+    "quote": "«Всё подобно числу.»",
+    "source": "Аристотель, «Метафизика», I, 5, 986a",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_plotinus",
+    "name": "Плотин",
+    "quote": "«Отними всё.»",
+    "source": "Плотин, «Эннеады», V, 3, 17",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "philosopher_philo",
+    "name": "Филон Александрийский",
+    "quote": "«Закон начинается с сотворения мира, чтобы показать согласие мира и закона.»",
+    "source": "Филон Александрийский, «О сотворении мира», 3",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_витрувий",
+    "name": "Витрувий",
+    "quote": "«Прочность, польза и красота.»",
+    "source": "Витрувий, «Десять книг об архитектуре», I, 3, 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_герон_александрийский",
+    "name": "Герон Александрийский",
+    "quote": "«Механика учит двигать тяжести малой силой посредством устройств.»",
+    "source": "Герон Александрийский, «Механика», I, вступление",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_архимед",
+    "name": "Архимед",
+    "quote": "«Дайте мне место, где стать, и я сдвину Землю.»",
+    "source": "Папп Александрийский, «Математическое собрание», VIII; ср. Плутарх, «Марцелл», 14",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_секст_юлий_фронтин",
+    "name": "Секст Юлий Фронтин",
+    "quote": "«Никто не имеет права отводить воду без разрешения императора.»",
+    "source": "Фронтин, «О водопроводах города Рима», 103",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_аполлодор_дамасский",
+    "name": "Аполлодор Дамасский",
+    "quote": "«Мост Траяна через Истр был делом, достойным удивления.»",
+    "source": "Дион Кассий, «Римская история», LXVIII, 13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_ктесибий",
+    "name": "Ктесибий",
+    "quote": "«Ктесибий открыл силу воздуха и создал водяные органы.»",
+    "source": "Витрувий, «Десять книг об архитектуре», X, 7",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_сострат_книдский",
+    "name": "Сострат Книдский",
+    "quote": "«Сострат Книдский, сын Дексифана, богам-спасителям — за мореплавателей.»",
+    "source": "Страбон, «География», XVII, 1, 6",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_гипподам_милетский",
+    "name": "Гипподам Милетский",
+    "quote": "«Гипподам из Милета изобрёл деление городов и распланировал Пирей.»",
+    "source": "Аристотель, «Политика», II, 8, 1267b",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_динократ_родосский",
+    "name": "Динократ Родосский",
+    "quote": "«Динократ предложил Александру превратить гору Афон в статую человека.»",
+    "source": "Витрувий, «Десять книг об архитектуре», II, предисловие",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_филон_византийский",
+    "name": "Филон Византийский",
+    "quote": "«В устройстве осадных машин главное — соразмерность частей и точность изготовления.»",
+    "source": "Филон Византийский, «Белопоэтика», вступление",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_метон_афинский",
+    "name": "Метон Афинский",
+    "quote": "«Метон установил девятнадцатилетний круг Луны.»",
+    "source": "Диодор Сицилийский, «Историческая библиотека», XII, 36",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "engineer_евпалинид_самосский",
+    "name": "Евпалинид Самосский",
+    "quote": "«На Самосе есть тоннель, прорубленный сквозь гору, работа Евпалина из Мегары.»",
+    "source": "Геродот, «История», III, 60",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_тит_помпоний_аттик",
+    "name": "Тит Помпоний Аттик",
+    "quote": "«Он так вёл дела, что никого не обманул и никого не подвёл.»",
+    "source": "Корнелий Непот, «Аттик», 13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_марк_лициний_красс",
+    "name": "Марк Лициний Красс",
+    "quote": "«Никто не богат, если не может содержать войско на свои средства.»",
+    "source": "Плутарх, «Красс», 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_гай_рабирий_постум",
+    "name": "Гай Рабирий Постум",
+    "quote": "«Он доверил своё имущество царю Египта и взял на себя опасность взыскания долга.»",
+    "source": "Цицерон, «В защиту Рабирия Постума», 4–5",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_тримальхион",
+    "name": "Тримальхион",
+    "quote": "«Поверьте мне: асс рождается от асса; имей — и будешь иметь.»",
+    "source": "Петроний, «Сатирикон», 75",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_деметрий_фалерский",
+    "name": "Деметрий Фалерский",
+    "quote": "«Деметрий управлял Афинами десять лет и составил законы.»",
+    "source": "Диоген Лаэртский, «О жизни философов», V, 75",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_сострат_книдский",
+    "name": "Сострат Книдский",
+    "quote": "«Сострат Книдский, сын Дексифана, богам-спасителям — за мореплавателей.»",
+    "source": "Страбон, «География», XVII, 1, 6",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_никанор_стагирит",
+    "name": "Никанор Стагирит",
+    "quote": "«Никанор был назначен исполнителем завещания Аристотеля.»",
+    "source": "Диоген Лаэртский, «О жизни философов», V, 12",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_гай_цильний_меценат",
+    "name": "Гай Цильний Меценат",
+    "quote": "«Меценат был другом Августа и покровителем поэтов.»",
+    "source": "Светоний, «Август», 66; Гораций, «Оды», I, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_публий_ведий_поллион",
+    "name": "Публий Ведий Поллион",
+    "quote": "«Август велел разбить драгоценные сосуды Ведия Поллиона и засыпать его садки.»",
+    "source": "Сенека, «О гневе», III, 40",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_луций_корнелий_бальб",
+    "name": "Луций Корнелий Бальб",
+    "quote": "«Балб получил римское гражданство по закону и заслугам перед государством.»",
+    "source": "Цицерон, «В защиту Бальба», 19–21",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_герод_аттик",
+    "name": "Герод Аттик",
+    "quote": "«Он тратил богатство на города, театры, водопроводы и школы.»",
+    "source": "Филострат, «Жизни софистов», II, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "merchant_зенон_каунский",
+    "name": "Зенон Каунский",
+    "quote": "«Письма и счета Зенона показывают управление имениями, грузами и платежами.»",
+    "source": "Архив Зенона, папирусы P.Cair.Zen., III в. до н. э.",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_колумелла",
+    "name": "Колумелла",
+    "quote": "«Земледелие — ближайшая родственница мудрости.»",
+    "source": "Колумелла, «О сельском хозяйстве», I, предисловие",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_катон_старший",
+    "name": "Катон Старший",
+    "quote": "«Когда хозяин пришёл на усадьбу, прежде всего пусть поклонится домашнему лару.»",
+    "source": "Катон Старший, «О земледелии», 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_варрон",
+    "name": "Варрон",
+    "quote": "«Сельское хозяйство есть наука о том, что и как следует делать на поле.»",
+    "source": "Варрон, «О сельском хозяйстве», I, 3",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_плиний_старший",
+    "name": "Плиний Старший",
+    "quote": "«Земля никогда не возвращает без процентов то, что получила.»",
+    "source": "Плиний Старший, «Естественная история», XVIII, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_магон_карфагенский",
+    "name": "Магон Карфагенский",
+    "quote": "«Магона Карфагенского сенат велел перевести на латинский язык ради пользы земледелия.»",
+    "source": "Плиний Старший, «Естественная история», XVIII, 22",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_вергилий_георгик",
+    "name": "Вергилий-Георгик",
+    "quote": "«Труд всё победил — труд упорный.»",
+    "source": "Вергилий, «Георгики», I, 145–146",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_гесиод",
+    "name": "Гесиод",
+    "quote": "«Работа не позор; позор — праздность.»",
+    "source": "Гесиод, «Труды и дни», 311",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_ксенофонт",
+    "name": "Ксенофонт",
+    "quote": "«Земледелие — мать и кормилица всех искусств.»",
+    "source": "Ксенофонт, «Домострой», V, 17",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_сасерна",
+    "name": "Сасерна",
+    "quote": "«Сасерны писали о сроках работ, скоте и доходности сельского хозяйства.»",
+    "source": "Варрон, «О сельском хозяйстве», I, 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_палладий",
+    "name": "Палладий",
+    "quote": "«Каждому месяцу назначены свои работы в поле, саду и винограднике.»",
+    "source": "Палладий, «О сельском хозяйстве», I, 6",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_феофраст",
+    "name": "Феофраст",
+    "quote": "«Природа деревьев различается по месту, воздуху и уходу.»",
+    "source": "Феофраст, «Исследование о растениях», I, 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "agronomist_анатолий_беритский",
+    "name": "Анатолий Беритский",
+    "quote": "«Геопоники собирают наставления древних о земле, погоде, лозах, садах и скоте.»",
+    "source": "«Геопоники», I, 1; традиция Анатолия Беритского",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_гай_дуилий",
+    "name": "Гай Дуилий",
+    "quote": "«Он первым из римских консулов одержал морской триумф над карфагенянами и с их кораблей взял ростры.»",
+    "source": "Не прямая цитата Дуилия: elogium с Columna Rostrata / CIL I² 25",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_агриппа",
+    "name": "Агриппа",
+    "quote": "«Цезарь, получив весть о победе при Акции, воздал Агриппе высшие почести.»",
+    "source": "Не прямая цитата Агриппы: Дион Кассий, «Римская история», кн. 51",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_фемистокл",
+    "name": "Фемистокл",
+    "quote": "«Паллада даст Зевсу деревянную стену, единственную несокрушимую защиту тебе и детям твоим.»",
+    "source": "Геродот, «История», VII, 141",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_кимон_афинский",
+    "name": "Кимон Афинский",
+    "quote": "«Кимон, овладев городом, отпустил пленных союзников и тем ещё более расположил к себе греков.»",
+    "source": "Не прямая цитата Кимона: Плутарх, «Кимон», 8",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_конон_афинский",
+    "name": "Конон Афинский",
+    "quote": "«Конон, спасшись с девятью кораблями, бежал к Эвагору на Кипр.»",
+    "source": "Не прямая цитата Конона: Ксенофонт, «Греческая история», II, 1, 29",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_лисандр_спартанский",
+    "name": "Лисандр Спартанский",
+    "quote": "«Где не хватает львиной шкуры, надо пришить лисью.»",
+    "source": "Плутарх, «Лисандр», 7",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_деметрий_полиоркет",
+    "name": "Деметрий Полиоркет",
+    "quote": "«Корабли Деметрия были огромны, некоторые имели по пятнадцать и шестнадцать рядов вёсел.»",
+    "source": "Не прямая цитата Деметрия: Плутарх, «Деметрий», 43",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_секст_помпей",
+    "name": "Секст Помпей",
+    "quote": "«Секст Помпей владел Сицилией, господствовал на море и перехватывал подвоз хлеба.»",
+    "source": "Не прямая цитата Секста Помпея: Аппиан, «Гражданские войны», V",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_гней_помпей",
+    "name": "Гней Помпей",
+    "quote": "«Помпей очистил всё море от пиратов в три месяца.»",
+    "source": "Не прямая цитата Помпея: Плутарх, «Помпей», 28",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_марк_антоний",
+    "name": "Марк Антоний",
+    "quote": "«Бежим, Антоний; ты погублен не врагами, а Клеопатрой.»",
+    "source": "Плутарх, «Антоний», 66; слова Антония по изложению Плутарха",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_ганнон_мореплаватель",
+    "name": "Ганнон Мореплаватель",
+    "quote": "«Мы плыли за Геракловы столбы и основали ливийско-финикийские города.»",
+    "source": "Ганнон, «Перипл Ганнона», 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "admiral_неарх",
+    "name": "Неарх",
+    "quote": "«Александр велел Неарху исследовать море от Инда до Персидского залива.»",
+    "source": "Не прямая цитата Неарха: Арриан, «Индия», 20",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_гай_цильний_меценат",
+    "name": "Гай Цильний Меценат",
+    "quote": "«Не удивляйся, что я держусь в стороне: я ненавижу почести.»",
+    "source": "Не прямая цитата Мецената; образ и политическая роль: Дион Кассий, «Римская история», LII",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_квинт_фабий_максим_кунктатор",
+    "name": "Квинт Фабий Максим Кунктатор",
+    "quote": "«Ты один промедлением восстановил наше государство.»",
+    "source": "Энний, фрагмент об Фабии Максиме, цит. у Цицерона, «О старости», 10",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_посидоний",
+    "name": "Посидоний",
+    "quote": "«Мир един, конечен и имеет шарообразную форму.»",
+    "source": "Посидоний, фрагменты у Страбона, «География», II",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_полибий",
+    "name": "Полибий",
+    "quote": "«Кто думает, будто из частной истории можно понять целое, тот похож на человека, который видит части тела, но не живое существо.»",
+    "source": "Полибий, «Всеобщая история», I, 4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_николай_дамасский",
+    "name": "Николай Дамасский",
+    "quote": "«Август был кроток в обращении и доступен для тех, кто приходил к нему с делом.»",
+    "source": "Николай Дамасский, «Жизнь Августа», фрагменты",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_герод_великий",
+    "name": "Герод Великий",
+    "quote": "«Герод был царём по имени, но другом и союзником римлян по положению.»",
+    "source": "Не прямая цитата Герода: Иосиф Флавий, «Иудейские древности», XV",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_береника_ii",
+    "name": "Береника II",
+    "quote": "«Каллимах воспел локон Береники, посвящённый богам за благополучное возвращение царя.»",
+    "source": "Не прямая цитата Береники II: Катулл, 66; по Каллимаху, «Локон Береники»",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_поппей_ленат",
+    "name": "Поппей Ленат",
+    "quote": "«Ленат передал письмо Тиберия и потребовал ответа не словами, а делом.»",
+    "source": "Не прямая цитата Поппея Лената: Тацит, «Анналы», II",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_тит_квинкций_фламинин",
+    "name": "Тит Квинкций Фламинин",
+    "quote": "«Сенат римский и Тит Квинкций, победив царя Филиппа, объявляют греков свободными.»",
+    "source": "Плутарх, «Тит Фламинин», 10",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_арат_сикионский",
+    "name": "Арат Сикионский",
+    "quote": "«Арат освободил Сикион от тиранов и присоединил город к Ахейскому союзу.»",
+    "source": "Не прямая цитата Арата: Плутарх, «Арат», 9",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_птолемей_ii_филадельф",
+    "name": "Птолемей II Филадельф",
+    "quote": "«Царь Птолемей пожелал собрать книги всех народов и перевести закон иудеев на греческий язык.»",
+    "source": "Не прямая цитата Птолемея II: «Письмо Аристея», 9–11",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "diplomat_иосиф_флавий",
+    "name": "Иосиф Флавий",
+    "quote": "«Я написал истинное повествование о войне, в которой сам участвовал.»",
+    "source": "Иосиф Флавий, «Иудейская война», предисловие",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_гай",
+    "name": "Гай",
+    "quote": "«Все народы, которые управляются законами и обычаями, пользуются частью своим собственным правом, частью правом, общим всем людям.»",
+    "source": "Гай, «Институции», I, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_ульпиан",
+    "name": "Ульпиан",
+    "quote": "«Правосудие есть постоянная и непрерывная воля воздавать каждому своё право.»",
+    "source": "Ульпиан, «Дигесты» Юстиниана, 1.1.10 pr.",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_папиниан",
+    "name": "Папиниан",
+    "quote": "«Легче совершить отцеубийство, чем оправдать его.»",
+    "source": "Папиниан, по традиции у «Истории Августов», Caracalla, 8",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_павел_юлий",
+    "name": "Павел Юлий",
+    "quote": "«Всякое определение в гражданском праве опасно: редко бывает, чтобы его нельзя было опровергнуть.»",
+    "source": "Юлий Павел, «Дигесты» Юстиниана, 50.17.202",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_модестин",
+    "name": "Модестин",
+    "quote": "«Брак есть союз мужчины и женщины, общность всей жизни, участие в божеском и человеческом праве.»",
+    "source": "Модестин, «Дигесты» Юстиниана, 23.2.1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_квинт_муций_сцевола",
+    "name": "Квинт Муций Сцевола",
+    "quote": "«Он первым расположил гражданское право по родам и разделам.»",
+    "source": "Не прямая цитата Сцеволы: Помпоний, «Дигесты» Юстиниана, 1.2.2.41",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_сервий_сульпиций_руф",
+    "name": "Сервий Сульпиций Руф",
+    "quote": "«Сервий был первым среди всех знатоков гражданского права.»",
+    "source": "Не прямая цитата Сервия: Цицерон, «Брут», 41",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_сальвий_юлиан",
+    "name": "Сальвий Юлиан",
+    "quote": "«То, что установлено против смысла права, нельзя распространять на последствия.»",
+    "source": "Сальвий Юлиан, «Дигесты» Юстиниана, 1.3.15",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_лабеон",
+    "name": "Лабеон",
+    "quote": "«Лабеон положил начало школе, которая предпочитала свободу толкования авторитету власти.»",
+    "source": "Не прямая цитата Лабеона: Помпоний, «Дигесты» Юстиниана, 1.2.2.47",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_капитон",
+    "name": "Капитон",
+    "quote": "«Капитон держался того, что было ему передано, и следовал древнему праву.»",
+    "source": "Не прямая цитата Капитона: Помпоний, «Дигесты» Юстиниана, 1.2.2.47",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_трибониан",
+    "name": "Трибониан",
+    "quote": "«Мы повелели собрать и исправить древнее право, чтобы оно не заключало противоречий.»",
+    "source": "Юстиниан, конституция «Deo auctore» к «Дигестам», 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "jurist_цицерон_юрист",
+    "name": "Цицерон-юрист",
+    "quote": "«Мы рабы законов для того, чтобы быть свободными.»",
+    "source": "Цицерон, «В защиту Клуенция», 53, 146",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_аполлодор_дамасский",
+    "name": "Аполлодор Дамасский",
+    "quote": "«Иди и рисуй свои тыквы: в этом ты ничего не понимаешь.»",
+    "source": "Дион Кассий, «Римская история», LXIX, 4; слова Аполлодора Адриану",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_витрувий",
+    "name": "Витрувий",
+    "quote": "«Архитектура состоит из порядка, расположения, евритмии, соразмерности, благообразия и расчёта.»",
+    "source": "Витрувий, «Десять книг об архитектуре», I, 2",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_рабирий",
+    "name": "Рабирий",
+    "quote": "«Рабирий прославился строительством дворца Домициана на Палатине.»",
+    "source": "Не прямая цитата Рабирия: Марциал, «Эпиграммы», VII, 56",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_север_и_целер",
+    "name": "Север и Целер",
+    "quote": "«Север и Целер обладали дерзким и изобретательным талантом: искусством они создавали то, в чём отказала природа.»",
+    "source": "Тацит, «Анналы», XV, 42",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_герон_александрийский",
+    "name": "Герон Александрийский",
+    "quote": "«Теорема о равновесии тел доказывается тем, что равные тяжести на равных расстояниях находятся в равновесии.»",
+    "source": "Герон Александрийский, «Механика», I",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_сострат_книдский",
+    "name": "Сострат Книдский",
+    "quote": "«Сострат Книдский, сын Дексифана, посвятил это богам-спасителям ради мореплавателей.»",
+    "source": "Страбон, «География», XVII, 1, 6; надпись Фаросского маяка",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_гипподам_милетский",
+    "name": "Гипподам Милетский",
+    "quote": "«Гипподам первым из не государственных людей взялся рассуждать о наилучшем государственном устройстве.»",
+    "source": "Аристотель, «Политика», II, 8",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_динократ_родосский",
+    "name": "Динократ Родосский",
+    "quote": "«Я могу придать горе Афон образ человека, держащего в левой руке город, а в правой чашу для вод всех потоков.»",
+    "source": "Витрувий, «Десять книг об архитектуре», II, предисловие",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_каллимах_афинский",
+    "name": "Каллимах Афинский",
+    "quote": "«Коринфская капитель возникла из корзины и листьев аканта, которые заметил Каллимах.»",
+    "source": "Не прямая цитата Каллимаха: Витрувий, «Десять книг об архитектуре», IV, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_иктин",
+    "name": "Иктин",
+    "quote": "«Иктин и Калликрат построили Парфенон; Фидий руководил всем убранством.»",
+    "source": "Не прямая цитата Иктина: Плутарх, «Перикл», 13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_калликрат",
+    "name": "Калликрат",
+    "quote": "«Калликрат был строителем Парфенона вместе с Иктином.»",
+    "source": "Не прямая цитата Калликрата: Плутарх, «Перикл», 13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "architect_мнесикл",
+    "name": "Мнесикл",
+    "quote": "«Пропилеи Акрополя строил Мнесикл; работа была завершена за пять лет.»",
+    "source": "Не прямая цитата Мнесикла: Плутарх, «Перикл», 13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_моисей",
+    "name": "Моисей",
+    "quote": "«Не бойтесь: стойте — и увидите спасение Господа.»",
+    "source": "Исход 14:13",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_исаия",
+    "name": "Исаия",
+    "quote": "«Перекуют мечи свои на орала и копья свои — на серпы.»",
+    "source": "Книга пророка Исаии 2:4",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_иеремия",
+    "name": "Иеремия",
+    "quote": "«Спросите о путях древних, где путь добрый, и идите по нему.»",
+    "source": "Книга пророка Иеремии 6:16",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_иезекииль",
+    "name": "Иезекииль",
+    "quote": "«Вот, Я открою гробы ваши и выведу вас, народ Мой, из гробов ваших.»",
+    "source": "Книга пророка Иезекииля 37:12",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_даниил",
+    "name": "Даниил",
+    "quote": "«Он изменяет времена и лета, низлагает царей и поставляет царей.»",
+    "source": "Книга пророка Даниила 2:21",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_самуил",
+    "name": "Самуил",
+    "quote": "«Послушание лучше жертвы и повиновение лучше тука овнов.»",
+    "source": "Первая книга Самуила / 1 Царств 15:22",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_илия",
+    "name": "Илия",
+    "quote": "«Долго ли вам хромать на оба колена?»",
+    "source": "Третья книга Царств / 1 Kings 18:21",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_елисей",
+    "name": "Елисей",
+    "quote": "«Пусть будет дух, который в тебе, на мне вдвойне.»",
+    "source": "Четвёртая книга Царств / 2 Kings 2:9",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_амос",
+    "name": "Амос",
+    "quote": "«Пусть, как вода, течёт суд, и правда — как сильный поток.»",
+    "source": "Книга пророка Амоса 5:24",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_осия",
+    "name": "Осия",
+    "quote": "«Милости хочу, а не жертвы, и боговедения более, нежели всесожжений.»",
+    "source": "Книга пророка Осии 6:6",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_михей",
+    "name": "Михей",
+    "quote": "«Действовать справедливо, любить дела милосердия и смиренномудренно ходить пред Богом твоим.»",
+    "source": "Книга пророка Михея 6:8",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "prophet_захария",
+    "name": "Захария",
+    "quote": "«Не воинством и не силою, но Духом Моим.»",
+    "source": "Книга пророка Захарии 4:6",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_гомер",
+    "name": "Гомер",
+    "quote": "«Гнев, богиня, воспой Ахиллеса, Пелеева сына.»",
+    "source": "Гомер, «Илиада», I, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_вергилий",
+    "name": "Вергилий",
+    "quote": "«Брань и мужа пою, кто первым из Трои от брегов прибыл в Италию.»",
+    "source": "Вергилий, «Энеида», I, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_тит_ливий",
+    "name": "Тит Ливий",
+    "quote": "«То, что главным образом спасительно и плодотворно в знании истории, — видеть всякого рода примеры как на ясном памятнике.»",
+    "source": "Тит Ливий, «История Рима от основания города», предисловие, 10",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_тацит",
+    "name": "Тацит",
+    "quote": "«Без гнева и пристрастия.»",
+    "source": "Тацит, «Анналы», I, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_саллюстий",
+    "name": "Саллюстий",
+    "quote": "«Вся наша сила заключена в душе и теле: душою мы больше пользуемся для власти, телом — для служения.»",
+    "source": "Саллюстий, «О заговоре Катилины», 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_плутарх",
+    "name": "Плутарх",
+    "quote": "«Я пишу не истории, а жизни; не всегда в самых славных делах обнаруживается доблесть или порок.»",
+    "source": "Плутарх, «Александр», 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_геродот",
+    "name": "Геродот",
+    "quote": "«Чтобы деяния людей не изгладились со временем и великие дела не остались без славы.»",
+    "source": "Геродот, «История», I, предисловие",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_фукидид",
+    "name": "Фукидид",
+    "quote": "«Моё сочинение создано как достояние навеки, а не как состязательное украшение для минутного слушания.»",
+    "source": "Фукидид, «История Пелопоннесской войны», I, 22",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_овидий",
+    "name": "Овидий",
+    "quote": "«Всё изменяется, ничто не гибнет.»",
+    "source": "Овидий, «Метаморфозы», XV, 165",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_гораций",
+    "name": "Гораций",
+    "quote": "«Я воздвиг памятник прочнее меди.»",
+    "source": "Гораций, «Оды», III, 30",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_ювенал",
+    "name": "Ювенал",
+    "quote": "«Хлеба и зрелищ.»",
+    "source": "Ювенал, «Сатиры», X, 81",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  },
+  {
+    "id": "writer_иосиф_флавий",
+    "name": "Иосиф Флавий",
+    "quote": "«Я, Иосиф, сын Матфия, священник из Иерусалима, сам сначала воевал против римлян.»",
+    "source": "Иосиф Флавий, «Иудейская война», предисловие, 1",
+    "original": "",
+    "literal_translation": "",
+    "semantic_translation": "",
+    "translation_note": ""
+  }
+]

@@ -1,0 +1,33 @@
+ROMA AETERNA v3.0.1 — MARE NOSTRUM STABILITY FIX
+
+Проверено:
+[OK] py_compile: roma_aeterna.py
+[OK] py_compile: roma_navy.py
+[OK] py_compile: roma_army_groups.py
+[OK] py_compile: все roma_*.py
+[OK] python roma_aeterna.py --self-test
+[OK] 200 повторных вызовов advanced_economy_context + game_price
+[OK] сохранение/загрузка player.navy_system и совместимого player.v24['fleet']
+[OK] кнопка «Завершить ход»
+[OK] «Флот»
+[OK] «Сенат и роды»
+[OK] «Экономика»
+[OK] «Ауксилии»
+[OK] «Магазин артиллерии»
+[OK] «Чудеса света»
+[OK] «Вражеский штаб»
+
+Устранённый цикл:
+advanced_economy_context
+ -> v24_fleet_upkeep
+ -> game_price(market=True)
+ -> _advanced_market_price_multiplier
+ -> advanced_economy_context
+
+Новая цепочка:
+advanced_economy_context
+ -> roma_navy.economy_snapshot
+ -> roma_navy.upkeep
+ -> фиксированный global_upkeep_multiplier
+
+Динамический рынок в этой цепочке не вызывается.
