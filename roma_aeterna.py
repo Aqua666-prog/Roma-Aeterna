@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "2.70.1-siege-damage-hotfix"
+GAME_VERSION = "2.90.0-gentes-regna"
 
 import random
 import ast
@@ -70,6 +70,58 @@ except Exception as _resource_economy_import_error:
     RESOURCE_ECONOMY_IMPORT_ERROR = (
         f"{type(_resource_economy_import_error).__name__}: {_resource_economy_import_error}"
     )
+
+# ─── CIVITATES ET PROVINCIAE: ЖИВЫЕ ГОРОДА И СОБЫТИЯ ─────────────────────
+CITY_EVENTS_IMPORT_ERROR = ""
+try:
+    import roma_city_events as CITY_EVENTS
+except Exception as _city_events_import_error:
+    CITY_EVENTS = None
+    CITY_EVENTS_IMPORT_ERROR = f"{type(_city_events_import_error).__name__}: {_city_events_import_error}"
+
+# ─── ORBIS POLITICUS: СТРАТЕГИЧЕСКАЯ ДИПЛОМАТИЯ И ИИ ДЕРЖАВ ─────────────
+DIPLOMACY_AI_IMPORT_ERROR = ""
+try:
+    import roma_diplomacy_ai as DIPLOMACY_AI
+except Exception as _diplomacy_ai_import_error:
+    DIPLOMACY_AI = None
+    DIPLOMACY_AI_IMPORT_ERROR = f"{type(_diplomacy_ai_import_error).__name__}: {_diplomacy_ai_import_error}"
+
+# ─── GENTES ET REGNA: УНИКАЛЬНЫЕ ДЕРЖАВЫ, ВОЙНЫ, ТОРГОВЛЯ И ДИНАСТИИ ───
+NATIONS_IMPORT_ERROR = ""
+try:
+    import roma_nations as NATIONS
+except Exception as _nations_import_error:
+    NATIONS = None
+    NATIONS_IMPORT_ERROR = f"{type(_nations_import_error).__name__}: {_nations_import_error}"
+
+WORLD_COUNCIL_IMPORT_ERROR = ""
+try:
+    import roma_world_council as WORLD_COUNCIL
+except Exception as _world_council_import_error:
+    WORLD_COUNCIL = None
+    WORLD_COUNCIL_IMPORT_ERROR = f"{type(_world_council_import_error).__name__}: {_world_council_import_error}"
+
+WARFARE_AI_IMPORT_ERROR = ""
+try:
+    import roma_warfare_ai as WARFARE_AI
+except Exception as _warfare_ai_import_error:
+    WARFARE_AI = None
+    WARFARE_AI_IMPORT_ERROR = f"{type(_warfare_ai_import_error).__name__}: {_warfare_ai_import_error}"
+
+DIPLOMATIC_TRADE_IMPORT_ERROR = ""
+try:
+    import roma_diplomatic_trade as DIPLOMATIC_TRADE
+except Exception as _diplomatic_trade_import_error:
+    DIPLOMATIC_TRADE = None
+    DIPLOMATIC_TRADE_IMPORT_ERROR = f"{type(_diplomatic_trade_import_error).__name__}: {_diplomatic_trade_import_error}"
+
+DYNASTIES_IMPORT_ERROR = ""
+try:
+    import roma_dynasties as DYNASTIES
+except Exception as _dynasties_import_error:
+    DYNASTIES = None
+    DYNASTIES_IMPORT_ERROR = f"{type(_dynasties_import_error).__name__}: {_dynasties_import_error}"
 
 # ─── ГЛАВНОЕ МЕНЮ «Aurum et Purpura» ────────────────────────────────────────
 # Внешний roma_menu.py больше не обязателен: главное меню рисуется встроенными
@@ -10130,6 +10182,13 @@ class Player:
         self.economy : dict[str, Any] = {}  # Roma Economica: макроэкономика, бюджет и проводки
         self.conquest_economy : dict[str, Any] = {}  # Bellum Oeconomicum: трофеи, контрибуции и режимы провинций
         self.resource_economy : dict[str, Any] = {}  # Opes Imperii: запасы, автодобыча, инвестиции и сделки
+        self.city_system : dict[str, Any] = {}  # Civitates: параметры городов, очередь и архив событий
+        self.diplomatic_ai : dict[str, Any] = {}  # Orbis Politicus: цели, планы, коалиции и память держав
+        self.nation_system : dict[str, Any] = {}  # Gentes et Regna: уникальные свойства и бонусы держав
+        self.world_council : dict[str, Any] = {}  # Consilium Orbis: очередь многоэтапных послеходовых обсуждений
+        self.foreign_warfare : dict[str, Any] = {}  # Bella Regnorum: прямые войны, фронты и национальные армии
+        self.diplomatic_trade : dict[str, Any] = {}  # Mercatura Gentium: контракты и торговые споры
+        self.dynasty_system : dict[str, Any] = {}  # Domus et Coniugia: браки, супруга, наследники и память
 
         # ── Техдрево ────────────────────────────────────────────────────────
         self.tech_researched : list[str] = []
@@ -14855,9 +14914,10 @@ def external_policy_menu(player: Player):
             ("5", "Дипломатические депеши", "последние донесения и исходы кризисов", "📨"),
             ("6", "Нерешённые кризисы", "срочные ноты и ультиматумы", "⚠"),
             ("7", "Справка о системе", "капитал, разведка, договоры и события", "📚"),
+            ("8", "Orbis Politicus", "самостоятельные цели, планы, коалиции и войны держав", "🕸"),
             ("Q", "Назад", "", "↩"),
         ], title="Канцелярия внешних дел")
-        ch = read_choice(f"\n{clr('  Ваш приказ: ', C.CYAN)}", ["1", "2", "3", "4", "5", "6", "7", "Q"])
+        ch = read_choice(f"\n{clr('  Ваш приказ: ', C.CYAN)}", ["1", "2", "3", "4", "5", "6", "7", "8", "Q"])
         if ch == "Q": return
         if ch == "1":
             key, d = _selected_power(player)
@@ -14875,6 +14935,14 @@ def external_policy_menu(player: Player):
             show_pending_foreign_crises(player)
         elif ch == "7":
             show_foreign_policy_help(player)
+        elif ch == "8":
+            if DIPLOMACY_AI is not None:
+                DIPLOMACY_AI.open_menu(player, globals())
+            else:
+                print(clr("  Orbis Politicus недоступен.", C.RED))
+                if DIPLOMACY_AI_IMPORT_ERROR:
+                    print(clr(f"  Причина: {DIPLOMACY_AI_IMPORT_ERROR}", C.GOLD))
+                pause()
 
 
 def diplomacy_menu(player: Player):
@@ -19167,7 +19235,7 @@ def end_turn(player: Player):
 MAIN_MENU_KEYS_V2261 = [
     "1", "2", "4", "5", "6", "7", "8", "9",
     "A", "B", "V", "C", "L", "W", "Y", "Z", "T",
-    "D", "P", "F", "N", "S", "Q",
+    "D", "P", "F", "N", "G", "S", "Q",
 ]
 
 
@@ -25915,6 +25983,7 @@ def _main_menu_sections_v2257() -> list[MenuSection]:
     return [
         MenuSection("Кампания", "⚔", C.RED, (
             MenuItem("1", "Провинции", "захват, гарнизоны, романизация", "🗺"),
+            MenuItem("M", "Города и муниципии", "население, порядок, здоровье и городские события", "🏙"),
             MenuItem("2", "Легионы", "найм, обучение, генералы", "🛡"),
             MenuItem("4", "Завершить ход", "следующий год и события", "⏭"),
             MenuItem("V", "Условия победы", "прогресс кампании", "🏆"),
@@ -25934,6 +26003,8 @@ def _main_menu_sections_v2257() -> list[MenuSection]:
         )),
         MenuSection("Развитие и события", "⭐", C.CYAN, (
             MenuItem("6", "Внешняя политика", "доктрина, миссии, кризисы, договоры", "🌍"),
+            MenuItem("I", "Стратегический ИИ держав", "цели, планы, коалиции, войны и контрразведка", "🕸"),
+            MenuItem("G", "Державы, войны и династии", "уникальные страны, торговля, браки и послеходовый совет", "👑"),
             MenuItem("7", "Наука и стройки", "технологии и исследования", "🔬"),
             MenuItem("9", "Баттл-пасс", "уровни и награды", "🎖"),
             MenuItem("A", "Ауксилия", "вспомогательные войска", "🏹"),
@@ -26373,7 +26444,64 @@ def ensure_all_states(player):
                 exc_info=True,
                 level=logging.WARNING,
             )
+    if CITY_EVENTS is not None:
+        try:
+            CITY_EVENTS.ensure_state(player, globals())
+        except Exception as exc:
+            debug_log("City system state migration failed: %s", exc, exc_info=True, level=logging.WARNING)
+    if DIPLOMACY_AI is not None:
+        try:
+            DIPLOMACY_AI.ensure_state(player, globals())
+        except Exception as exc:
+            debug_log("Diplomacy AI state migration failed: %s", exc, exc_info=True, level=logging.WARNING)
+    for module, label in (
+        (NATIONS, "Nation system"),
+        (WORLD_COUNCIL, "World council"),
+        (WARFARE_AI, "Foreign warfare"),
+        (DIPLOMATIC_TRADE, "Diplomatic trade"),
+        (DYNASTIES, "Dynasty system"),
+    ):
+        if module is not None and hasattr(module, "ensure_state"):
+            try:
+                module.ensure_state(player, globals())
+            except Exception as exc:
+                debug_log(f"{label} state migration failed: %s", exc, exc_info=True, level=logging.WARNING)
     return result
+
+
+# Все стратегические системы входят в единый послеходовый Совет. Сначала ИИ
+# держав формирует намерения, затем обновляются уникальные бонусы, войны,
+# торговля и династии. Их важные решения складываются в Consilium Orbis и
+# автоматически разбираются в несколько этапов. После международного совета
+# следуют городские события и прежние локальные интеракции.
+_process_pending_interactions_civitates_base = process_pending_interactions
+def process_pending_interactions(player) -> None:
+    modules = (
+        (DIPLOMACY_AI, "Strategic diplomacy AI"),
+        (NATIONS, "Unique nations"),
+        (WARFARE_AI, "Foreign warfare"),
+        (DIPLOMATIC_TRADE, "Diplomatic trade"),
+        (DYNASTIES, "Dynasties"),
+    )
+    for module, label in modules:
+        if module is not None and hasattr(module, "process_turn"):
+            try:
+                module.process_turn(player, globals())
+            except Exception as exc:
+                debug_log(f"{label} turn failed: %s", exc, exc_info=True, level=logging.ERROR)
+    if WORLD_COUNCIL is not None:
+        try:
+            WORLD_COUNCIL.process_pending(player, globals(), interactive=True)
+        except Exception as exc:
+            debug_log("World council failed: %s", exc, exc_info=True, level=logging.ERROR)
+            print(clr(f"  ⚠ Consilium Orbis не завершил заседание: {exc}", C.RED))
+    if CITY_EVENTS is not None:
+        try:
+            CITY_EVENTS.process_turn(player, globals(), interactive=True)
+        except Exception as exc:
+            debug_log("City events turn failed: %s", exc, exc_info=True, level=logging.ERROR)
+            print(clr(f"  ⚠ Городская система не завершила обработку хода: {exc}", C.RED))
+    return _process_pending_interactions_civitates_base(player)
 
 
 def run_internal_self_tests(verbose: bool = False) -> tuple[bool, list[str], list[str]]:
@@ -26451,7 +26579,7 @@ def run_internal_self_tests(verbose: bool = False) -> tuple[bool, list[str], lis
     handled_keys = {
         "1", "2", "4", "5", "6", "7", "8", "9",
         "E", "R", "H", "X", "A", "B", "V", "C", "L", "W", "Y", "Z",
-        "T", "D", "P", "F", "N", "S", "Q",
+        "T", "D", "P", "F", "N", "M", "I", "G", "S", "Q",
     }
     missing_handlers = displayed_keys - handled_keys
     if missing_handlers:
@@ -27596,7 +27724,33 @@ def show_economy_v24_menu(player):
 
 def dispatch_main_choice(player, choice) -> bool:
     """Выполняет приказ меню. False означает завершение игрового цикла."""
-    if choice == "1":
+    if choice == "G":
+        if WORLD_COUNCIL is not None:
+            WORLD_COUNCIL.open_menu(player, globals())
+        else:
+            print(clr("  Система Gentes et Regna недоступна.", C.RED))
+            errors = [NATIONS_IMPORT_ERROR, WORLD_COUNCIL_IMPORT_ERROR, WARFARE_AI_IMPORT_ERROR, DIPLOMATIC_TRADE_IMPORT_ERROR, DYNASTIES_IMPORT_ERROR]
+            for error in errors:
+                if error:
+                    print(clr(f"  Причина: {error}", C.GOLD))
+            pause()
+    elif choice == "M":
+        if CITY_EVENTS is not None:
+            CITY_EVENTS.open_menu(player, globals())
+        else:
+            print(clr("  Городская система недоступна.", C.RED))
+            if CITY_EVENTS_IMPORT_ERROR:
+                print(clr(f"  Причина: {CITY_EVENTS_IMPORT_ERROR}", C.GOLD))
+            pause()
+    elif choice == "I":
+        if DIPLOMACY_AI is not None:
+            DIPLOMACY_AI.open_menu(player, globals())
+        else:
+            print(clr("  Стратегический дипломатический ИИ недоступен.", C.RED))
+            if DIPLOMACY_AI_IMPORT_ERROR:
+                print(clr(f"  Причина: {DIPLOMACY_AI_IMPORT_ERROR}", C.GOLD))
+            pause()
+    elif choice == "1":
         if roma_map_textual and getattr(roma_map_textual, "TEXTUAL_MAP_AVAILABLE", False):
             map_choice = roma_map_textual.run_textual_map(
                 player,
