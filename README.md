@@ -1,20 +1,27 @@
-<div align="center">
+<h1 align="center">🏛 ROMA AETERNA</h1>
 
-# 🏛 ROMA AETERNA
+<p align="center">
+<b>Grand Strategy • 4X • Historical Sandbox • Roman Republic & Empire</b>
+</p>
 
-### **GENTES ET REGNA · CIVITATES ET ORBIS · CONSILIUM REGINAE**
+<p align="center">
 
-**Большая историческая 4X-стратегия о Риме — в терминале, на чистом Python.**
+[![Play on itch.io](https://img.shields.io/badge/Play_on-itch.io-FA5C5C?logo=itchdotio&logoColor=white)](https://aqua666-prog.itch.io/roma-aeterna)
+[![Build](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/python-app.yml/badge.svg)](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/python-app.yml)
+[![CodeQL](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/codeql.yml/badge.svg)](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/codeql.yml)
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](#-системные-требования)
-[![Version](https://img.shields.io/badge/version-2.90.0%20Gentes%20et%20Regna-8B0000)](#-текущая-версия)
-[![Dynasties](https://img.shields.io/badge/Domus%20et%20Coniugia-1.1.0-D4AF37)](#-династии-и-умная-супруга)
-[![Genre](https://img.shields.io/badge/genre-historical%204X-4B0082)](#-четыре-основания-4x)
-[![Interface](https://img.shields.io/badge/interface-ANSI%20%7C%20Rich%20%7C%20Textual-2F4F4F)](#-интерфейс)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Lua](https://img.shields.io/badge/Lua-5.4-2C2D72?logo=lua&logoColor=white)
+![Version](https://img.shields.io/badge/Version-v2.90.0-gold)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Android-success)
+![Last Commit](https://img.shields.io/github/last-commit/Aqua666-prog/Roma-Aeterna)
+![Release](https://img.shields.io/github/v/release/Aqua666-prog/Roma-Aeterna)
+![Repo Size](https://img.shields.io/github/repo-size/Aqua666-prog/Roma-Aeterna)
+![Stars](https://img.shields.io/github/stars/Aqua666-prog/Roma-Aeterna?style=social)
+![Forks](https://img.shields.io/github/forks/Aqua666-prog/Roma-Aeterna?style=social)
 
-[**Страница игры на itch.io**](https://aqua666-prog.itch.io/roma-aeterna)
-
-</div>
+</p>
 
 > *Hoc illud est praecipue in cognitione rerum salubre ac frugiferum, omnis te exempli documenta in inlustri posita monumento intueri.*
 >
