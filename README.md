@@ -25,7 +25,7 @@
 [![Interface](https://img.shields.io/badge/interface-ANSI%20%7C%20Rich%20%7C%20Textual-2F4F4F)](#-интерфейс)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-5C2D91)](#-установка-и-запуск)
 [![Architecture](https://img.shields.io/badge/architecture-modular-D4AF37)](#-архитектура-проекта)
-[![Development](https://img.shields.io/badge/development-human--directed%20AI--assisted-6A5ACD)](#-путь-разработки)
+[![Development](https://img.shields.io/badge/development-human--directed%20AI---6A5ACD)](#-путь-разработки)
 
 [**🎮 itch.io**](https://aqua666-prog.itch.io/roma-aeterna)
 &nbsp;·&nbsp;
