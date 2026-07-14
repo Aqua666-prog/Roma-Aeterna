@@ -26,6 +26,8 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-5C2D91)](#-установка-и-запуск)
 [![Architecture](https://img.shields.io/badge/architecture-modular-D4AF37)](#-архитектура-проекта)
 [![Made by Human](https://img.shields.io/badge/made%20by-human%20%F0%9F%A7%91%E2%80%8D%F0%9F%92%BB-blue)](#-путь-разработки)
+![CI](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/python-app.yml/badge.svg)
+![CodeQL](https://github.com/Aqua666-prog/Roma-Aeterna/actions/workflows/codeql.yml/badge.svg)
 ![Repo Size](https://img.shields.io/github/repo-size/Aqua666-prog/Roma-Aeterna)
 
 [**🎮 itch.io**](https://aqua666-prog.itch.io/roma-aeterna)
