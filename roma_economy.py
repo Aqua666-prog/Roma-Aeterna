@@ -34,7 +34,21 @@ import random
 from dataclasses import asdict, dataclass
 from typing import Any
 
-ECONOMY_VERSION = 4
+try:
+    import economy_modifiers as ECONOMY_MODIFIERS
+except (ImportError, SyntaxError):
+    ECONOMY_MODIFIERS = None
+
+try:
+    import economy_dictionary as ECONOMY_DICTIONARY
+except (ImportError, SyntaxError):
+    ECONOMY_DICTIONARY = None
+
+ECONOMY_VERSION = 10
+
+STARTING_BASE_REVENUE_MIN = 50
+STARTING_BASE_REVENUE_DEFAULT = 80
+STARTING_BASE_REVENUE_MAX = 100
 
 
 @dataclass(frozen=True)
@@ -92,6 +106,17 @@ DEFAULT_BUDGET_SHARES = {
     "religion": 0.06,
 }
 
+# Один процент бюджета стоит по-разному в разных ведомствах. Перенос средств
+# в армию или великие стройки теперь меняет не только бонусы, но и общий баланс.
+PROGRAMME_COST_MULTIPLIERS = {
+    "administration": 0.95,
+    "military": 1.20,
+    "infrastructure": 1.30,
+    "welfare": 1.05,
+    "science": 1.15,
+    "religion": 0.90,
+}
+
 FISCAL_STANCES = {
     "austerity": {"label": "Экономия", "investment_ratio": 0.55, "confidence": 0.02},
     "balanced": {"label": "Сбалансированный бюджет", "investment_ratio": 0.85, "confidence": 0.01},
@@ -110,6 +135,62 @@ CREDIT_POLICIES = {
     "neutral": {"label": "Нейтральная политика", "rate": 0.000, "credit_growth": 0.08, "risk": 0.00},
     "tight": {"label": "Ограничение кредита", "rate": 0.035, "credit_growth": -0.02, "risk": -0.04},
 }
+
+# Автономная «имперская машина». Игрок выбирает доктрину один раз, после чего
+# экономика сама подрезает необязательные расходы и удерживает положительный
+# денежный поток. Сложная макромодель при этом остаётся под капотом.
+AUTOMATION_DOCTRINES = {
+    "balanced": {
+        "label": "Стабильный фиск",
+        "revenue_mult": 1.00,
+        "customs_mult": 1.00,
+        "commerce_mult": 1.00,
+        "programme_mult": 1.00,
+        "military_upkeep_mult": 1.00,
+        "minimum_balance": 15,
+    },
+    "treasury": {
+        "label": "Приоритет казны",
+        "revenue_mult": 1.12,
+        "customs_mult": 1.05,
+        "commerce_mult": 1.05,
+        "programme_mult": 0.82,
+        "military_upkeep_mult": 1.00,
+        "minimum_balance": 35,
+    },
+    "mercantile": {
+        "label": "Средиземноморская торговля",
+        "revenue_mult": 1.03,
+        "customs_mult": 1.35,
+        "commerce_mult": 1.25,
+        "programme_mult": 0.95,
+        "military_upkeep_mult": 1.00,
+        "minimum_balance": 25,
+    },
+    "development": {
+        "label": "Имперское развитие",
+        "revenue_mult": 1.05,
+        "customs_mult": 1.00,
+        "commerce_mult": 1.05,
+        "programme_mult": 1.18,
+        "military_upkeep_mult": 1.00,
+        "minimum_balance": 10,
+    },
+    "war": {
+        "label": "Военная экономика",
+        "revenue_mult": 1.06,
+        "customs_mult": 0.95,
+        "commerce_mult": 0.95,
+        "programme_mult": 1.02,
+        "military_upkeep_mult": 0.88,
+        "minimum_balance": 5,
+    },
+}
+
+REVENUE_KEYS = (
+    "direct_tax", "customs", "domains", "tribute", "commerce", "base_revenue",
+    "micro_income", "doctrine_income", "automatic_stabilizer",
+)
 
 SECTOR_KEYS = (
     "agriculture",
@@ -502,6 +583,13 @@ def _initial_state(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "grain_subsidy": True,
         "strategic_grain_target": DEFAULT_CONFIG.default_reserve_turns,
         "sector_policy": "balanced",
+        "automation": {
+            "enabled": True,
+            "doctrine": "balanced",
+            "last_reconfigured_turn": 0,
+            "stabilizer_uses": 0,
+            "last_stabilizer_income": 0.0,
+        },
         "sectoral_capital": sectoral_capital,
         "sectoral_labor_share": dict(DEFAULT_SECTOR_LABOR_SHARES),
         "sectoral_productivity": dict(DEFAULT_SECTOR_PRODUCTIVITY),
@@ -535,6 +623,15 @@ def _initial_state(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "pending_bond_issue": 0.0,
         "pending_debt_repayment": 0.0,
         "last_real_output": initial_output,
+        "fiscal": {
+            "last_realized_revenue": 0.0,
+            "last_realized_expense": 0.0,
+            "last_realized_balance": 0.0,
+            "last_candidate_revenue": 0.0,
+            "last_policy_signature": "",
+            "last_province_count": int(context.get("province_count", 0)),
+            "history": [],
+        },
     }
 
 
@@ -574,6 +671,20 @@ def migrate_economy_state(player: Any, state: dict[str, Any], context: dict[str,
     # v4 добавляет отдельный счёт военных трофеев и капитальных трансфертов.
     if old_version < 4:
         _merge_defaults(state.setdefault("conquest", {}), defaults["conquest"])
+
+    # v5 вводит единый фискальный мост между макромоделью и игровой казной.
+    # Последняя реально применённая ведомость становится якорем прогноза, чтобы
+    # показатель «золото за ход» не прыгал на тысячи без понятной причины.
+    if old_version < 5:
+        fiscal = state.setdefault("fiscal", {})
+        _merge_defaults(fiscal, defaults["fiscal"])
+        last = state.get("last_statement") if isinstance(state.get("last_statement"), dict) else {}
+        if finite(fiscal.get("last_realized_revenue", 0.0)) <= 0:
+            fiscal["last_realized_revenue"] = max(0.0, finite(last.get("revenue_total", 0.0)))
+        if finite(fiscal.get("last_realized_expense", 0.0)) <= 0:
+            fiscal["last_realized_expense"] = max(0.0, finite(last.get("expense_total", 0.0)))
+        if not finite(fiscal.get("last_realized_balance", 0.0)) and last:
+            fiscal["last_realized_balance"] = finite(last.get("overall_balance", 0.0))
 
     state["version"] = ECONOMY_VERSION
     return state
@@ -697,6 +808,23 @@ def ensure_economy_state(player: Any, context: dict[str, Any] | None = None) -> 
     conquest["history"] = [row for row in conquest["history"] if isinstance(row, dict)][-240:]
     for key in ("city_spoils", "province_indemnities", "grain_requisitions", "captives", "capital_transfers"):
         conquest[key] = max(0.0, finite(conquest.get(key, 0.0)))
+
+    fiscal = state.setdefault("fiscal", {})
+    _merge_defaults(fiscal, _initial_state(player, context)["fiscal"])
+    for key in (
+        "last_realized_revenue", "last_realized_expense",
+        "last_candidate_revenue",
+    ):
+        fiscal[key] = max(0.0, finite(fiscal.get(key, 0.0)))
+    fiscal["last_realized_balance"] = finite(fiscal.get("last_realized_balance", 0.0))
+    fiscal["last_policy_signature"] = str(fiscal.get("last_policy_signature", ""))
+    fiscal["last_province_count"] = max(
+        0,
+        int(finite(fiscal.get("last_province_count", context.get("province_count", 0)), 0)),
+    )
+    if not isinstance(fiscal.get("history"), list):
+        fiscal["history"] = []
+    fiscal["history"] = [row for row in fiscal["history"] if isinstance(row, dict)][-120:]
     return state
 
 
@@ -1220,6 +1348,224 @@ def _external_trade(
     }
 
 
+
+def _automation_spec(state: dict[str, Any]) -> dict[str, Any]:
+    automation = state.get("automation") if isinstance(state.get("automation"), dict) else {}
+    doctrine = str(automation.get("doctrine", "balanced"))
+    return AUTOMATION_DOCTRINES.get(doctrine, AUTOMATION_DOCTRINES["balanced"])
+
+
+def _legacy_economic_magic_modifiers(
+    context: dict[str, Any],
+    state: dict[str, Any],
+    macro: dict[str, float],
+    sectors: dict[str, Any],
+    finance: dict[str, float],
+    trade: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Много мелких финансовых шестерёнок, каждая даёт или отнимает копеечку."""
+    nominal = max(1.0, finite(macro.get("nominal_output", 0.0)))
+    population = max(1.0, finite(macro.get("population", state.get("population", 1.0))))
+    rows: list[dict[str, Any]] = []
+
+    def add(key: str, label: str, value: Any, gold: float, category: str) -> None:
+        rows.append({
+            "key": key,
+            "label": label,
+            "value": value,
+            "gold_per_turn": round(finite(gold), 2),
+            "category": category,
+        })
+
+    commerce_profit = finite(sectors.get("profitability", {}).get("commerce", 1.0), 1.0)
+    capital = max(0.0, finite(macro.get("capital_stock", state.get("capital_stock", 0.0))))
+    infrastructure = max(0.0, finite(macro.get("infrastructure", state.get("infrastructure", 0.0))))
+    human_capital = max(0.0, finite(macro.get("human_capital", state.get("human_capital", 0.0))))
+    velocity = finite(macro.get("velocity", state.get("velocity", 1.0)), 1.0)
+    banking = clamp(finite(macro.get("banking_health", finance.get("banking_health", 0.5))), 0.0, 1.0)
+    confidence = clamp(finite(macro.get("confidence", state.get("confidence", 0.5))), 0.0, 1.0)
+    urbanization = clamp(finite(macro.get("urbanization", state.get("demographics", {}).get("urbanization_rate", 0.2))), 0.0, 1.0)
+    tax_capacity = clamp(finite(macro.get("tax_capacity", state.get("tax_capacity", 0.4))), 0.0, 1.0)
+    terms = clamp(finite(trade.get("terms_of_trade", 1.0)), 0.25, 4.0)
+    trade_balance = finite(trade.get("trade_balance", 0.0))
+    money_supply = max(1.0, finite(macro.get("money_supply", state.get("money_supply", 1.0))))
+    deposits = max(0.0, finite(state.get("financial", {}).get("deposit_base", 0.0)))
+    credit_ratio = clamp(finite(macro.get("credit_to_gdp", finance.get("credit_to_gdp", 0.0))), 0.0, 5.0)
+    romanization = clamp(finite(context.get("avg_romanization", 0.0)), 0.0, 100.0)
+    route_value = max(0.0, finite(context.get("trade_route_value", 0.0)))
+    trade_pacts = max(0, int(finite(context.get("trade_pacts", 0))))
+    building_count = max(0, int(finite(context.get("municipal_building_count", 0))))
+
+    add("gdp_dividend", "Дивиденд валового продукта", round(nominal, 1), nominal * 0.008, "Макроэкономика")
+    add("capital_turnover", "Оборот основного капитала", round(capital, 1), capital * 0.010, "Капитал")
+    add("money_velocity", "Скорость обращения денег", round(velocity, 3), clamp((velocity - 1.40) * nominal * 0.012, -8.0, 15.0), "Деньги")
+    add("monetization", "Монетизация хозяйства", round(money_supply / nominal, 3), clamp(math.log1p(money_supply / nominal) * 2.2, 0.0, 10.0), "Деньги")
+    add("banking_health", "Банковское здоровье", f"{banking:.1%}", clamp((banking - 0.45) * nominal * 0.015, -8.0, 16.0), "Финансы")
+    add("liquidity", "Ликвидность вкладов", round(deposits / nominal, 3), clamp(deposits / nominal * 3.2, 0.0, 12.0), "Финансы")
+    add("credit_multiplier", "Кредитный мультипликатор", round(credit_ratio, 3), clamp(credit_ratio * 6.0, 0.0, 18.0), "Финансы")
+    add("trade_margin", "Торговая маржа", round(commerce_profit, 3), clamp((commerce_profit - 0.82) * nominal * 0.025, -8.0, 22.0), "Торговля")
+    add("trade_balance", "Сальдо торгового баланса", round(trade_balance, 2), clamp(trade_balance * 0.15, -15.0, 25.0), "Торговля")
+    add("terms_of_trade", "Условия торговли", round(terms, 3), clamp((terms - 1.0) * nominal * 0.010, -10.0, 18.0), "Торговля")
+    add("infrastructure_rent", "Инфраструктурная рента", round(infrastructure, 1), infrastructure * 0.12, "Инфраструктура")
+    add("human_capital", "Премия человеческого капитала", round(human_capital, 1), human_capital * 0.08, "Труд")
+    add("agglomeration", "Урбанизационная агломерация", f"{urbanization:.1%}", population * urbanization * 0.020, "Труд")
+    add("fiscal_capacity", "Фискальная ёмкость", f"{tax_capacity:.1%}", nominal * max(0.0, tax_capacity - 0.30) * 0.010, "Налоги")
+    add("confidence_premium", "Премия доверия", f"{confidence:.1%}", nominal * max(-0.20, confidence - 0.45) * 0.006, "Финансы")
+    add("romanization", "Романизационная налоговая премия", f"{romanization:.0f}%", romanization * 0.06, "Римская экономика")
+    add("route_network", "Рента торговых маршрутов", round(route_value, 1), clamp(route_value * 0.020, 0.0, 20.0), "Торговля")
+    add("trade_pacts", "Договорная торговая премия", trade_pacts, trade_pacts * 2.0, "Торговля")
+    add("municipal_density", "Муниципальная плотность", building_count, building_count * 0.35, "Римская экономика")
+    add("research_diffusion", "Диффузия знаний", round(finite(state.get("innovation", {}).get("diffusion", 0.0)), 3), finite(state.get("innovation", {}).get("diffusion", 0.0)) * 5.0, "Технологии")
+    return rows
+
+
+def _economic_magic_modifiers(
+    context: dict[str, Any],
+    state: dict[str, Any],
+    macro: dict[str, float],
+    sectors: dict[str, Any],
+    finance: dict[str, float],
+    trade: dict[str, Any],
+    revenues: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Hundreds of data-driven microformulae, with a safe legacy fallback."""
+    if ECONOMY_MODIFIERS is not None:
+        try:
+            return ECONOMY_MODIFIERS.calculate_modifiers(
+                context, state, macro, sectors, finance, trade, revenues
+            )
+        except (AttributeError, KeyError, TypeError, ValueError, ArithmeticError):
+            pass
+    return _legacy_economic_magic_modifiers(context, state, macro, sectors, finance, trade)
+
+
+def microformula_count() -> int:
+    if ECONOMY_MODIFIERS is None:
+        return 20
+    try:
+        return int(ECONOMY_MODIFIERS.modifier_count())
+    except (AttributeError, TypeError, ValueError):
+        return 20
+
+
+def microformula_library_audit() -> list[str]:
+    if ECONOMY_MODIFIERS is None:
+        return ["economy_modifiers.py не импортирован"]
+    try:
+        return list(ECONOMY_MODIFIERS.audit_library())
+    except (AttributeError, TypeError, ValueError) as exc:
+        return [f"Ошибка проверки библиотеки микроформул: {type(exc).__name__}: {exc}"]
+
+
+
+def _realize_magic_rows(
+    rows: list[dict[str, Any]],
+    realization_factor: float,
+) -> list[dict[str, Any]]:
+    """Scale visible microformulae by the same collection factor as revenue.
+
+    Before v10, stabilized revenue was scaled while the 306 visible rows kept
+    their candidate values. After a few turns the lexicon could therefore claim
+    a different micro-income than the treasury actually received.
+    """
+    factor = max(0.0, finite(realization_factor, 1.0))
+    precision = int(getattr(ECONOMY_MODIFIERS, "MICROFORMULA_PRECISION", 3)) if ECONOMY_MODIFIERS is not None else 3
+    precision = max(2, min(6, precision))
+    realized: list[dict[str, Any]] = []
+    raw_total = 0.0
+    for source in rows:
+        if not isinstance(source, dict):
+            continue
+        row = dict(source)
+        raw = finite(row.get("gold_per_turn", 0.0))
+        raw_total += raw
+        row["candidate_gold_per_turn"] = round(raw, precision)
+        row["realization_factor"] = round(factor, 8)
+        row["gold_per_turn"] = round(raw * factor, precision)
+        row.setdefault("kind", "microformula")
+        row["included_in_micro_total"] = True
+        realized.append(row)
+
+    target = round(raw_total * factor, precision)
+    visible = round(sum(finite(row.get("gold_per_turn", 0.0)) for row in realized), precision)
+    residual = round(target - visible, precision)
+    if residual and realized:
+        anchor_row = max(realized, key=lambda row: abs(finite(row.get("gold_per_turn", 0.0))))
+        anchor_row["gold_per_turn"] = round(
+            finite(anchor_row.get("gold_per_turn", 0.0)) + residual,
+            precision,
+        )
+        anchor_row["realization_rounding_reconciliation"] = residual
+    return realized
+
+
+def _magic_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    if ECONOMY_MODIFIERS is not None and hasattr(ECONOMY_MODIFIERS, "modifier_summary"):
+        try:
+            return dict(ECONOMY_MODIFIERS.modifier_summary(rows))
+        except (AttributeError, TypeError, ValueError, ArithmeticError):
+            pass
+    clean = [row for row in rows if isinstance(row, dict)]
+    positive = sum(max(0.0, finite(row.get("gold_per_turn", 0.0))) for row in clean)
+    negative = sum(min(0.0, finite(row.get("gold_per_turn", 0.0))) for row in clean)
+    return {
+        "count": len(clean),
+        "positive": round(positive, 3),
+        "negative": round(negative, 3),
+        "net": round(positive + negative, 3),
+        "zero_rows": sum(1 for row in clean if finite(row.get("gold_per_turn", 0.0)) == 0.0),
+    }
+
+def _doctrine_income(state: dict[str, Any], revenues: dict[str, float]) -> float:
+    automation = state.get("automation") if isinstance(state.get("automation"), dict) else {}
+    if not bool(automation.get("enabled", True)):
+        return 0.0
+    spec = _automation_spec(state)
+    ordinary = sum(max(0.0, finite(revenues.get(k, 0.0))) for k in ("direct_tax", "domains", "tribute", "base_revenue"))
+    return max(0.0,
+        ordinary * (finite(spec.get("revenue_mult", 1.0), 1.0) - 1.0)
+        + max(0.0, finite(revenues.get("customs", 0.0))) * (finite(spec.get("customs_mult", 1.0), 1.0) - 1.0)
+        + max(0.0, finite(revenues.get("commerce", 0.0))) * (finite(spec.get("commerce_mult", 1.0), 1.0) - 1.0)
+    )
+
+
+def _apply_automatic_spending(state: dict[str, Any], expenditures: dict[str, Any]) -> None:
+    automation = state.get("automation") if isinstance(state.get("automation"), dict) else {}
+    if not bool(automation.get("enabled", True)):
+        return
+    spec = _automation_spec(state)
+    programme_mult = clamp(finite(spec.get("programme_mult", 1.0), 1.0), 0.25, 2.0)
+    military_mult = clamp(finite(spec.get("military_upkeep_mult", 1.0), 1.0), 0.50, 1.50)
+    expenditures["programmes"] = {
+        key: max(0.0, finite(value)) * programme_mult
+        for key, value in expenditures.get("programmes", {}).items()
+    }
+    expenditures["military_upkeep"] = max(0.0, finite(expenditures.get("military_upkeep", 0.0))) * military_mult
+    expenditures["programme_total"] = sum(expenditures["programmes"].values())
+    expenditures["mandatory_total"] = sum(max(0.0, finite(expenditures.get(key, 0.0))) for key in (
+        "administration", "military_upkeep", "fleet_upkeep", "auxiliary_upkeep",
+        "artillery_upkeep", "garrison_upkeep", "municipal_building_upkeep",
+        "tribute_paid", "interest", "treasury_management", "strategic_reserve",
+    ))
+    expenditures["total"] = expenditures["mandatory_total"] + expenditures["programme_total"]
+
+
+def set_economy_automation(player: Any, enabled: bool) -> bool:
+    state = ensure_economy_state(player)
+    state.setdefault("automation", {})["enabled"] = bool(enabled)
+    state["automation"]["last_reconfigured_turn"] = int(getattr(player, "turn", 1))
+    return state["automation"]["enabled"]
+
+
+def set_automation_doctrine(player: Any, doctrine: str) -> str:
+    if doctrine not in AUTOMATION_DOCTRINES:
+        raise ValueError(f"Неизвестная автоматическая доктрина: {doctrine}")
+    state = ensure_economy_state(player)
+    state.setdefault("automation", {})["doctrine"] = doctrine
+    state["automation"]["last_reconfigured_turn"] = int(getattr(player, "turn", 1))
+    return doctrine
+
+
 def _tax_revenue(
     context: dict[str, Any],
     state: dict[str, Any],
@@ -1245,7 +1591,7 @@ def _tax_revenue(
     domains = max(0.0, finite(context.get("state_domain_income", 0.0))) * nominal_scale
     tribute = max(0.0, finite(context.get("tribute_income", 0.0))) * nominal_scale
     commerce = max(0.0, finite(context.get("special_gold_income", 0.0))) * nominal_scale
-    base_revenue = max(0.0, finite(context.get("base_revenue", 10.0))) * nominal_scale
+    base_revenue = max(0.0, finite(context.get("base_revenue", STARTING_BASE_REVENUE_DEFAULT))) * nominal_scale
     difficulty = clamp(finite(context.get("income_mult", 1.0), 1.0), 0.20, 3.0)
     direct_tax *= difficulty
     customs *= difficulty
@@ -1353,6 +1699,92 @@ def _political_economy(
     }
 
 
+def _fiscal_policy_signature(state: dict[str, Any], context: dict[str, Any]) -> str:
+    """Короткая подпись решений, способных изменить бюджетный поток."""
+    payload = {
+        "tax": round(finite(state.get("tax_rate", 0.0)), 4),
+        "tariff": round(finite(state.get("tariff_rate", 0.0)), 4),
+        "stance": str(state.get("fiscal_stance", "balanced")),
+        "coin": str(state.get("coin_standard", "managed")),
+        "credit": str(state.get("financial", {}).get("policy", "neutral")),
+        "budget": {
+            key: round(finite(state.get("budget_shares", {}).get(key, 0.0)), 4)
+            for key in BUDGET_KEYS
+        },
+        "reserve": round(finite(state.get("strategic_grain_target", 0.0)), 2),
+        "provinces": int(context.get("province_count", 0)),
+    }
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    ).hexdigest()[:16]
+
+
+def _stabilized_revenue(
+    state: dict[str, Any],
+    context: dict[str, Any],
+    candidate: float,
+) -> tuple[float, dict[str, Any]]:
+    """Превращает волатильную макрооценку в реально собираемый доход казны."""
+    candidate = max(0.0, finite(candidate))
+    fiscal = state.setdefault("fiscal", {})
+    previous = max(0.0, finite(fiscal.get("last_realized_revenue", 0.0)))
+    signature = _fiscal_policy_signature(state, context)
+    previous_signature = str(fiscal.get("last_policy_signature", ""))
+    current_provinces = max(0, int(context.get("province_count", 0)))
+    previous_provinces = max(
+        0,
+        int(finite(fiscal.get("last_province_count", current_provinces), current_provinces)),
+    )
+
+    if previous <= 0.0:
+        return candidate, {
+            "candidate": candidate,
+            "realized": candidate,
+            "previous": previous,
+            "lower_bound": 0.0,
+            "upper_bound": candidate,
+            "policy_changed": bool(previous_signature and previous_signature != signature),
+            "province_delta": current_provinces - previous_provinces,
+            "stabilized": False,
+            "policy_signature": signature,
+        }
+
+    policy_changed = bool(previous_signature and previous_signature != signature)
+    province_delta = current_provinces - previous_provinces
+    shock_active = any(
+        isinstance(row, dict) and int(finite(row.get("remaining", 0))) > 0
+        for row in state.get("active_shocks", [])
+    )
+
+    rise_rate = 0.28
+    fall_rate = 0.34
+    if policy_changed:
+        rise_rate += 0.12
+        fall_rate += 0.10
+    if province_delta:
+        expansion = min(0.30, abs(province_delta) * 0.055)
+        rise_rate += expansion
+        fall_rate += expansion * 0.55
+    if shock_active:
+        rise_rate += 0.16
+        fall_rate += 0.22
+
+    upper = previous + max(35.0, previous * rise_rate)
+    lower = max(0.0, previous - max(35.0, previous * fall_rate))
+    realized = clamp(candidate, lower, upper)
+    return realized, {
+        "candidate": candidate,
+        "realized": realized,
+        "previous": previous,
+        "lower_bound": lower,
+        "upper_bound": upper,
+        "policy_changed": policy_changed,
+        "province_delta": province_delta,
+        "stabilized": abs(realized - candidate) > 0.5,
+        "policy_signature": signature,
+    }
+
+
 def _expenditures(
     context: dict[str, Any],
     state: dict[str, Any],
@@ -1366,41 +1798,98 @@ def _expenditures(
     force_limit = max(1, int(context.get("legion_force_limit", 2)))
     over_limit = max(0, legion_count - force_limit)
     quality_index = clamp(finite(context.get("legion_quality_index", 1.0), 1.0), 0.50, 3.0)
-    military_technology = clamp(finite(state["innovation"].get("military_technology", 1.0)), 0.5, 10.0)
+    military_technology = clamp(
+        finite(state["innovation"].get("military_technology", 1.0)),
+        0.5,
+        10.0,
+    )
     price = state["price_level"]
+    corruption = state["corruption"]
+    local_unrest = clamp(finite(context.get("avg_province_unrest", 0.0)), 0.0, 10.0)
 
-    military = legion_count * (8.0 + 2.0 * quality_index) * price / (military_technology ** 0.12)
-    military += over_limit * (10.0 + 5.0 * over_limit) * price
+    # Профессиональная армия и большая территория должны ощущаться в казне.
+    military = (
+        legion_count
+        * (24.0 + 7.0 * quality_index)
+        * price
+        / (military_technology ** 0.12)
+    )
+    military += over_limit * (18.0 + 8.0 * over_limit) * price
+
     fleet = max(0.0, finite(context.get("fleet_upkeep", 0.0))) * price
-    administration = (4.0 + 2.8 * (province_count ** 1.18)) * price
-    administration *= 1.0 + 0.35 * state["corruption"]
-    tribute_paid = max(0.0, finite(context.get("tribute_paid", 0.0)))
+    auxiliaries = max(0.0, finite(context.get("auxiliary_upkeep", 0.0))) * price
+    artillery = max(0.0, finite(context.get("artillery_upkeep", 0.0))) * price
+    provincial_garrisons = max(0.0, finite(context.get("garrison_upkeep", 0.0))) * price
+    municipal_buildings = max(0.0, finite(context.get("municipal_building_upkeep", 0.0))) * price
 
+    # Степень 1.55 создаёт настоящий late-game administrative burden:
+    # маленькая республика дешева, мировая империя требует большого аппарата.
+    administration = (6.0 + 1.55 * (province_count ** 1.55)) * price
+    administration *= 1.0 + 0.42 * corruption + 0.018 * local_unrest
+
+    tribute_paid = max(0.0, finite(context.get("tribute_paid", 0.0)))
     sovereign_rate = finance["sovereign_rate"]
     interest = state["debt"] * sovereign_rate
-    revenue_total = sum(revenues[key] for key in ("direct_tax", "customs", "domains", "tribute", "commerce", "base_revenue"))
+    revenue_total = sum(finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS)
+
+    # Крупная бездействующая казна требует охраны, перевозки, чеканки и
+    # создаёт утечки. Это мягкий late-game sink, а не конфискация накоплений.
     treasury_cash = max(0.0, finite(context.get("treasury_cash", 0.0)))
-    reserve_target = max(180.0, revenue_total * 4.0)
+    reserve_target = max(300.0, revenue_total * 3.0)
     excess_cash = max(0.0, treasury_cash - reserve_target)
-    treasury_management = min(revenue_total * 0.20, excess_cash * 0.003)
+    treasury_management = min(
+        revenue_total * 0.30,
+        excess_cash * 0.006 + math.sqrt(excess_cash) * 0.12,
+    )
+
     stance = FISCAL_STANCES[state["fiscal_stance"]]
-    investment_envelope = max(0.0, revenue_total * 0.34 * stance["investment_ratio"])
+    investment_envelope = max(
+        0.0,
+        revenue_total * 0.34 * stance["investment_ratio"],
+    )
     shares = normalize_budget_shares(state["budget_shares"])
-    programmes = {key: investment_envelope * shares[key] for key in BUDGET_KEYS}
+    programmes = {
+        key: investment_envelope
+        * shares[key]
+        * PROGRAMME_COST_MULTIPLIERS.get(key, 1.0)
+        for key in BUDGET_KEYS
+    }
 
     grain_subsidy = 0.0
     if state.get("grain_subsidy", True) and grain["price"] > 1.35:
-        grain_subsidy = min(revenue_total * 0.18, (grain["price"] - 1.0) * macro["population"] * 0.025)
+        grain_subsidy = min(
+            revenue_total * 0.18,
+            (grain["price"] - 1.0) * macro["population"] * 0.025,
+        )
         programmes["welfare"] += grain_subsidy
 
-    strategic_reserve = min(revenue_total * 0.25, max(0.0, grain["reserve_procurement_cost"]))
-    mandatory = administration + military + fleet + tribute_paid + interest + treasury_management + strategic_reserve
+    strategic_reserve = min(
+        revenue_total * 0.25,
+        max(0.0, grain["reserve_procurement_cost"]),
+    )
+    mandatory = (
+        administration
+        + military
+        + fleet
+        + auxiliaries
+        + artillery
+        + provincial_garrisons
+        + municipal_buildings
+        + tribute_paid
+        + interest
+        + treasury_management
+        + strategic_reserve
+    )
     programme_total = sum(programmes.values())
     total = mandatory + programme_total
     return {
         "administration": administration,
         "military_upkeep": military,
         "fleet_upkeep": fleet,
+        "auxiliary_upkeep": auxiliaries,
+        "artillery_upkeep": artillery,
+        "garrison_upkeep": provincial_garrisons,
+        "municipal_building_upkeep": municipal_buildings,
         "tribute_paid": tribute_paid,
         "interest": interest,
         "treasury_management": treasury_management,
@@ -1423,12 +1912,11 @@ def _national_accounts(
     expenditures: dict[str, Any],
 ) -> dict[str, Any]:
     nominal_gdp = max(1.0, macro["nominal_output"])
-    government_purchases = (
-        expenditures["administration"]
-        + expenditures["military_upkeep"]
-        + expenditures["fleet_upkeep"]
+    government_purchases = max(0.0,
+        expenditures["mandatory_total"]
+        - expenditures["interest"]
+        - expenditures["treasury_management"]
         + expenditures["programme_total"]
-        + expenditures["strategic_reserve"]
     )
     public_investment = (
         expenditures["programmes"].get("infrastructure", 0.0)
@@ -1502,6 +1990,136 @@ def _flow_of_funds(
     }
 
 
+
+
+def _integer_revenue_payload(revenues: dict[str, Any]) -> tuple[dict[str, Any], int]:
+    """Round fiscal receipts once and reconcile components to their total."""
+    payload: dict[str, Any] = {}
+    for key, value in revenues.items():
+        if key in ("laffer_effective_rate", "compliance", "trade_volume"):
+            payload[key] = value
+        else:
+            payload[key] = money(value)
+    for key in REVENUE_KEYS:
+        payload.setdefault(key, 0)
+    target = money(sum(finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS))
+    component_total = sum(int(payload.get(key, 0)) for key in REVENUE_KEYS)
+    residual = target - component_total
+    if residual:
+        anchors = ("automatic_stabilizer", "base_revenue", "micro_income", "direct_tax")
+        anchor_key = next((key for key in anchors if int(payload.get(key, 0)) != 0), "base_revenue")
+        payload[anchor_key] = int(payload.get(anchor_key, 0)) + residual
+    return payload, target
+
+
+def _integer_expenditure_payload(expenditures: dict[str, Any]) -> tuple[dict[str, Any], int]:
+    """Build an integer expenditure statement whose subtotals always add up."""
+    mandatory_keys = (
+        "administration", "military_upkeep", "fleet_upkeep", "auxiliary_upkeep",
+        "artillery_upkeep", "garrison_upkeep", "municipal_building_upkeep",
+        "tribute_paid", "interest", "treasury_management", "strategic_reserve",
+    )
+    payload = {key: money(expenditures.get(key, 0.0)) for key in mandatory_keys}
+    programmes_raw = expenditures.get("programmes") if isinstance(expenditures.get("programmes"), dict) else {}
+    programmes = {key: money(programmes_raw.get(key, 0.0)) for key in BUDGET_KEYS}
+    payload["programmes"] = programmes
+    payload["grain_subsidy"] = money(expenditures.get("grain_subsidy", 0.0))
+    payload["mandatory_total"] = sum(int(payload[key]) for key in mandatory_keys)
+    payload["programme_total"] = sum(int(programmes[key]) for key in BUDGET_KEYS)
+    payload["total"] = int(payload["mandatory_total"]) + int(payload["programme_total"])
+    return payload, int(payload["total"])
+
+def _roman_fiscal_accounts(
+    context: dict[str, Any],
+    state: dict[str, Any],
+    macro: dict[str, float],
+    sectors: dict[str, Any],
+    revenues: dict[str, float],
+    expenditures: dict[str, Any],
+    grain: dict[str, float],
+    finance: dict[str, float],
+    revenue_total: float,
+) -> dict[str, Any]:
+    """Read-only Roman decomposition of the already calculated budget.
+
+    These figures do not create a second stream of money. They partition direct
+    taxes, public-domain income and military expenditure into historically
+    legible Roman institutions for the lexicon and audits.
+    """
+    nominal = max(1.0, finite(macro.get("nominal_output", 1.0)))
+    output = sectors.get("output") if isinstance(sectors.get("output"), dict) else {}
+    total_output = max(1e-9, sum(max(0.0, finite(value)) for value in output.values()))
+    agriculture_share = clamp(finite(output.get("agriculture", 0.0)) / total_output, 0.0, 1.0)
+    urbanization = clamp(
+        finite(state.get("demographics", {}).get("urbanization_rate", macro.get("urbanization", 0.0))),
+        0.0,
+        1.0,
+    )
+
+    direct_tax = max(0.0, finite(revenues.get("direct_tax", 0.0)))
+    land_tax_share = clamp(0.50 + 0.34 * agriculture_share - 0.18 * urbanization, 0.34, 0.78)
+    tributum_soli = direct_tax * land_tax_share
+    tributum_capitis = direct_tax - tributum_soli
+
+    domains = max(0.0, finite(revenues.get("domains", 0.0)))
+    ager_share = clamp(0.56 + 0.30 * agriculture_share - 0.12 * urbanization, 0.35, 0.82)
+    ager_publicus = domains * ager_share
+    patrimonium_caesaris = domains - ager_publicus
+    scriptura = ager_publicus * clamp(0.10 + 0.24 * agriculture_share, 0.08, 0.30)
+
+    military_total = max(0.0, finite(expenditures.get("military_upkeep", 0.0)))
+    stipendium = military_total * 0.64
+    castra_logistics = military_total - stipendium
+
+    programmes = expenditures.get("programmes") if isinstance(expenditures.get("programmes"), dict) else {}
+    cursus_publicus_cost = (
+        max(0.0, finite(expenditures.get("administration", 0.0))) * 0.22
+        + max(0.0, finite(programmes.get("infrastructure", 0.0))) * 0.18
+    )
+    annona_cost = max(0.0, finite(expenditures.get("grain_subsidy", 0.0))) + max(
+        0.0, finite(expenditures.get("strategic_reserve", 0.0))
+    )
+    frumentatio_volume = max(0.0, finite(grain.get("consumption", 0.0))) * clamp(
+        0.14 + 0.34 * urbanization,
+        0.12,
+        0.42,
+    )
+    decuma_volume = max(0.0, finite(grain.get("production", 0.0))) * 0.10
+
+    avg_unrest = clamp(finite(context.get("avg_province_unrest", 0.0)) / 10.0, 0.0, 1.0)
+    romanization = clamp(finite(context.get("avg_romanization", 0.0)) / 100.0, 0.0, 1.0)
+    publicani_efficiency = clamp(finite(revenues.get("compliance", 0.0)), 0.0, 1.0)
+
+    return {
+        "aerarium": round(max(0.0, finite(revenue_total)), 6),
+        "fiscus": round(domains + max(0.0, finite(revenues.get("doctrine_income", 0.0))), 6),
+        "tributum": round(direct_tax, 6),
+        "tributum_soli": round(tributum_soli, 6),
+        "tributum_capitis": round(tributum_capitis, 6),
+        "portorium": round(max(0.0, finite(revenues.get("customs", 0.0))), 6),
+        "vectigalia": round(max(0.0, finite(revenues.get("customs", 0.0))) + domains, 6),
+        "ager_publicus": round(ager_publicus, 6),
+        "patrimonium_caesaris": round(patrimonium_caesaris, 6),
+        "scriptura": round(scriptura, 6),
+        "decuma_volume": round(decuma_volume, 6),
+        "annona_cost": round(annona_cost, 6),
+        "frumentatio_volume": round(frumentatio_volume, 6),
+        "horrea_cover": round(max(0.0, finite(grain.get("stock_cover", 0.0))), 6),
+        "cursus_publicus_cost": round(cursus_publicus_cost, 6),
+        "stipendium": round(stipendium, 6),
+        "castra_logistics": round(castra_logistics, 6),
+        "publicani_efficiency": round(publicani_efficiency, 6),
+        "argentarii_health": round(clamp(finite(finance.get("banking_health", 0.0)), 0.0, 1.0), 6),
+        "mensarii_liquidity": round(max(0.0, finite(finance.get("deposit_base", 0.0))), 6),
+        "nummularii_standard": str(state.get("coin_standard", "managed")),
+        "romanitas_fiscalis": round(romanization, 6),
+        "pax_romana": round(1.0 - avg_unrest, 6),
+        "agriculture_share": round(agriculture_share, 6),
+        "urbanization": round(urbanization, 6),
+        "nominal_basis": round(nominal, 6),
+        "accounting_note": "decomposition_only_no_double_counting",
+    }
+
 def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) -> dict[str, Any]:
     state = ensure_economy_state(player, context)
     sectors = _sectoral_snapshot(player, context, state)
@@ -1509,8 +2127,40 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
     finance = _financial_market(player, context, state, macro, sectors)
     trade = _external_trade(player, context, state, macro, sectors)
     revenues = _tax_revenue(context, state, macro, trade)
+    magic_rows = _economic_magic_modifiers(context, state, macro, sectors, finance, trade, revenues)
+    candidate_micro_income = sum(finite(row.get("gold_per_turn", 0.0)) for row in magic_rows)
+    revenues["micro_income"] = candidate_micro_income
+    revenues["doctrine_income"] = _doctrine_income(state, revenues)
+    revenues["automatic_stabilizer"] = 0.0
+
+    candidate_revenue_total = sum(finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS)
+    realized_revenue_total, fiscal_stabilization = _stabilized_revenue(
+        state,
+        context,
+        candidate_revenue_total,
+    )
+    if candidate_revenue_total > 0:
+        realization_factor = realized_revenue_total / candidate_revenue_total
+        for key in REVENUE_KEYS:
+            if key != "automatic_stabilizer":
+                revenues[key] = finite(revenues.get(key, 0.0)) * realization_factor
+    else:
+        realization_factor = 1.0
+
+    # Keep the 306 visible rows and the realized treasury flow in exact accord.
+    magic_rows = _realize_magic_rows(magic_rows, realization_factor)
+    revenues["micro_income"] = sum(
+        finite(row.get("gold_per_turn", 0.0)) for row in magic_rows
+    )
+    realized_revenue_total = sum(
+        finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS
+    )
+    fiscal_stabilization["realized"] = realized_revenue_total
+    microformula_summary = _magic_summary(magic_rows)
+
     grain = _grain_market(player, context, state, macro, trade)
     expenditures = _expenditures(context, state, macro, revenues, grain, finance)
+    _apply_automatic_spending(state, expenditures)
     if grain["reserve_procurement_cost"] > 0:
         funding_ratio = clamp(expenditures["strategic_reserve"] / grain["reserve_procurement_cost"], 0.0, 1.0)
         funded_purchase = grain["reserve_purchase"] * funding_ratio
@@ -1523,12 +2173,23 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         grain["funded_reserve_purchase"] = 0.0
     politics = _political_economy(player, context, state, expenditures["programmes"])
 
-    revenue_total = sum(revenues[key] for key in ("direct_tax", "customs", "domains", "tribute", "commerce", "base_revenue"))
+    revenue_total_before_stabilizer = sum(finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS if key != "automatic_stabilizer")
+    structural_balance = revenue_total_before_stabilizer - expenditures["total"]
+    automation = state.get("automation") if isinstance(state.get("automation"), dict) else {}
+    doctrine_key = str(automation.get("doctrine", "balanced"))
+    doctrine_spec = AUTOMATION_DOCTRINES.get(doctrine_key, AUTOMATION_DOCTRINES["balanced"])
+    target_floor = int(finite(doctrine_spec.get("minimum_balance", 0))) if bool(automation.get("enabled", True)) else -10**9
+    stabilizer_income = max(0.0, target_floor - structural_balance) if bool(automation.get("enabled", True)) else 0.0
+    revenues["automatic_stabilizer"] = stabilizer_income
+    revenue_total = revenue_total_before_stabilizer + stabilizer_income
     primary_balance = revenue_total - (expenditures["total"] - expenditures["interest"])
     overall_balance = revenue_total - expenditures["total"]
     debt_ratio = state["debt"] / max(1.0, macro["nominal_output"])
     national_accounts = _national_accounts(state, macro, sectors, trade, finance, expenditures)
     flow_of_funds = _flow_of_funds(state, macro, trade, finance, revenue_total, expenditures)
+    roman_accounts = _roman_fiscal_accounts(
+        context, state, macro, sectors, revenues, expenditures, grain, finance, revenue_total
+    )
     total_private_investment = max(0.0, national_accounts["expenditure"]["private_investment"])
     total_public_investment = max(0.0, national_accounts["expenditure"]["public_investment"])
     sectoral_balances = {}
@@ -1541,13 +2202,35 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         )
         sectoral_balances[key] = value_added - investment_use - intermediate_use
 
+    revenue_payload, revenue_total_game = _integer_revenue_payload(revenues)
+    expenditure_payload, expense_total_game = _integer_expenditure_payload(expenditures)
+    # Integer rounding must not defeat the selected automatic floor.
+    if bool(automation.get("enabled", True)) and target_floor > -10**8:
+        floor_gap = max(0, target_floor - (revenue_total_game - expense_total_game))
+        if floor_gap:
+            revenue_payload["automatic_stabilizer"] = int(
+                revenue_payload.get("automatic_stabilizer", 0)
+            ) + floor_gap
+            revenue_total_game += floor_gap
+    overall_balance_game = revenue_total_game - expense_total_game
+    structural_balance_game = (
+        revenue_total_game - int(revenue_payload.get("automatic_stabilizer", 0)) - expense_total_game
+    )
+    primary_balance_game = revenue_total_game - (
+        expense_total_game - int(expenditure_payload.get("interest", 0))
+    )
+    roman_accounts["aerarium"] = revenue_total_game
+
     rows = [
-        {"key": "direct_tax", "label": "Прямые налоги", "amount": money(revenues["direct_tax"]), "note": f"ставка {state['tax_rate']:.0%}; эффективная {revenues['laffer_effective_rate']:.1%}"},
-        {"key": "customs", "label": "Пошлины и портовые сборы", "amount": money(revenues["customs"]), "note": f"тариф {state['tariff_rate']:.0%}"},
-        {"key": "domains", "label": "Доходы государственных владений", "amount": money(revenues["domains"]), "note": "рудники, города, земля и монополии"},
-        {"key": "tribute", "label": "Дань и союзные платежи", "amount": money(revenues["tribute"]), "note": "внешние поступления"},
-        {"key": "commerce", "label": "Торговля и морские пути", "amount": money(revenues["commerce"]), "note": "рынки, караваны, ресурсы"},
-        {"key": "base_revenue", "label": "Доход столицы и казённых служб", "amount": money(revenues["base_revenue"]), "note": "устойчивая налоговая база"},
+        {"key": "direct_tax", "label": "Прямые налоги", "amount": int(revenue_payload["direct_tax"]), "note": f"ставка {state['tax_rate']:.0%}; эффективная {revenues['laffer_effective_rate']:.1%}"},
+        {"key": "customs", "label": "Пошлины и портовые сборы", "amount": int(revenue_payload["customs"]), "note": f"тариф {state['tariff_rate']:.0%}"},
+        {"key": "domains", "label": "Доходы государственных владений", "amount": int(revenue_payload["domains"]), "note": "рудники, города, земля и монополии"},
+        {"key": "tribute", "label": "Дань и союзные платежи", "amount": int(revenue_payload["tribute"]), "note": "внешние поступления"},
+        {"key": "commerce", "label": "Торговля и морские пути", "amount": int(revenue_payload["commerce"]), "note": "рынки, караваны, ресурсы"},
+        {"key": "base_revenue", "label": "Доход столицы и казённых служб", "amount": int(revenue_payload["base_revenue"]), "note": "устойчивая налоговая база"},
+        {"key": "micro_income", "label": "Наноэкономические модификаторы", "amount": int(revenue_payload.get("micro_income", 0)), "note": "ВВП, маржа, ликвидность, дороги и ещё много непонятной магии"},
+        {"key": "doctrine_income", "label": "Доход экономической доктрины", "amount": int(revenue_payload.get("doctrine_income", 0)), "note": doctrine_spec.get("label", doctrine_key)},
+        {"key": "automatic_stabilizer", "label": "Автоматическая фискальная стабилизация", "amount": int(revenue_payload.get("automatic_stabilizer", 0)), "note": "автономные налоги, отсрочки и казначейские меры"},
     ]
     rows = [row for row in rows if row["amount"]]
 
@@ -1567,6 +2250,11 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         "inequality": round(state["inequality"], 6),
         "debt": round(state["debt"], 2),
         "debt_ratio": round(debt_ratio, 6),
+        # Выпуск на занятого: раньше ключ не публиковался вовсе, и легаси-отчёт
+        # честно показывал macro.get("labor_productivity", 0.0) == 0.
+        "labor_productivity": round(
+            finite(macro.get("real_output", 0.0)) / max(1.0, finite(macro.get("labor", 1.0))), 6
+        ),
         "interest_rate": round(finance["sovereign_rate"], 8),
         "trade_balance": round(trade["trade_balance"], 4),
         "current_account": round(trade["current_account"], 4),
@@ -1584,41 +2272,32 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
 
     statement = {
         "version": ECONOMY_VERSION,
+        "microformula_version": int(getattr(ECONOMY_MODIFIERS, "MICROFORMULA_VERSION", 0)) if ECONOMY_MODIFIERS is not None else 0,
+        "microformula_count": len(magic_rows),
+        "microformula_summary": microformula_summary,
+        "micro_income_candidate": round(candidate_micro_income, 6),
+        "micro_income_realized": round(
+            sum(finite(row.get("gold_per_turn", 0.0)) for row in magic_rows), 6
+        ),
         "turn": int(getattr(player, "turn", 1)),
         "rows": rows,
-        "raw_gold": money(revenue_total),
+        "raw_gold": money(candidate_revenue_total),
         "difficulty_mult": finite(context.get("income_mult", 1.0), 1.0),
-        "after_difficulty": money(revenue_total),
+        "after_difficulty": money(candidate_revenue_total),
         "tech_percent": finite(context.get("tech_productivity", 0.0)),
         "percent_mult": 1.0 + finite(context.get("tech_productivity", 0.0)),
-        "final_gold": money(revenue_total),
+        "final_gold": revenue_total_game,
         "final_grain": money(grain["total_supply"]),
         "grain_consumption": money(grain["consumption"]),
-        "revenues": {
-            key: money(value) if key not in ("laffer_effective_rate", "compliance", "trade_volume") else value
-            for key, value in revenues.items()
-        },
-        "expenditures": {
-            "administration": money(expenditures["administration"]),
-            "military_upkeep": money(expenditures["military_upkeep"]),
-            "fleet_upkeep": money(expenditures["fleet_upkeep"]),
-            "tribute_paid": money(expenditures["tribute_paid"]),
-            "interest": money(expenditures["interest"]),
-            "treasury_management": money(expenditures["treasury_management"]),
-            "strategic_reserve": money(expenditures["strategic_reserve"]),
-            "programmes": {key: money(value) for key, value in expenditures["programmes"].items()},
-            "grain_subsidy": money(expenditures["grain_subsidy"]),
-            "mandatory_total": money(expenditures["mandatory_total"]),
-            "programme_total": money(expenditures["programme_total"]),
-            "total": money(expenditures["total"]),
-        },
+        "revenues": revenue_payload,
+        "expenditures": expenditure_payload,
         "macro": macro_payload,
         "sectors": {
             "output": {key: round(value, 4) for key, value in sectors["output"].items()},
             "capital": {key: round(value, 4) for key, value in sectors["capital"].items()},
             "labor": {key: round(value, 4) for key, value in sectors["labor"].items()},
-            "labor_shares": {key: round(value, 6) for key, value in sectors["labor_shares"].items()},
-            "capital_shares": {key: round(value, 6) for key, value in sectors["capital_shares"].items()},
+            "labor_shares": {key: round(value, 9) for key, value in sectors["labor_shares"].items()},
+            "capital_shares": {key: round(value, 9) for key, value in sectors["capital_shares"].items()},
             "profitability": {key: round(value, 6) for key, value in sectors["profitability"].items()},
             "bottlenecks": {key: round(value, 6) for key, value in sectors["bottlenecks"].items()},
             "labor_mobility": round(sectors["labor_mobility"], 6),
@@ -1642,14 +2321,35 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         },
         "grain": {key: round(value, 6) for key, value in grain.items()},
         "political_economy": politics,
+        "magic_modifiers": magic_rows,
+        "automation": {
+            "enabled": bool(automation.get("enabled", True)),
+            "doctrine": doctrine_key,
+            "doctrine_label": doctrine_spec.get("label", doctrine_key),
+            "target_floor": target_floor if target_floor > -10**8 else None,
+            "structural_balance": structural_balance_game,
+            "stabilizer_income": int(revenue_payload.get("automatic_stabilizer", 0)),
+        },
         "national_accounts": national_accounts,
+        "roman_accounts": roman_accounts,
         "flow_of_funds": flow_of_funds,
         "sectoral_balances": {key: round(value, 4) for key, value in sectoral_balances.items()},
-        "revenue_total": money(revenue_total),
-        "expense_total": money(expenditures["total"]),
-        "primary_balance": money(primary_balance),
-        "overall_balance": money(overall_balance),
-        "upkeep_gold": money(expenditures["total"]),
+        "fiscal_stabilization": {
+            **fiscal_stabilization,
+            "candidate": money(fiscal_stabilization["candidate"]),
+            "realized": money(fiscal_stabilization["realized"]),
+            "previous": money(fiscal_stabilization["previous"]),
+            "lower_bound": money(fiscal_stabilization["lower_bound"]),
+            "upper_bound": money(fiscal_stabilization["upper_bound"]),
+            "realization_factor": round(realization_factor, 6),
+        },
+        "candidate_revenue_total": money(candidate_revenue_total),
+        "revenue_total": revenue_total_game,
+        "expense_total": expense_total_game,
+        "primary_balance": primary_balance_game,
+        "structural_balance": structural_balance_game,
+        "overall_balance": overall_balance_game,
+        "upkeep_gold": expense_total_game,
         "upkeep_grain": money(grain["consumption"]),
         "mutated": bool(mutate),
     }
@@ -2043,6 +2743,9 @@ def _post_statement_ledger(player: Any, state: dict[str, Any], statement: dict[s
         "tribute": "Доходы: дань",
         "commerce": "Доходы: торговля",
         "base_revenue": "Доходы: столица",
+        "micro_income": "Доходы: наноэкономические модификаторы",
+        "doctrine_income": "Доходы: экономическая доктрина",
+        "automatic_stabilizer": "Доходы: автоматическая стабилизация",
     }
     for key, account in revenue_accounts.items():
         _ledger_post(state, turn, "Казна", account, statement["revenues"].get(key, 0), account)
@@ -2050,6 +2753,10 @@ def _post_statement_ledger(player: Any, state: dict[str, Any], statement: dict[s
         "administration": "Расходы: управление",
         "military_upkeep": "Расходы: армия",
         "fleet_upkeep": "Расходы: флот",
+        "auxiliary_upkeep": "Расходы: ауксилии",
+        "artillery_upkeep": "Расходы: артиллерия",
+        "garrison_upkeep": "Расходы: провинциальные гарнизоны",
+        "municipal_building_upkeep": "Расходы: содержание городских сооружений",
         "tribute_paid": "Расходы: внешние платежи",
         "interest": "Расходы: проценты",
         "treasury_management": "Расходы: хранение и управление казной",
@@ -2270,10 +2977,21 @@ def apply_turn(player: Any, context: dict[str, Any]) -> str | None:
     _update_trade_state(state, statement)
     innovation_messages = _update_innovation(player, context, state, statement)
     _update_money(state, statement, context)
+    automatic_support = max(0.0, finite(statement.get("automation", {}).get("stabilizer_income", 0.0)))
+    if automatic_support > 0:
+        pressure = automatic_support / max(1.0, nominal_output)
+        state["corruption"] = clamp(state["corruption"] + min(0.012, pressure * 0.004), 0.005, 0.95)
+        state["inflation"] = clamp(state["inflation"] + min(0.018, pressure * 0.005), -0.25, 5.0)
+        state["confidence"] = clamp(state["confidence"] - min(0.015, pressure * 0.004), 0.01, 0.995)
+        auto_state = state.setdefault("automation", {})
+        auto_state["stabilizer_uses"] = int(finite(auto_state.get("stabilizer_uses", 0))) + 1
+        auto_state["last_stabilizer_income"] = automatic_support
     shock_messages = apply_economic_shocks(player, context, state)
     state["unemployment"] = clamp(finite(statement["macro"]["unemployment"]), 0.0, 0.75)
 
     warning_parts: list[str] = []
+    if automatic_support > 0:
+        warning_parts.append(f"автоматическая фискальная стабилизация: +{money(automatic_support)} золота")
     if grain_after < 0:
         shortage = -grain_after
         severity = min(20, max(4, money(shortage / max(1.0, statement["upkeep_grain"]) * 25)))
@@ -2305,6 +3023,41 @@ def apply_turn(player: Any, context: dict[str, Any]) -> str | None:
         warning_parts.append(f"реструктуризация списала {money(restructured)} долга, но ударила по доверию")
     warning_parts.extend(innovation_messages)
     warning_parts.extend(shock_messages)
+
+    statement["cash_change_after_financing"] = money(
+        finite(getattr(player, "gold", 0.0)) - old_gold
+    )
+    fiscal = state.setdefault("fiscal", {})
+    fiscal["last_realized_revenue"] = max(0.0, finite(statement["revenue_total"]) - finite(statement.get("automation", {}).get("stabilizer_income", 0.0)))
+    fiscal["last_realized_expense"] = max(0.0, finite(statement["expense_total"]))
+    fiscal["last_realized_balance"] = finite(statement.get("structural_balance", statement["overall_balance"]))
+    fiscal["last_candidate_revenue"] = max(
+        0.0,
+        finite(statement.get("candidate_revenue_total", statement["revenue_total"])),
+    )
+    fiscal["last_policy_signature"] = str(
+        statement.get("fiscal_stabilization", {}).get(
+            "policy_signature",
+            _fiscal_policy_signature(state, context),
+        )
+    )
+    fiscal["last_province_count"] = max(0, int(context.get("province_count", 0)))
+    fiscal_history = fiscal.setdefault("history", [])
+    fiscal_history.append({
+        "turn": int(getattr(player, "turn", 1)),
+        "candidate_revenue": int(
+            statement.get("candidate_revenue_total", statement["revenue_total"])
+        ),
+        "revenue": int(statement["revenue_total"]),
+        "expense": int(statement["expense_total"]),
+        "balance": int(statement["overall_balance"]),
+        "cash_change": int(statement["cash_change_after_financing"]),
+    })
+    del fiscal_history[:-120]
+
+    setattr(player, "gold_income_last_turn", int(statement["revenue_total"]))
+    setattr(player, "gold_expense_last_turn", int(statement["expense_total"]))
+    setattr(player, "gold_per_turn", int(statement["overall_balance"]))
 
     state["last_statement"] = statement
     history = state.setdefault("history", [])
@@ -2639,6 +3392,108 @@ def sell_grain(player: Any, units: int = 50) -> tuple[int, int]:
     return amount, revenue
 
 
+
+def _legacy_economic_glossary(player: Any, context: dict[str, Any]) -> list[dict[str, Any]]:
+    """Термины справки с текущим числом и прямым вкладом в золото/ход."""
+    statement = preview_turn(player, context)
+    macro = statement["macro"]
+    revenues = statement["revenues"]
+    trade = statement["trade"]
+    finance = statement["finance"]
+    national = statement["national_accounts"]
+    automation = statement.get("automation", {})
+    magic = {str(row.get("key")): row for row in statement.get("magic_modifiers", []) if isinstance(row, dict)}
+
+    def mg(key: str) -> float:
+        return finite(magic.get(key, {}).get("gold_per_turn", 0.0))
+
+    rows: list[dict[str, Any]] = []
+    def add(category: str, term: str, value: Any, gold: float = 0.0) -> None:
+        rows.append({"category": category, "term": term, "value": value, "gold_per_turn": round(finite(gold), 2)})
+
+    add("Национальные счета", "ВВП", round(macro.get("nominal_output", 0.0), 2), mg("gdp_dividend"))
+    add("Национальные счета", "Валовой выпуск", round(macro.get("real_output", 0.0), 2), 0)
+    add("Национальные счета", "Валовая добавленная стоимость", round(national["production"]["gdp"], 2), mg("gdp_dividend"))
+    add("Национальные счета", "Частное потребление", round(national["expenditure"]["consumption"], 2), 0)
+    add("Национальные счета", "Частные инвестиции", round(national["expenditure"]["private_investment"], 2), 0)
+    add("Национальные счета", "Государственные закупки", round(national["expenditure"]["government"], 2), 0)  # отток казны показан в «Фиске»
+    add("Фиск", "Aerarium", statement["revenue_total"], statement["overall_balance"])
+    add("Фиск", "Fiscus", revenues.get("domains", 0), revenues.get("domains", 0))
+    add("Фиск", "Tributum", f"{ensure_economy_state(player).get('tax_rate', 0):.1%}", revenues.get("direct_tax", 0))
+    add("Фиск", "Portorium", f"{ensure_economy_state(player).get('tariff_rate', 0):.1%}", revenues.get("customs", 0))
+    add("Фиск", "Vectigalia", revenues.get("customs", 0) + revenues.get("domains", 0), revenues.get("customs", 0) + revenues.get("domains", 0))
+    add("Фиск", "Налоговая база", round(macro.get("nominal_output", 0), 2), revenues.get("direct_tax", 0))
+    add("Фиск", "Кривая Лаффера", f"{revenues.get('laffer_effective_rate', 0):.2%}", revenues.get("direct_tax", 0))
+    add("Фиск", "Собираемость налогов", f"{revenues.get('compliance', 0):.2%}", revenues.get("direct_tax", 0))
+    add("Фиск", "Первичный баланс", statement["primary_balance"], statement["primary_balance"])
+    add("Фиск", "Структурный баланс", statement.get("structural_balance", 0), statement.get("structural_balance", 0))
+    add("Фиск", "Сальдо бюджета", statement["overall_balance"], statement["overall_balance"])
+    add("Фиск", "Профицит", max(0, statement["overall_balance"]), max(0, statement["overall_balance"]))
+    add("Фиск", "Дефицит", max(0, -statement.get("structural_balance", 0)), min(0, statement.get("structural_balance", 0)))
+    add("Фиск", "Автоматический стабилизатор", automation.get("stabilizer_income", 0), automation.get("stabilizer_income", 0))
+    add("Деньги", "Денежная масса", round(macro.get("money_supply", 0), 2), mg("monetization"))
+    add("Деньги", "Скорость обращения денег", round(macro.get("velocity", 0), 3), mg("money_velocity"))
+    add("Деньги", "Инфляция", f"{macro.get('inflation', 0):.2%}", 0)
+    add("Деньги", "Дефлятор ВВП", round(macro.get("price_level", 1), 3), 0)
+    add("Деньги", "Покупательная способность", round(1 / max(0.01, macro.get("price_level", 1)), 3), 0)
+    add("Деньги", "Сеньораж", round(ensure_economy_state(player).get("pending_minting", 0), 2), 0)
+    add("Кредит", "Государственный долг", round(macro.get("debt", 0), 2), -statement["expenditures"].get("interest", 0))
+    add("Кредит", "Долговая нагрузка", f"{macro.get('debt_ratio', 0):.2%}", -statement["expenditures"].get("interest", 0))
+    add("Кредит", "Процентная ставка", f"{macro.get('interest_rate', 0):.2%}", -statement["expenditures"].get("interest", 0))
+    add("Кредит", "Банковское здоровье", f"{macro.get('banking_health', 0):.2%}", mg("banking_health"))
+    add("Кредит", "Ликвидность", round(finance.get("deposit_base", ensure_economy_state(player).get("financial", {}).get("deposit_base", 0)), 2), mg("liquidity"))
+    add("Кредит", "Кредитный мультипликатор", round(finite(macro.get("private_credit", 0)) / max(1.0, finite(finance.get("deposit_base", ensure_economy_state(player).get("financial", {}).get("deposit_base", 1.0)), 1.0)), 3), mg("credit_multiplier"))
+    add("Кредит", "Leverage", round(ensure_economy_state(player).get("financial", {}).get("leverage", 0), 3), 0)
+    add("Торговля", "Торговый оборот", round(revenues.get("trade_volume", 0), 2), revenues.get("commerce", 0) + revenues.get("customs", 0))
+    add("Торговля", "Маржа", round(magic.get("trade_margin", {}).get("value", 0), 3), mg("trade_margin"))
+    add("Торговля", "Экспорт", round(trade.get("export_value", 0), 2), max(0, mg("trade_balance")))
+    add("Торговля", "Импорт", round(trade.get("import_value", 0), 2), min(0, mg("trade_balance")))
+    add("Торговля", "Сальдо торгового баланса", round(trade.get("trade_balance", 0), 2), mg("trade_balance"))
+    add("Торговля", "Сальдо текущего счёта", round(trade.get("current_account", 0), 2), 0)
+    add("Торговля", "Условия торговли", round(trade.get("terms_of_trade", 1), 3), mg("terms_of_trade"))
+    add("Торговля", "Валютный курс", round(trade.get("exchange_rate", 1), 3), 0)
+    add("Торговля", "Импортозависимость", f"{trade.get('import_dependency', 0):.2%}", 0)
+    add("Производство", "Основной капитал", round(macro.get("capital_stock", 0), 2), mg("capital_turnover"))
+    add("Производство", "Амортизация", round(sum(ensure_economy_state(player).get("sectoral_depreciation", {}).values()), 3), 0)
+    add("Производство", "Производительность труда", round(macro.get("labor_productivity", 0), 3), 0)
+    add("Производство", "Человеческий капитал", round(macro.get("human_capital", 0), 2), mg("human_capital"))
+    add("Производство", "Инфраструктурная рента", round(macro.get("infrastructure", 0), 2), mg("infrastructure_rent"))
+    add("Население", "Урбанизация", f"{macro.get('urbanization', 0):.2%}", mg("agglomeration"))
+    add("Население", "Безработица", f"{macro.get('unemployment', 0):.2%}", 0)
+    add("Население", "Рабская доля", f"{macro.get('slave_ratio', 0):.2%}", 0)
+    add("Институты", "Коррупция", f"{macro.get('corruption', 0):.2%}", 0)
+    add("Институты", "Доверие", f"{macro.get('confidence', 0):.2%}", mg("confidence_premium"))
+    add("Институты", "Неравенство", f"{macro.get('inequality', 0):.2%}", 0)
+    add("Римская экономика", "Annona", round(statement["expenditures"].get("grain_subsidy", 0), 2), -statement["expenditures"].get("grain_subsidy", 0))
+    add("Римская экономика", "Publicani", f"{revenues.get('compliance', 0):.2%}", revenues.get("direct_tax", 0))
+    add("Римская экономика", "Cursus Publicus", round(macro.get("infrastructure", 0), 2), mg("infrastructure_rent"))
+    add("Римская экономика", "Romanitas fiscalis", magic.get("romanization", {}).get("value", 0), mg("romanization"))
+    return rows
+
+
+def economic_glossary(player: Any, context: dict[str, Any]) -> list[dict[str, Any]]:
+    """Complete accounting lexicon plus every active microformula."""
+    statement = preview_turn(player, context)
+    state = ensure_economy_state(player, context)
+    magic_rows = [row for row in statement.get("magic_modifiers", []) if isinstance(row, dict)]
+    if ECONOMY_DICTIONARY is not None:
+        try:
+            return ECONOMY_DICTIONARY.build_glossary(statement, state, magic_rows)
+        except (AttributeError, KeyError, TypeError, ValueError, ArithmeticError):
+            pass
+    return _legacy_economic_glossary(player, context)
+
+
+def glossary_audit(player: Any, context: dict[str, Any]) -> list[str]:
+    rows = economic_glossary(player, context)
+    if ECONOMY_DICTIONARY is None:
+        return ["economy_dictionary.py не импортирован"]
+    try:
+        return list(ECONOMY_DICTIONARY.audit_glossary(rows))
+    except (AttributeError, TypeError, ValueError) as exc:
+        return [f"Ошибка проверки справочника: {type(exc).__name__}: {exc}"]
+
+
 def sector_report(player: Any, context: dict[str, Any]) -> list[dict[str, Any]]:
     statement = preview_turn(player, context)
     rows: list[dict[str, Any]] = []
@@ -2714,6 +3569,58 @@ def audit_invariants(player: Any, context: dict[str, Any] | None = None) -> list
         flow = statement["flow_of_funds"]
         if not all(math.isfinite(finite(flow.get(key))) for key in flow):
             errors.append("flow-of-funds содержит нечисловые значения")
+
+        magic_rows = [row for row in statement.get("magic_modifiers", []) if isinstance(row, dict)]
+        if len(magic_rows) != microformula_count():
+            errors.append(
+                f"число активных микроформул {len(magic_rows)} не равно библиотеке {microformula_count()}"
+            )
+        magic_total = sum(finite(row.get("gold_per_turn", 0.0)) for row in magic_rows)
+        precise_total = finite(statement.get("micro_income_realized", magic_total))
+        if abs(magic_total - precise_total) > 0.002:
+            errors.append("видимые микроформулы не сходятся с точным микродоходом")
+        summary = statement.get("microformula_summary", {})
+        if isinstance(summary, dict):
+            if int(finite(summary.get("count", -1))) != len(magic_rows):
+                errors.append("сводка микроформул содержит неверное число строк")
+            if abs(finite(summary.get("net", 0.0)) - magic_total) > 0.002:
+                errors.append("сводка микроформул не сходится с суммой строк")
+            if int(finite(summary.get("zero_rows", 0))) != 0:
+                errors.append("часть микроформул округлилась до нулевого вклада")
+        if any(not math.isfinite(finite(row.get("gold_per_turn"), float("nan"))) for row in magic_rows):
+            errors.append("микроформулы содержат NaN или бесконечность")
+
+        if statement["overall_balance"] != statement["revenue_total"] - statement["expense_total"]:
+            errors.append("итоговый баланс не равен доходам минус расходы")
+        stabilizer = finite(statement.get("revenues", {}).get("automatic_stabilizer", 0.0))
+        expected_structural = statement["revenue_total"] - stabilizer - statement["expense_total"]
+        if abs(statement["structural_balance"] - expected_structural) > 1.0:
+            errors.append("структурный баланс не согласован со стабилизатором")
+
+        roman = statement.get("roman_accounts", {})
+        if not isinstance(roman, dict):
+            errors.append("римские счета отсутствуют")
+        else:
+            if abs(
+                finite(roman.get("tributum", 0.0))
+                - finite(roman.get("tributum_soli", 0.0))
+                - finite(roman.get("tributum_capitis", 0.0))
+            ) > 0.002:
+                errors.append("Tributum не равен сумме tributum soli и tributum capitis")
+            if abs(
+                finite(statement.get("revenues", {}).get("domains", 0.0))
+                - finite(roman.get("ager_publicus", 0.0))
+                - finite(roman.get("patrimonium_caesaris", 0.0))
+            ) > 1.1:
+                errors.append("доходы доменов не разделены между ager publicus и patrimonium")
+            if abs(
+                finite(statement.get("expenditures", {}).get("military_upkeep", 0.0))
+                - finite(roman.get("stipendium", 0.0))
+                - finite(roman.get("castra_logistics", 0.0))
+            ) > 1.1:
+                errors.append("военное содержание не разделено между stipendium и логистикой")
+            if str(roman.get("accounting_note", "")) != "decomposition_only_no_double_counting":
+                errors.append("римские счета не помечены как декомпозиция без двойного счёта")
     except Exception as exc:
         errors.append(f"построение национальных счетов упало: {type(exc).__name__}: {exc}")
     return errors

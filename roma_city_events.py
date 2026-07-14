@@ -1070,3 +1070,232 @@ def open_menu(player: Any, ctx: dict | None = None) -> None:
         ]
         ui.table("Города", ["Город", "Нас.", "Процв.", "Поряд.", "Здор.", "Лоял.", "Инфр.", "Статус"], table_rows, "CYAN")
         ui.pause()
+
+# ─── OPERA PUBLICA v3.2: MUNICIPAL CONSTRUCTION ────────────────────────────
+BUILDINGS_IMPORT_ERROR = ""
+try:
+    import roma_buildings as BUILDINGS
+except Exception as _buildings_import_error:
+    BUILDINGS = None
+    BUILDINGS_IMPORT_ERROR = f"{type(_buildings_import_error).__name__}: {_buildings_import_error}"
+
+MODULE_VERSION = "1.1.0-opera-publica"
+SCHEMA_VERSION = 2
+
+_ensure_state_before_buildings = ensure_state
+def ensure_state(player: Any, ctx: dict | None = None) -> dict:
+    state = _ensure_state_before_buildings(player, ctx)
+    state.setdefault("last_project_turn", 0)
+    state.setdefault("last_building_yield_turn", 0)
+    state.setdefault("building_history", [])
+    state["building_history"] = [x for x in _list(state.get("building_history")) if isinstance(x, dict)][-240:]
+    state["schema"] = SCHEMA_VERSION
+    state["version"] = MODULE_VERSION
+    if BUILDINGS is not None:
+        for city in _dict(state.get("cities")).values():
+            if isinstance(city, dict):
+                BUILDINGS.ensure_city(city)
+    player.city_system = state
+    return state
+
+
+def building_economy_snapshot(player: Any, ctx: dict | None = None) -> dict:
+    ensure_state(player, ctx)
+    if BUILDINGS is None:
+        return {
+            "gold_per_turn": 0, "grain_per_turn": 0, "science_per_turn": 0,
+            "faith_per_turn": 0, "upkeep": 0, "resource_output": {},
+            "resource_input": {}, "sector_bonuses": {},
+            "province_sector_bonuses": {}, "building_count": 0,
+        }
+    return BUILDINGS.economy_snapshot(player, _ctx(ctx))
+
+
+_resolve_event_before_buildings = resolve_event
+def resolve_event(player: Any, event: dict, option: dict, ctx: dict | None = None) -> str:
+    ctx = _ctx(ctx)
+    if event.get("kind") != "building_project" or BUILDINGS is None:
+        return _resolve_event_before_buildings(player, event, option, ctx)
+    state = ensure_state(player, ctx)
+    province = _province_map(player).get(str(event.get("province")))
+    city = state["cities"].get(_city_key(str(event.get("province")), str(event.get("city"))))
+    if not isinstance(province, dict) or not isinstance(city, dict):
+        return "Проект утратил актуальность: город больше не находится под властью Рима."
+    result = BUILDINGS.execute_project(player, province, city, option, ctx)
+    building_id = str(event.get("building_id", option.get("building_id", "")))
+    building = BUILDINGS.BUILDING_CATALOG.get(building_id, {})
+    action = str(option.get("project_action", ""))
+    if action.startswith("build") and building_id in city.get("buildings", []):
+        state["building_history"].append({
+            "turn": _i(getattr(player, "turn", 1), 1), "province": province.get("name"),
+            "city": city.get("name"), "building_id": building_id,
+            "building": building.get("name", building_id), "action": action,
+        })
+        state["building_history"] = state["building_history"][-240:]
+    city["last_event_turn"] = _i(getattr(player, "turn", 1), 1)
+    _update_status(city)
+    _record(player, ctx, event, option, result)
+    return result
+
+
+_auto_choice_before_buildings = _auto_choice
+def _auto_choice(player: Any, event: dict) -> dict:
+    if event.get("kind") == "building_project" and BUILDINGS is not None:
+        state = ensure_state(player, {})
+        city = state["cities"].get(_city_key(str(event.get("province")), str(event.get("city"))), {})
+        for option in _list(event.get("options")):
+            if isinstance(option, dict) and str(option.get("project_action", "")).startswith("build"):
+                if BUILDINGS.can_execute(player, city, option, {}):
+                    return option
+        return next((o for o in _list(event.get("options")) if o.get("project_action") == "defer"), _list(event.get("options"))[-1])
+    return _auto_choice_before_buildings(player, event)
+
+
+_present_pending_before_buildings = present_pending_events
+def present_pending_events(player: Any, ctx: dict | None = None) -> int:
+    ctx = _ctx(ctx)
+    state = ensure_state(player, ctx)
+    pending = [x for x in _list(state.get("pending")) if isinstance(x, dict)]
+    projects = [x for x in pending if x.get("kind") == "building_project"]
+    normal = [x for x in pending if x.get("kind") != "building_project"]
+    if not projects:
+        return _present_pending_before_buildings(player, ctx)
+
+    state["pending"] = normal
+    ui = UI(ctx)
+    resolved = 0
+    for index, event in enumerate(projects, 1):
+        ui.screen()
+        ui.header("OPERA PUBLICA", "🏗", f"Муниципальный проект {index}/{len(projects)} после завершения хода")
+        ui.info(f"{event.get('city')} • {event.get('province')}", "CYAN")
+        ui.section(str(event.get("title", "Городская строительная инициатива")), "GOLD")
+        ui.wrap(event.get("description", ""), "WHITE")
+        valid: list[str] = []
+        city = state["cities"].get(_city_key(str(event.get("province")), str(event.get("city"))), {})
+        for option in _list(event.get("options")):
+            if not isinstance(option, dict):
+                continue
+            key = str(option.get("key", len(valid) + 1)).upper()
+            valid.append(key)
+            req = _dict(option.get("requires"))
+            costs = []
+            if _i(req.get("gold", 0), 0): costs.append(f"{_i(req['gold'])} зол.")
+            if _i(req.get("grain", 0), 0): costs.append(f"{_i(req['grain'])} зерна")
+            for resource, amount in _dict(req.get("resources")).items():
+                costs.append(f"{BUILDINGS.resource_name(resource, ctx)} ×{_f(amount):g}")
+            affordable = BUILDINGS.can_execute(player, city, option, ctx)
+            suffix = "" if affordable else " [НЕДОСТАТОЧНО СРЕДСТВ ИЛИ МАТЕРИАЛОВ]"
+            cost_text = f" ({', '.join(costs)})" if costs else ""
+            print(ui.color(f"\n  {key}. {option.get('label')}{cost_text}{suffix}", "GREEN" if affordable else "RED", True))
+            ui.wrap(option.get("desc", ""), "GRAY")
+        answer = ui.choice("\n  Решение Рима: ", valid)
+        chosen = next((o for o in _list(event.get("options")) if str(o.get("key", "")).upper() == answer), None)
+        if not isinstance(chosen, dict) or not BUILDINGS.can_execute(player, city, chosen, ctx):
+            ui.info("Выбранный подряд невозможно исполнить; проект отложен.", "GOLD")
+            chosen = next((o for o in _list(event.get("options")) if o.get("project_action") == "defer"), _list(event.get("options"))[-1])
+        result = resolve_event(player, event, chosen, ctx)
+        ui.section("Постановление исполнено", "GREEN")
+        ui.wrap(result, "GREEN")
+        resolved += 1
+        ui.pause()
+
+    if normal:
+        resolved += _present_pending_before_buildings(player, ctx)
+    return resolved
+
+
+_process_turn_before_buildings = process_turn
+def process_turn(player: Any, ctx: dict | None = None, interactive: bool = True) -> list[dict]:
+    ctx = _ctx(ctx)
+    state = ensure_state(player, ctx)
+    turn = _i(getattr(player, "turn", 1), 1, 1)
+    generated: list[dict] = []
+    if BUILDINGS is not None and _i(state.get("last_project_turn", 0), 0) < turn:
+        provinces = _province_map(player)
+        active: list[tuple[dict, dict]] = []
+        for city in _dict(state.get("cities")).values():
+            if not isinstance(city, dict) or not city.get("active"):
+                continue
+            province = provinces.get(str(city.get("province")))
+            if not isinstance(province, dict):
+                continue
+            BUILDINGS.tick_city(city)
+            active.append((province, city))
+        slots = min(2, 1 + max(0, len(provinces) - 12) // 18)
+        for province, city, building in BUILDINGS.select_projects(player, active, ctx, limit=slots):
+            generated.append(BUILDINGS.make_project_event(player, province, city, building, ctx))
+        state["pending"].extend(generated)
+        state["pending"] = state["pending"][-MAX_PENDING:]
+        state["last_project_turn"] = turn
+        passive = BUILDINGS.apply_passive_civic_yields(player, ctx)
+        if passive.get("science") or passive.get("faith"):
+            summary = ctx.get("turn_summary_add")
+            if callable(summary):
+                summary(player, f"Муниципальные учреждения: +{passive.get('science', 0)} науки, +{passive.get('faith', 0)} веры")
+    story_events = _process_turn_before_buildings(player, ctx, interactive)
+    return generated + list(story_events or [])
+
+
+_empire_metrics_before_buildings = empire_metrics
+def empire_metrics(player: Any, ctx: dict | None = None) -> dict[str, float]:
+    result = _empire_metrics_before_buildings(player, ctx)
+    snap = building_economy_snapshot(player, ctx)
+    result["buildings"] = float(snap.get("building_count", 0))
+    result["building_gold"] = float(snap.get("gold_per_turn", 0))
+    result["building_grain"] = float(snap.get("grain_per_turn", 0))
+    result["building_upkeep"] = float(snap.get("upkeep", 0))
+    return result
+
+
+_open_menu_before_buildings = open_menu
+def open_menu(player: Any, ctx: dict | None = None) -> None:
+    ctx = _ctx(ctx)
+    ui = UI(ctx)
+    state = ensure_state(player, ctx)
+    while True:
+        ui.screen()
+        ui.header("CIVITATES ET OPERA PUBLICA", "🏙", f"Города и муниципальные сооружения • {MODULE_VERSION}")
+        metrics = empire_metrics(player, ctx)
+        ui.info(
+            f"Городов: {int(metrics.get('cities', 0))} • зданий: {int(metrics.get('buildings', 0))} • "
+            f"доход зданий: +{int(metrics.get('building_gold', 0))} зол./ход, +{int(metrics.get('building_grain', 0))} зерна/ход • "
+            f"содержание: {int(metrics.get('building_upkeep', 0))} зол./ход",
+            "CYAN",
+        )
+        provinces = sorted({str(c.get("province")) for c in state["cities"].values() if isinstance(c, dict) and c.get("active")})
+        ui.section("Провинции", "GOLD")
+        for index, pname in enumerate(provinces, 1):
+            rows = _city_rows_for_province(state, pname)
+            count = sum(len(_list(c.get("buildings"))) for c in rows)
+            print(f"  {index}. {pname} — {len(rows)} гор.; сооружений {count}")
+        print("\n  H. Архив городских решений")
+        print("  Q. Назад")
+        answer = ui.choice("\n  Выбор: ", [str(i) for i in range(1, len(provinces) + 1)] + ["H", "Q"])
+        if answer == "Q": return
+        if answer == "H":
+            history = _list(state.get("history"))[-30:]
+            ui.screen(); ui.header("АРХИВ ГОРОДСКИХ РЕШЕНИЙ", "📜")
+            if history:
+                ui.table("Последние решения", ["Ход", "Город", "Событие", "Решение"], [(x.get("turn"), x.get("city"), x.get("title"), x.get("choice")) for x in reversed(history)], "GOLD")
+            else: ui.info("Архив пока пуст.", "GRAY")
+            ui.pause(); continue
+        pname = provinces[int(answer) - 1]
+        rows = _city_rows_for_province(state, pname)
+        ui.screen(); ui.header(pname.upper(), "🏛", "Муниципальная ведомость")
+        ui.table("Города", ["#", "Город", "Тип", "Нас.", "Процв.", "Поряд.", "Зданий"], [
+            (i, c.get("name"), c.get("type"), c.get("population"), c.get("prosperity"), c.get("order"), len(_list(c.get("buildings"))))
+            for i, c in enumerate(rows, 1)
+        ], "CYAN")
+        choice = ui.choice("\n  Открыть город (номер) или Q: ", [str(i) for i in range(1, len(rows) + 1)] + ["Q"])
+        if choice == "Q": continue
+        city = rows[int(choice) - 1]
+        ui.screen(); ui.header(str(city.get("name", "ГОРОД")).upper(), "🏗", f"{pname} • {city.get('type', 'город')}")
+        built = [BUILDINGS.BUILDING_CATALOG.get(x) for x in _list(city.get("buildings"))] if BUILDINGS is not None else []
+        built = [x for x in built if isinstance(x, dict)]
+        if not built:
+            ui.info("Построек пока нет. Муниципий выдвинет инициативу после завершения хода.", "GRAY")
+        else:
+            ui.table("Построенные сооружения", ["Сооружение", "Зол./ход", "Зерно/ход", "Содержание"], [
+                (b.get("name"), _dict(b.get("effects")).get("gold_per_turn", 0), _dict(b.get("effects")).get("grain_per_turn", 0), b.get("upkeep", 0)) for b in built
+            ], "GOLD")
+        ui.pause()

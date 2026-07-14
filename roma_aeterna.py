@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.0.1-mare-nostrum-fix"
+GAME_VERSION = "3.5.0-economy-final"
 
 import random
 import ast
@@ -1472,7 +1472,7 @@ DEFAULT_SETTINGS = {
     "legion_disband_refund": 20,
     "pacify_cost": 20,
     "research_invest_amount": 20,
-    "base_gold_income": 30,
+    "base_gold_income": 80,
     "base_grain_income": 20,
     "random_event_chance": 0.4,
     "choice_event_chance": 0.5,
@@ -1595,6 +1595,10 @@ def sanitize_settings(raw: dict) -> dict:
         for key, default in DEFAULT_SETTINGS.items():
             if key in raw:
                 settings[key] = _coerce_setting_value(key, raw[key], default)
+    # Миграция старого баланса: прежние settings содержали 30 золота/ход.
+    # Значения ниже нового игрового минимума заменяются штатным стартом 80.
+    if safe_int(settings.get("base_gold_income", 80), 80) < 50:
+        settings["base_gold_income"] = 80
     return settings
 
 def load_settings(path: str = SETTINGS_FILE) -> dict:
@@ -9146,8 +9150,14 @@ def auxiliary_upkeep(player) -> int:
     return game_price(player, raw, upkeep=True, market=True, minimum=0)
 
 def apply_auxiliary_upkeep(player) -> int:
-    """Содержание купленных ауксилий в золоте за ход."""
+    """Содержание ауксилий.
+
+    При активной Roma Economica расход уже включён в общую ведомость и не
+    списывается второй раз. Старый режим сохранён как fallback.
+    """
     cost = auxiliary_upkeep(player)
+    if ADVANCED_ECONOMY is not None:
+        return 0
     if cost:
         player.gold -= cost
         log_event(player, f"Содержание ауксилии: -{cost} золота")
@@ -10353,7 +10363,7 @@ class Player:
                 rows.append({"key": key, "label": label, "amount": value, "note": note})
 
         # 1) Стабильная казна Рима.
-        add("base", "Базовая казна", SETTINGS["base_gold_income"], "фиксированный доход столицы")
+        add("base", "Базовая казна", starting_base_gold_income(), "гарантированный доход столицы 50–100 золота/ход")
 
         # 2) Провинциальное богатство и городская налоговая база.
         province_wealth = sum(int(p.get("wealth", 0)) for p in self.provinces)
@@ -10792,6 +10802,14 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
     """
     ensure_province_details(player)
     ensure_expansion_state(player)
+    building_snapshot: dict[str, Any] = {}
+    if CITY_EVENTS is not None and hasattr(CITY_EVENTS, "building_economy_snapshot"):
+        try:
+            building_snapshot = CITY_EVENTS.building_economy_snapshot(player, globals())
+        except Exception as exc:
+            debug_log("Opera Publica economy snapshot failed: %s", exc, exc_info=True, level=logging.WARNING)
+            building_snapshot = {}
+    province_building_sectors = safe_dict(building_snapshot.get("province_sector_bonuses"))
     profiles: list[dict[str, Any]] = []
     agriculture_types = {"земледельческий", "речной", "столица", "порт", "центр провинции"}
     agricultural_regions = {
@@ -10813,6 +10831,7 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
     province_policy_cost = 0.0
     occupation_grain = 0.0
     reconstruction_demand = 0.0
+    total_garrison = 0
 
     for province in getattr(player, "provinces", []):
         if not isinstance(province, dict):
@@ -10828,17 +10847,19 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         romanization = safe_int(province.get("romanization", 0), 0, 0, 100)
         local_unrest = safe_int(province.get("unrest", 0), 0, 0, 10)
         garrison = max(0, safe_int(province.get("garrison", 0), 0))
+        total_garrison += garrison
         port_cities = sum(1 for c in cities if "порт" in str(c.get("type", "")).lower())
         damage = max(0.0, min(0.90, float(province.get("war_damage", 0.0) or 0.0)))
         recovery_factor = max(0.18, 1.0 - 0.72 * damage)
         policy = province_policy_spec(province) if "economic_policy" in province else {"sector_mult": {}, "sector_focus": "core"}
         sector_mult = safe_dict(policy.get("sector_mult"))
+        municipal_sector = safe_dict(province_building_sectors.get(province_name))
         city_population = int(round(city_population * (0.72 + 0.28 * recovery_factor)))
-        agriculture_endowment = (0.48 + 0.14 * agricultural_cities + (0.38 if province_name in agricultural_regions else 0.0)) * recovery_factor * float(sector_mult.get("agriculture", 1.0))
-        mining_endowment = (0.20 + (0.62 if province_name in mining_regions else 0.0) + wealth * 0.025) * recovery_factor * float(sector_mult.get("mining", 1.0))
-        manufacturing_endowment = (0.18 + len(cities) * 0.11 + wealth * 0.035 + romanization * 0.0025) * recovery_factor * float(sector_mult.get("manufacturing", 1.0))
-        construction_endowment = (0.18 + wealth * 0.045 + garrison * 0.006 + romanization * 0.0015) * recovery_factor * float(sector_mult.get("construction", 1.0))
-        commerce_endowment = (0.22 + len(cities) * 0.10 + port_cities * 0.30 + (0.42 if province_name in commercial_regions else 0.0)) * recovery_factor * float(sector_mult.get("commerce", 1.0))
+        agriculture_endowment = (0.48 + 0.14 * agricultural_cities + (0.38 if province_name in agricultural_regions else 0.0)) * recovery_factor * float(sector_mult.get("agriculture", 1.0)) * (1.0 + max(-0.50, min(2.50, float(municipal_sector.get("agriculture", 0.0) or 0.0))))
+        mining_endowment = (0.20 + (0.62 if province_name in mining_regions else 0.0) + wealth * 0.025) * recovery_factor * float(sector_mult.get("mining", 1.0)) * (1.0 + max(-0.50, min(2.50, float(municipal_sector.get("mining", 0.0) or 0.0))))
+        manufacturing_endowment = (0.18 + len(cities) * 0.11 + wealth * 0.035 + romanization * 0.0025) * recovery_factor * float(sector_mult.get("manufacturing", 1.0)) * (1.0 + max(-0.50, min(2.50, float(municipal_sector.get("manufacturing", 0.0) or 0.0))))
+        construction_endowment = (0.18 + wealth * 0.045 + garrison * 0.006 + romanization * 0.0015) * recovery_factor * float(sector_mult.get("construction", 1.0)) * (1.0 + max(-0.50, min(2.50, float(municipal_sector.get("construction", 0.0) or 0.0))))
+        commerce_endowment = (0.22 + len(cities) * 0.10 + port_cities * 0.30 + (0.42 if province_name in commercial_regions else 0.0)) * recovery_factor * float(sector_mult.get("commerce", 1.0)) * (1.0 + max(-0.50, min(2.50, float(municipal_sector.get("commerce", 0.0) or 0.0))))
         profiles.append({
             "name": province_name,
             "wealth": wealth,
@@ -10887,6 +10908,7 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
     embargo_level = min(0.90, hostile_relations / max(1, len(diplomatic_records)) * 0.75)
 
     special_gold = special_grain = fleet_cost = route_value = 0
+    auxiliary_cost = artillery_cost = garrison_cost = 0
     try:
         ensure_v24_state(player)
         resource_gold, resource_grain = v24_resource_income(player)
@@ -10910,6 +10932,39 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         special_grain += occupation_grain
         debug_log("Roma Economica: v2.4 context unavailable: %s", exc, exc_info=True, level=logging.DEBUG)
 
+    # Municipal buildings are real fiscal actors: markets and mines add cash,
+    # agrarian works add grain, and every completed structure has upkeep.
+    special_gold += max(0.0, float(building_snapshot.get("gold_per_turn", 0.0) or 0.0))
+    special_grain += max(0.0, float(building_snapshot.get("grain_per_turn", 0.0) or 0.0))
+    municipal_building_upkeep = max(0.0, float(building_snapshot.get("upkeep", 0.0) or 0.0))
+
+    # Ауксилии, артиллерия и провинциальные гарнизоны включаются в единую
+    # бюджетную ведомость. Здесь используются только статические базовые цены:
+    # динамический уровень цен применит roma_economy, поэтому рекурсии нет.
+    upkeep_scale = _configured_price_scale(upkeep=True)
+    try:
+        raw_auxiliary = sum(
+            max(0, safe_int(unit.get("upkeep", 0), 0, 0, 100))
+            for unit in getattr(player, "aux_units", [])
+            if isinstance(unit, dict)
+        )
+        auxiliary_cost = int(math.ceil(raw_auxiliary * upkeep_scale))
+    except (TypeError, ValueError, AttributeError):
+        auxiliary_cost = 0
+    try:
+        inventory = ensure_artillery_state(player)
+        raw_artillery = sum(
+            max(0, safe_int(qty, 0))
+            * max(0, safe_int(ARTILLERY_TYPES.get(key, {}).get("upkeep", 0), 0))
+            for key, qty in inventory.items()
+        )
+        artillery_cost = int(math.ceil(raw_artillery * upkeep_scale))
+    except (TypeError, ValueError, AttributeError, NameError):
+        artillery_cost = 0
+    # Гарнизоны обходятся дешевле полевых частей, но большая империя не может
+    # держать десятки провинций бесплатно.
+    garrison_cost = int(math.ceil(max(0, total_garrison) * 0.80 * upkeep_scale))
+
     researched_categories = [TECH_TREE.get(key, {}).get("category") for key in getattr(player, "tech_researched", [])]
     economic_techs = sum(1 for category in researched_categories if category in {"economic", "civil", "administration", "naval"})
     military_techs = sum(1 for category in researched_categories if category == "military")
@@ -10924,7 +10979,7 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         max(0, safe_int(tech_effect(player, "grain_flat", 0), 0))
         + len(getattr(player, "provinces", [])) * max(0, safe_int(tech_effect(player, "grain_per_province", 0), 0))
     )
-    base_revenue = max(5, safe_int(SETTINGS.get("base_gold_income", 30), 30))
+    base_revenue = starting_base_gold_income()
     base_revenue += max(0, safe_int(tech_effect(player, "gold_flat", 0), 0)) * 0.35
 
     legion_qualities = [safe_int(getattr(legion, "quality", 5), 5, 1, 10) for legion in getattr(player, "legions", [])]
@@ -10945,6 +11000,11 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         "special_gold_income": special_gold,
         "special_grain_income": special_grain,
         "fleet_upkeep": fleet_cost,
+        "auxiliary_upkeep": auxiliary_cost,
+        "artillery_upkeep": artillery_cost,
+        "garrison_upkeep": garrison_cost,
+        "municipal_building_upkeep": municipal_building_upkeep,
+        "municipal_building_count": safe_int(building_snapshot.get("building_count", 0), 0, 0),
         "state_domain_income": domain_income,
         "agriculture_index": agriculture_index,
         "grain_productivity": grain_productivity,
@@ -10969,6 +11029,24 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         "occupation_income": max(0.0, domain_income),
         "reconstruction_demand": reconstruction_demand,
     }
+
+
+def starting_base_gold_income() -> int:
+    """Гарантированный стартовый доход столицы: от 50 до 100 золота/ход."""
+    default = 80
+    low = 50
+    high = 100
+    if ADVANCED_ECONOMY is not None:
+        default = safe_int(getattr(ADVANCED_ECONOMY, "STARTING_BASE_REVENUE_DEFAULT", default), default)
+        low = safe_int(getattr(ADVANCED_ECONOMY, "STARTING_BASE_REVENUE_MIN", low), low)
+        high = safe_int(getattr(ADVANCED_ECONOMY, "STARTING_BASE_REVENUE_MAX", high), high)
+    configured = safe_int(SETTINGS.get("base_gold_income", default), default)
+    # Старые roma_settings.json хранили значение 30. После обновления такое
+    # значение автоматически мигрирует к новой стартовой норме, а не оставляет
+    # игрока с прежней нищей казной.
+    if configured < low:
+        configured = default
+    return max(low, min(high, configured))
 
 
 def _configured_price_scale(*, upkeep: bool = False) -> float:
@@ -21658,8 +21736,9 @@ def end_turn(player: Player):
     _end_turn_v240_original(player)
 
     apply_siege_arsenal_upkeep(player)
-    resource_economy_turn_tick(player)
+    resource_flow = resource_economy_turn_tick(player)
     show_turn_summary(player)
+    show_imperial_resource_report(player, resource_flow)
     process_pending_interactions(player)
     process_resource_economy_interactions(player)
     player.turn_summary = []
@@ -21996,6 +22075,8 @@ def _siege_arsenal_upkeep(player) -> int:
 def apply_siege_arsenal_upkeep(player) -> int:
     ensure_artillery_state(player)
     cost = _siege_arsenal_upkeep(player)
+    if ADVANCED_ECONOMY is not None:
+        return 0
     if cost > 0:
         player.gold = max(0, safe_int(getattr(player, "gold", 0), 0) - cost)
         turn_summary_add(player, f"Артиллерийские корпуса: содержание -{cost} золота")
@@ -25598,9 +25679,37 @@ def v24_tick_trade_and_fleet(player):
     for line in report[-3:]: log_event(player,"Флот: "+line[:90])
 
 def v24_end_turn_tick(player):
-    ensure_v24_state(player); res_gold,res_grain=v24_resource_income(player); trade_gold=v24_trade_income(player); sea_grain=v25_sea_grain_income(player); fleet_cost=v24_fleet_upkeep(player)
-    player.gold += res_gold+trade_gold-fleet_cost; player.grain += res_grain+sea_grain; v24_tick_senate(player); v24_tick_trade_and_fleet(player)
-    if res_gold or res_grain or trade_gold or sea_grain or fleet_cost: log_event(player,f"Mare Nostrum: +{res_gold+trade_gold-fleet_cost} золота, +{res_grain+sea_grain} зерна")
+    """Обрабатывает флот и старые торговые состояния без двойного начисления.
+
+    Roma Economica уже включает торговые маршруты, морское зерно и содержание
+    флота в общей ведомости. В этом режиме старый тик меняет только состояние
+    Сената, эскадр, пиратства и морских приказов.
+    """
+    ensure_v24_state(player)
+    res_gold, res_grain = v24_resource_income(player)
+    trade_gold = v24_trade_income(player)
+    sea_grain = v25_sea_grain_income(player)
+    fleet_cost = v24_fleet_upkeep(player)
+
+    if ADVANCED_ECONOMY is None:
+        player.gold += res_gold + trade_gold - fleet_cost
+        player.grain += res_grain + sea_grain
+
+    v24_tick_senate(player)
+    v24_tick_trade_and_fleet(player)
+
+    if res_gold or res_grain or trade_gold or sea_grain or fleet_cost:
+        if ADVANCED_ECONOMY is None:
+            text = (
+                f"Mare Nostrum: +{res_gold + trade_gold - fleet_cost} золота, "
+                f"+{res_grain + sea_grain} зерна"
+            )
+        else:
+            text = (
+                "Mare Nostrum: торговля, зерно и содержание флота "
+                "учтены в единой бюджетной ведомости"
+            )
+        log_event(player, text)
 
 def _print_lines_v25(lines, success=None):
     for line in lines:
@@ -26838,6 +26947,30 @@ def run_internal_self_tests(verbose: bool = False) -> tuple[bool, list[str], lis
                 fail("Тождество ВВП C+I+G+NX нарушено.")
             if not 0 <= macro_report["macro"].get("banking_health", -1) <= 1:
                 fail("Здоровье банков вне диапазона 0-1.")
+            if safe_int(macro_report.get("microformula_count", 0), 0) < 300:
+                fail("Библиотека Microformulae содержит меньше 300 микроформул.")
+            for message in ADVANCED_ECONOMY.microformula_library_audit():
+                fail("Microformulae: " + message)
+            glossary_rows = ADVANCED_ECONOMY.economic_glossary(macro_player, advanced_economy_context(macro_player))
+            if len(glossary_rows) < 350:
+                fail(f"Экономический справочник слишком мал: {len(glossary_rows)} понятий.")
+            for message in ADVANCED_ECONOMY.glossary_audit(macro_player, advanced_economy_context(macro_player)):
+                fail("Lexicon Oeconomicum: " + message)
+            magic_rows = [row for row in macro_report.get("magic_modifiers", []) if isinstance(row, dict)]
+            magic_sum = sum(float(row.get("gold_per_turn", 0) or 0) for row in magic_rows)
+            precise_micro = float(macro_report.get("micro_income_realized", magic_sum) or 0)
+            if abs(magic_sum - precise_micro) > 0.002:
+                fail("Сумма микроформул не совпадает с точным наноэкономическим доходом.")
+            if any(float(row.get("gold_per_turn", 0) or 0) == 0.0 for row in magic_rows):
+                fail("Часть микроформул округлилась до нулевой микрокопейки.")
+            summary = macro_report.get("microformula_summary", {})
+            if safe_int(summary.get("count", -1), -1) != len(magic_rows):
+                fail("Сводка Microformulae содержит неверное число строк.")
+            roman = macro_report.get("roman_accounts", {})
+            if abs(float(roman.get("tributum", 0) or 0) - float(roman.get("tributum_soli", 0) or 0) - float(roman.get("tributum_capitis", 0) or 0)) > 0.002:
+                fail("Римские счета: tributum не разделён на soli и capitis.")
+            if roman.get("accounting_note") != "decomposition_only_no_double_counting":
+                fail("Римские счета не защищены от двойного начисления.")
             # Bellum Oeconomicum: трофеи начисляются один раз, а провинция получает режим.
             conquest_target = province_by_name("Etruria")
             if conquest_target:
@@ -27033,6 +27166,18 @@ def run_internal_self_tests(verbose: bool = False) -> tuple[bool, list[str], lis
             pass
         fail(f"Проверка осадного урона v2.70.1 упала: {type(exc).__name__}: {exc}")
 
+    # Opera Publica 3.2: полный каталог, проекты и ресурсные ведомости.
+    try:
+        if CITY_EVENTS is None or not hasattr(CITY_EVENTS, "BUILDINGS") or CITY_EVENTS.BUILDINGS is None:
+            fail("Opera Publica не импортировала roma_buildings.py.")
+        else:
+            for message in CITY_EVENTS.BUILDINGS.catalogue_audit():
+                fail(f"Opera Publica: {message}")
+            if len(CITY_EVENTS.BUILDINGS.BUILDING_CATALOG) != 200:
+                fail("Opera Publica содержит не 200 зданий.")
+    except Exception as exc:
+        fail(f"Проверка Opera Publica упала: {type(exc).__name__}: {exc}")
+
     # Регрессии Roma Aeterna 3.0: соединения, автономные цивилизации и директор войны.
     try:
         missing_v3 = []
@@ -27157,9 +27302,13 @@ def show_passive_income_report(player: Player):
         for key, value in expenses["programmes"].items()
     ]
     fixed_rows = [
-        ("Управление", _economy_money(expenses["administration"])),
+        ("Управление империей", _economy_money(expenses["administration"])),
         ("Содержание легионов", _economy_money(expenses["military_upkeep"])),
         ("Флот", _economy_money(expenses["fleet_upkeep"])),
+        ("Ауксилии", _economy_money(expenses.get("auxiliary_upkeep", 0))),
+        ("Артиллерийские корпуса", _economy_money(expenses.get("artillery_upkeep", 0))),
+        ("Провинциальные гарнизоны", _economy_money(expenses.get("garrison_upkeep", 0))),
+        ("Стратегический зерновой резерв", _economy_money(expenses.get("strategic_reserve", 0))),
         ("Проценты по долгу", _economy_money(expenses["interest"])),
         ("Хранение и управление казной", _economy_money(expenses.get("treasury_management", 0))),
     ]
@@ -27171,6 +27320,14 @@ def show_passive_income_report(player: Player):
         f"первичный баланс {report['primary_balance']:+} • итог {report['overall_balance']:+}",
         balance_color,
     )
+    fiscal_flow = safe_dict(report.get("fiscal_stabilization"))
+    if fiscal_flow.get("stabilized"):
+        rui_info(
+            f"Налоговый аппарат собирает {_economy_money(report['revenue_total'])} из "
+            f"макропотенциала {_economy_money(report.get('candidate_revenue_total', report['revenue_total']))}; "
+            f"остаток войдёт в доход постепенно.",
+            C.GRAY,
+        )
     rui_info(
         f"Долг {_economy_money(macro['debt'])} ({_economy_percent(macro['debt_ratio'])} выпуска) • "
         f"ставка {_economy_percent(macro['interest_rate'])} • коррупция {_economy_percent(macro['corruption'])} • "
@@ -27551,6 +27708,13 @@ def resource_economy_context(player: Player) -> dict[str, Any]:
             "relation": safe_int(row.get("relation", 40), 40, 0, 100),
         })
 
+    building_snapshot: dict[str, Any] = {}
+    if CITY_EVENTS is not None and hasattr(CITY_EVENTS, "building_economy_snapshot"):
+        try:
+            building_snapshot = CITY_EVENTS.building_economy_snapshot(player, globals())
+        except Exception as exc:
+            debug_log("Opera Publica resource snapshot failed: %s", exc, exc_info=True, level=logging.WARNING)
+
     return {
         "turn": safe_int(getattr(player, "turn", 1), 1, 1),
         "provinces": provinces,
@@ -27572,6 +27736,9 @@ def resource_economy_context(player: Player) -> dict[str, Any]:
         "price_multiplier": float(SETTINGS.get("global_price_multiplier", 1.0) or 1.0),
         "diplomatic_partners": diplomatic_partners,
         "barbarian_partners": barbarian_partners,
+        "building_resource_output": safe_dict(building_snapshot.get("resource_output")),
+        "building_resource_input": safe_dict(building_snapshot.get("resource_input")),
+        "building_count": safe_int(building_snapshot.get("building_count", 0), 0, 0),
     }
 
 
@@ -27612,9 +27779,63 @@ def resource_economy_turn_tick(player: Player) -> dict[str, Any]:
     purchase_cost = safe_int(flow.get("auto_purchase_cost", 0), 0, 0)
     if purchase_cost:
         turn_summary_add(player, f"Автоснабжение закупило дефицитные ресурсы: -{purchase_cost} золота")
+    rare_income = safe_int(flow.get("rare_resource_income", 0), 0, 0)
+    if rare_income:
+        turn_summary_add(player, f"Редкие ресурсы принесли в казну: +{rare_income} золота")
     for note in safe_list(flow.get("notes"))[:3]:
         turn_summary_add(player, "Ресурсы: " + str(note))
     return flow
+
+
+def show_imperial_resource_report(player: Player, flow: dict[str, Any] | None = None) -> None:
+    """Shows gross production and current imperial stock after every turn."""
+    if RESOURCE_ECONOMY is None or not hasattr(RESOURCE_ECONOMY, "imperial_turn_report"):
+        return
+    try:
+        rows = RESOURCE_ECONOMY.imperial_turn_report(player, resource_economy_context(player))
+    except Exception as exc:
+        debug_log("Imperial resource report failed: %s", exc, exc_info=True, level=logging.WARNING)
+        return
+    if not rows:
+        return
+    print(clr("\n  📦 OPES IMPERII — РЕСУРСЫ ВСЕЙ ИМПЕРИИ", C.BOLD + C.GOLD))
+    print(hr())
+    table_rows = []
+    last_category = None
+    for row in rows:
+        category = row.get("category_label", "")
+        display_category = category if category != last_category else ""
+        last_category = category
+        shortage = row.get("shortage", 0.0)
+        stock_text = f"{row.get('stock', 0):g}" + (f"  ⚠ -{shortage:g}" if shortage else "")
+        table_rows.append((
+            display_category,
+            f"{row.get('icon', '•')} {row.get('name', row.get('key', ''))}",
+            f"+{row.get('produced', 0):g}",
+            f"-{row.get('consumed', 0):g}",
+            f"{row.get('net', 0):+g}",
+            stock_text,
+        ))
+    rui_table("Производство и запасы", ["Категория", "Ресурс", "Произв.", "Расход", "Баланс", "Сейчас"], table_rows, color=C.CYAN)
+    total_produced = sum(float(row.get("produced", 0.0) or 0.0) for row in rows)
+    total_stock = sum(float(row.get("stock", 0.0) or 0.0) for row in rows)
+    rui_info(f"Всего произведено за ход: {total_produced:.1f} ед. • суммарный физический запас: {total_stock:.1f} ед.", C.GOLD)
+    current_flow = flow if isinstance(flow, dict) else {}
+    rare_income = safe_int(current_flow.get("rare_resource_income", 0), 0, 0)
+    rare_rows = safe_list(current_flow.get("rare_resource_income_breakdown"))
+    if rare_income:
+        rui_section("Доход от владения редкими ресурсами", C.GOLD)
+        for item in rare_rows:
+            if not isinstance(item, dict):
+                continue
+            rui_info(
+                f"{item.get('icon', '•')} {item.get('name', item.get('key', ''))}: "
+                f"{item.get('units', 0):g} × {item.get('rate', 0)} = +{item.get('income', 0)} золота/ход",
+                C.GREEN,
+            )
+        rui_info(f"Всего от редких ресурсов: +{rare_income} золота/ход", C.BOLD + C.GOLD)
+    if _resource_interactions_are_available():
+        pause()
 
 
 def _resource_interactions_are_available() -> bool:
@@ -27734,6 +27955,144 @@ def show_resource_economy_menu(player: Player) -> None:
         pause()
 
 
+
+def _economy_automation_menu(player: Player) -> None:
+    """Настройка, которую можно выбрать один раз и больше не трогать."""
+    while True:
+        context = advanced_economy_context(player)
+        state = ADVANCED_ECONOMY.ensure_economy_state(player, context)
+        report = ADVANCED_ECONOMY.preview_turn(player, context)
+        auto = safe_dict(state.get("automation"))
+        current = str(auto.get("doctrine", "balanced"))
+        spec = ADVANCED_ECONOMY.AUTOMATION_DOCTRINES.get(current, ADVANCED_ECONOMY.AUTOMATION_DOCTRINES["balanced"])
+        rui_screen_start()
+        rui_header("AUTOMATON FISCI — АВТОНОМНАЯ ЭКОНОМИКА", "⚙", C.GOLD)
+        rui_info(
+            f"Автопилот: {'ВКЛЮЧЁН' if auto.get('enabled', True) else 'ВЫКЛЮЧЕН'} • "
+            f"доктрина: {spec.get('label', current)}",
+            C.GREEN if auto.get("enabled", True) else C.RED,
+        )
+        rui_info(
+            f"Структурный баланс {safe_int(report.get('structural_balance', 0), 0):+}/ход • "
+            f"автоматическая стабилизация +{safe_int(report.get('automation', {}).get('stabilizer_income', 0), 0)} • "
+            f"итог {safe_int(report.get('overall_balance', 0), 0):+}/ход",
+            C.CYAN,
+        )
+        rows=[]
+        keys=list(ADVANCED_ECONOMY.AUTOMATION_DOCTRINES)
+        for i,key in enumerate(keys,1):
+            row=ADVANCED_ECONOMY.AUTOMATION_DOCTRINES[key]
+            rows.append((
+                str(i),
+                row.get("label", key),
+                f"×{row.get('revenue_mult',1.0):.2f}",
+                f"×{row.get('customs_mult',1.0):.2f}",
+                f"×{row.get('commerce_mult',1.0):.2f}",
+                f"×{row.get('programme_mult',1.0):.2f}",
+                f"+{row.get('minimum_balance',0)}",
+                "ТЕКУЩАЯ" if key==current else "",
+            ))
+        rui_table(
+            "Доктрины",
+            ["#","Доктрина","Доход","Пошлины","Торговля","Программы","Мин. з/х",""],
+            rows,
+            color=C.CYAN,
+        )
+        rui_menu([
+            ("A", "Переключить автопилот", "экономика работает сама или полностью вручную", "⚙"),
+            ("Q", "Назад", "", "↩"),
+        ], title="Настройка один раз на партию")
+        valid=[str(i) for i in range(1,len(keys)+1)]+["A","Q"]
+        choice=read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}",valid)
+        if choice=="Q": return
+        if choice=="A":
+            enabled=ADVANCED_ECONOMY.set_economy_automation(player, not bool(auto.get("enabled",True)))
+            print(clr(f"  ✓ Автопилот {'включён' if enabled else 'выключен'}.",C.GREEN)); pause(); continue
+        key=keys[int(choice)-1]
+        ADVANCED_ECONOMY.set_automation_doctrine(player,key)
+        print(clr(f"  ✓ Доктрина: {ADVANCED_ECONOMY.AUTOMATION_DOCTRINES[key]['label']}.",C.GREEN)); pause()
+
+
+def _economy_magic_help(player: Player) -> None:
+    """Read-only lexicon for the complete microformula library."""
+    while True:
+        context = advanced_economy_context(player)
+        report = ADVANCED_ECONOMY.preview_turn(player, context)
+        rows = ADVANCED_ECONOMY.economic_glossary(player, context)
+        categories: list[str] = []
+        for row in rows:
+            category = str(row.get("category", "Прочее"))
+            if category not in categories:
+                categories.append(category)
+
+        rui_screen_start()
+        rui_header("LEXICON OECONOMICUM — МАГИЯ ЗОЛОТА", "📖", C.GOLD)
+        rui_info(
+            f"Микроформул в движке: {safe_int(report.get('microformula_count', 0), 0)} • "
+            f"понятий в справке: {len(rows)} • "
+            f"микродоход: {safe_int(report.get('revenues', {}).get('micro_income', 0), 0):+} золота/ход",
+            C.GREEN,
+        )
+        rui_info(
+            f"Доктрина: {safe_int(report.get('revenues', {}).get('doctrine_income', 0), 0):+} • "
+            f"стабилизатор: {safe_int(report.get('automation', {}).get('stabilizer_income', 0), 0):+} • "
+            f"общий баланс: {safe_int(report.get('overall_balance', 0), 0):+}/ход",
+            C.PURPLE,
+        )
+
+        category_rows = []
+        for index, category in enumerate(categories, 1):
+            selected = [row for row in rows if str(row.get("category")) == category]
+            contribution = sum(
+                float(row.get("gold_per_turn", 0) or 0)
+                for row in selected
+                if str(row.get("kind", "indicator")) == "microformula"
+            )
+            category_rows.append((str(index), category, str(len(selected)), f"{contribution:+.3f}"))
+        rui_table("Разделы справочника", ["#", "Раздел", "Понятий", "Сумма золота/ход"], category_rows, color=C.CYAN)
+        rui_menu([
+            ("T", "Самые доходные формулы", "30 наибольших положительных вкладов", "▲"),
+            ("W", "Самые убыточные формулы", "30 наибольших отрицательных вкладов", "▼"),
+            ("A", "Полный список", "все понятия по разделам", "∞"),
+            ("Q", "Назад", "", "↩"),
+        ])
+        allowed = [str(i) for i in range(1, len(categories) + 1)] + ["T", "W", "A", "Q"]
+        choice = read_choice(f"\n{clr('  Раздел или действие: ', C.CYAN)}", allowed)
+        if choice == "Q":
+            return
+
+        if choice in {"T", "W"}:
+            micro_rows = [row for row in rows if str(row.get("kind", "indicator")) == "microformula"]
+            ordered = sorted(
+                micro_rows,
+                key=lambda row: float(row.get("gold_per_turn", 0) or 0),
+                reverse=(choice == "T"),
+            )[:30]
+            rui_screen_start()
+            rui_header("MAXIMA LUCRA" if choice == "T" else "MAXIMA DAMNA", "▲" if choice == "T" else "▼", C.GOLD)
+            rui_table(
+                "Доходные микроформулы" if choice == "T" else "Убыточные микроформулы",
+                ["Понятие", "Текущее число", "Золото/ход", "Раздел"],
+                [(str(row.get("term", "—")), str(row.get("value", "—")), f"{float(row.get('gold_per_turn', 0) or 0):+.3f}", str(row.get("category", "—"))) for row in ordered],
+                color=C.GREEN if choice == "T" else C.RED,
+            )
+            pause()
+            continue
+
+        selected_categories = categories if choice == "A" else [categories[int(choice) - 1]]
+        rui_screen_start()
+        rui_header("LEXICON OECONOMICUM", "📖", C.GOLD)
+        for category in selected_categories:
+            table = []
+            for row in rows:
+                if str(row.get("category")) != category:
+                    continue
+                gold = float(row.get("gold_per_turn", 0) or 0)
+                table.append((str(row.get("term", "—")), str(row.get("value", "—")), f"{gold:+.3f}"))
+            rui_table(category, ["Понятие", "Текущее число", "Золото/ход"], table, color=C.CYAN if category not in ("Фиск", "Римская экономика") else C.GOLD)
+        pause()
+
+
 def show_economy_v24_menu(player):
     if ADVANCED_ECONOMY is None:
         print(clr(f"  Roma Economica недоступна: {ECONOMY_IMPORT_ERROR}", C.RED))
@@ -27745,11 +28104,26 @@ def show_economy_v24_menu(player):
         macro = report["macro"]
         rui_screen_start()
         rui_header("ROMA ECONOMICA — КАЗНА, ДЕНЬГИ И БЮДЖЕТ", "💰", C.GOLD)
+        automation = safe_dict(report.get("automation"))
         rui_info(
             f"Казна {_economy_money(player.gold)} • долг {_economy_money(macro['debt'])} • "
-            f"бюджетный баланс {report['overall_balance']:+}/ход • первичный {report['primary_balance']:+}",
+            f"золото {report['overall_balance']:+}/ход • структурный баланс {report.get('structural_balance', report['overall_balance']):+}",
             C.GREEN if report["overall_balance"] >= 0 else C.RED,
         )
+        rui_info(
+            f"Автопилот: {'включён' if automation.get('enabled', True) else 'выключен'} • "
+            f"доктрина: {automation.get('doctrine_label', 'Стабильный фиск')} • "
+            f"фискальный стабилизатор +{safe_int(automation.get('stabilizer_income', 0), 0)}/ход",
+            C.PURPLE,
+        )
+        fiscal_flow = safe_dict(report.get("fiscal_stabilization"))
+        if fiscal_flow.get("stabilized"):
+            rui_info(
+                f"Потенциальный доход {_economy_money(report.get('candidate_revenue_total', report['revenue_total']))} • "
+                f"реально собирается {_economy_money(report['revenue_total'])} • "
+                f"коридор {_economy_money(fiscal_flow.get('lower_bound', 0))}–{_economy_money(fiscal_flow.get('upper_bound', 0))}",
+                C.GRAY,
+            )
         rui_info(
             f"Выпуск {_economy_money(macro['real_output'])} • цены {macro['price_level']:.2f} • "
             f"инфляция {_economy_percent(macro['inflation'])} • безработица {_economy_percent(macro['unemployment'])}",
@@ -27797,9 +28171,11 @@ def show_economy_v24_menu(player):
             ("L", "Главная книга", "двойная запись и обороты", "📚"),
             ("M", "Караваны и морская торговля", "оперативный рынок v2.4/v2.25", "🐎"),
             ("S", "Ресурсы и автодобыча", "автоматические запасы, расход, инвестиции и сделки", "⛏"),
+            ("P", "Автопилот и доктрина", "настроить один раз и оставить экономику работать", "⚙"),
+            ("H", "Справка и магия золота", "ВВП, Лаффер, маржа, сальдо и их вклад в золото/ход", "📖"),
             ("Q", "Назад", "", "↩"),
         ], title="Consilium Oeconomicum")
-        choice = read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}", ["1","2","3","4","5","6","7","8","9","A","B","D","C","T","K","J","G","R","L","M","S","Q"])
+        choice = read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}", ["1","2","3","4","5","6","7","8","9","A","B","D","C","T","K","J","G","R","L","M","S","P","H","Q"])
         if choice == "Q": return
         if choice == "1":
             pct = read_int("  Налоговая ставка, 0-65%: ", 0, 65)
@@ -27867,6 +28243,8 @@ def show_economy_v24_menu(player):
         elif choice == "L": _economy_ledger(player)
         elif choice == "M": _legacy_show_economy_v24_menu(player)
         elif choice == "S": show_resource_economy_menu(player)
+        elif choice == "P": _economy_automation_menu(player)
+        elif choice == "H": _economy_magic_help(player)
 
 def dispatch_main_choice(player, choice) -> bool:
     """Выполняет приказ меню. False означает завершение игрового цикла."""

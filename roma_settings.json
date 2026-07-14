@@ -20,7 +20,7 @@
   "legion_disband_refund": 20,
   "pacify_cost": 20,
   "research_invest_amount": 20,
-  "base_gold_income": 30,
+  "base_gold_income": 80,
   "base_grain_income": 20,
   "random_event_chance": 0.4,
   "choice_event_chance": 0.5,

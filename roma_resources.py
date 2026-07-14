@@ -19,7 +19,7 @@ import math
 import random
 from typing import Any
 
-RESOURCE_ECONOMY_VERSION = 1
+RESOURCE_ECONOMY_VERSION = 3
 
 CATEGORY_ORDER = (
     "food",
@@ -82,6 +82,29 @@ RESOURCE_CATALOG: dict[str, dict[str, Any]] = {
 
     "papyrus":     {"name": "Папирус",       "icon": "📜", "category": "special",   "base_price": 24, "reserve": 12, "sector": "manufacturing"},
 }
+
+# Фиксированный доход за владение одной единицей редкого ресурса.
+# Он начисляется напрямую в казну после ресурсного тика и не зависит от
+# инфляции, налоговой ставки или бюджетного сглаживания Roma Economica.
+# Поэтому 5 рубинов всегда дают ровно 5 × 20 = 100 золота за ход.
+RARE_RESOURCE_GOLD_PER_TURN: dict[str, int] = {
+    "silver": 4,
+    "gold": 8,
+    "purple": 18,
+    "incense": 10,
+    "spices": 12,
+    "amber": 8,
+    "pearls": 15,
+    "diamonds": 25,
+    "rubies": 20,
+    "sapphires": 18,
+    "emeralds": 20,
+}
+
+for _rare_key, _rare_income in RARE_RESOURCE_GOLD_PER_TURN.items():
+    if _rare_key in RESOURCE_CATALOG:
+        RESOURCE_CATALOG[_rare_key]["gold_per_turn"] = _rare_income
+
 
 # Базовый выпуск провинции в условных единицах за ход. Значения намеренно
 # небольшие: богатство создаётся комбинацией многих провинций и инвестиций.
@@ -256,6 +279,8 @@ def ensure_state(player: Any, context: dict[str, Any] | None = None) -> dict[str
         "total_auto_purchase_cost": 0.0,
         "total_trade_gold": 0.0,
         "total_investment": 0.0,
+        "last_rare_resource_income": 0,
+        "total_rare_resource_income": 0.0,
         "last_processed_turn": 0,
     }
     for key, value in defaults.items():
@@ -363,6 +388,15 @@ def _primary_production(player: Any, context: dict[str, Any], state: dict[str, A
             investment_factor = 1.0 + 0.16 * math.log1p(max(0.0, level - 1.0))
             yield_amount = base * efficiency * local_variation * investment_factor * _sector_factor(resource, context)
             production[resource] += max(0.0, yield_amount)
+
+    # Opera Publica: permanent municipal buildings contribute directly to the
+    # empire-wide resource flow.  The context is assembled by roma_aeterna, so
+    # this module remains independent from the city module.
+    building_output = context.get("building_resource_output", {})
+    if isinstance(building_output, dict):
+        for resource, amount in building_output.items():
+            if resource in production:
+                production[resource] += max(0.0, finite(amount))
     return production
 
 
@@ -407,6 +441,15 @@ def _demand_snapshot(context: dict[str, Any]) -> dict[str, float]:
     luxury_scale = clamp(0.025 * pop + 0.010 * wealth + 0.002 * senate, 0.02, 3.0)
     for key in ("purple", "incense", "spices", "amber", "pearls", "diamonds", "rubies", "sapphires", "emeralds"):
         demand[key] = luxury_scale * (0.22 if key in {"purple", "incense", "spices"} else 0.08)
+
+    # Workshops, mints, shipyards and other buildings can consume inputs every
+    # turn.  Their demand is settled by the same stockpile/auto-buy machinery
+    # as military and civilian demand, therefore shortages remain visible.
+    building_input = context.get("building_resource_input", {})
+    if isinstance(building_input, dict):
+        for resource, amount in building_input.items():
+            if resource in demand:
+                demand[resource] += max(0.0, finite(amount))
     return {key: max(0.0, value) for key, value in demand.items()}
 
 
@@ -799,6 +842,36 @@ def resolve_trade_offer(player: Any, accept: bool, context: dict[str, Any] | Non
     return {"ok": True, "message": "Сделка заключена: " + trade_offer_text(offer)}
 
 
+def rare_resource_income_breakdown(
+    player: Any,
+    context: dict[str, Any] | None = None,
+    state: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Возвращает точный доход от текущих запасов редких ресурсов."""
+    state = state if isinstance(state, dict) else ensure_state(player, context or {})
+    stock = state.get("stockpiles") if isinstance(state.get("stockpiles"), dict) else {}
+    rows: list[dict[str, Any]] = []
+    for key, rate in RARE_RESOURCE_GOLD_PER_TURN.items():
+        units = max(0.0, finite(stock.get(key, 0.0)))
+        income = int(round(units * rate))
+        if income <= 0:
+            continue
+        spec = RESOURCE_CATALOG.get(key, {})
+        rows.append({
+            "key": key,
+            "name": spec.get("name", key),
+            "icon": spec.get("icon", "•"),
+            "units": round(units, 3),
+            "rate": int(rate),
+            "income": income,
+        })
+    return rows
+
+
+def rare_resource_income(player: Any, context: dict[str, Any] | None = None) -> int:
+    return sum(row["income"] for row in rare_resource_income_breakdown(player, context))
+
+
 def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
     """Выполняет один автоматический ресурсный ход.
 
@@ -823,6 +896,18 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
     consumed, shortages, purchase_cost = _consume_and_autobuy(player, context, state, demand)
     shortage_notes = _apply_shortage_effects(player, shortages, demand)
 
+    rare_income_rows = rare_resource_income_breakdown(player, context, state)
+    rare_income = sum(row["income"] for row in rare_income_rows)
+    if rare_income:
+        player.gold = max(0, int(getattr(player, "gold", 0))) + rare_income
+        # Roma Economica уже записала обычный бюджетный итог раньше в этом ходе.
+        # Добавляем прямой ресурсный доход к итоговым показателям, не подменяя их.
+        player.gold_income_last_turn = int(getattr(player, "gold_income_last_turn", 0)) + rare_income
+        player.gold_per_turn = int(getattr(player, "gold_per_turn", 0)) + rare_income
+    player.rare_resource_income_last_turn = rare_income
+    state["last_rare_resource_income"] = rare_income
+    state["total_rare_resource_income"] = finite(state.get("total_rare_resource_income", 0.0)) + rare_income
+
     _maybe_create_investment_offer(player, context, state, demand, production)
     _maybe_create_trade_offer(player, context, state)
     _push_legacy_metals(player, state)
@@ -838,6 +923,8 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "demand": {key: round(value, 3) for key, value in demand.items() if value > 1e-6},
         "shortages": {key: round(value, 3) for key, value in shortages.items() if value > 1e-6},
         "auto_purchase_cost": int(round(purchase_cost)),
+        "rare_resource_income": rare_income,
+        "rare_resource_income_breakdown": rare_income_rows,
         "produced_total": round(produced_total, 2),
         "consumed_total": round(consumed_total, 2),
         "top_production": [(key, round(value, 2)) for key, value in important if value > 0.01],
@@ -849,6 +936,7 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "produced": round(produced_total, 2),
         "consumed": round(consumed_total, 2),
         "auto_purchase_cost": int(round(purchase_cost)),
+        "rare_resource_income": rare_income,
         "shortages": len(shortages),
         "stock_value": round(stockpile_value(player, context), 2),
     })
@@ -929,4 +1017,48 @@ def audit_invariants(player: Any, context: dict[str, Any] | None = None) -> list
             errors.append(f"{key}: цена неположительна")
     if int(state.get("last_processed_turn", 0)) < 0:
         errors.append("last_processed_turn отрицателен")
+    for key, spec in RESOURCE_CATALOG.items():
+        if spec.get("category") == "luxury" and int(RARE_RESOURCE_GOLD_PER_TURN.get(key, 0)) <= 0:
+            errors.append(f"{key}: редкий ресурс не даёт золото за ход")
     return errors
+
+
+
+def imperial_turn_report(player: Any, context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """Returns the complete post-turn imperial resource statement.
+
+    Each row contains gross production, consumption, net flow and current
+    stock.  Rows with no production, consumption or stock are omitted so a new
+    game remains readable while a developed empire still shows all active
+    commodities.
+    """
+    state = ensure_state(player, context or {})
+    flow = state.get("last_flow", {}) if isinstance(state.get("last_flow"), dict) else {}
+    production = flow.get("production", {}) if isinstance(flow.get("production"), dict) else {}
+    consumption = flow.get("consumption", {}) if isinstance(flow.get("consumption"), dict) else {}
+    processing_inputs = flow.get("processing_inputs", {}) if isinstance(flow.get("processing_inputs"), dict) else {}
+    shortages = flow.get("shortages", {}) if isinstance(flow.get("shortages"), dict) else {}
+    rows: list[dict[str, Any]] = []
+    for category in CATEGORY_ORDER:
+        for key, spec in RESOURCE_CATALOG.items():
+            if spec.get("category") != category:
+                continue
+            produced = finite(production.get(key, 0.0))
+            used = finite(consumption.get(key, 0.0)) + finite(processing_inputs.get(key, 0.0))
+            stock = finite(state.get("stockpiles", {}).get(key, 0.0))
+            shortage = finite(shortages.get(key, 0.0))
+            if max(abs(produced), abs(used), abs(stock), abs(shortage)) <= 1e-6:
+                continue
+            rows.append({
+                "key": key,
+                "category": category,
+                "category_label": CATEGORY_LABELS.get(category, category),
+                "name": spec.get("name", key),
+                "icon": spec.get("icon", "•"),
+                "produced": round(produced, 2),
+                "consumed": round(used, 2),
+                "net": round(produced - used, 2),
+                "stock": round(stock, 2),
+                "shortage": round(shortage, 2),
+            })
+    return rows
