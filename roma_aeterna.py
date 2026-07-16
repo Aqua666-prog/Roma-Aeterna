@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.5.0-economy-final"
+GAME_VERSION = "3.5.1-project-purchase-fix"
 
 import random
 import ast

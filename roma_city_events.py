@@ -25,7 +25,7 @@ import re
 import textwrap
 from typing import Any
 
-MODULE_VERSION = "1.0.0-civitates"
+MODULE_VERSION = "1.0.1-civitates-project-fallback"
 SCHEMA_VERSION = 1
 MAX_HISTORY = 240
 MAX_PENDING = 12
@@ -1151,6 +1151,46 @@ def _auto_choice(player: Any, event: dict) -> dict:
     return _auto_choice_before_buildings(player, event)
 
 
+def _project_blockers(player: Any, city: dict, option: dict, ctx: dict | None = None) -> list[str]:
+    fn = getattr(BUILDINGS, "execution_blockers", None) if BUILDINGS is not None else None
+    if callable(fn):
+        try:
+            return [str(x) for x in fn(player, city, option, ctx) if str(x)]
+        except Exception:
+            pass
+    if BUILDINGS is not None and BUILDINGS.can_execute(player, city, option, ctx):
+        return []
+    return ["недостаточно средств или материалов"]
+
+
+def _affordable_project_alternative(
+    player: Any, city: dict, event: dict, chosen: dict | None, ctx: dict | None = None
+) -> dict | None:
+    """Find a payable construction variant before deferring the project.
+
+    The common mobile mistake is choosing option 1 (materials from stock) while
+    option 2 (emergency purchase) is affordable.  In that case Rome now signs
+    the available procurement contract instead of silently postponing the work.
+    """
+    if BUILDINGS is None:
+        return None
+    options = [o for o in _list(event.get("options")) if isinstance(o, dict)]
+    selected_action = str(_dict(chosen).get("project_action", ""))
+    preferred: list[dict] = []
+    if selected_action == "build_stock":
+        preferred.extend(o for o in options if o.get("project_action") == "build_buy")
+    elif selected_action == "build_buy":
+        preferred.extend(o for o in options if o.get("project_action") == "build_stock")
+    preferred.extend(
+        o for o in options
+        if str(o.get("project_action", "")).startswith("build") and o not in preferred and o is not chosen
+    )
+    for option in preferred:
+        if BUILDINGS.can_execute(player, city, option, ctx):
+            return option
+    return None
+
+
 _present_pending_before_buildings = present_pending_events
 def present_pending_events(player: Any, ctx: dict | None = None) -> int:
     ctx = _ctx(ctx)
@@ -1183,16 +1223,28 @@ def present_pending_events(player: Any, ctx: dict | None = None) -> int:
             if _i(req.get("grain", 0), 0): costs.append(f"{_i(req['grain'])} зерна")
             for resource, amount in _dict(req.get("resources")).items():
                 costs.append(f"{BUILDINGS.resource_name(resource, ctx)} ×{_f(amount):g}")
-            affordable = BUILDINGS.can_execute(player, city, option, ctx)
-            suffix = "" if affordable else " [НЕДОСТАТОЧНО СРЕДСТВ ИЛИ МАТЕРИАЛОВ]"
+            blockers = _project_blockers(player, city, option, ctx)
+            affordable = not blockers
+            suffix = "" if affordable else f" [НЕ ХВАТАЕТ: {'; '.join(blockers)}]"
             cost_text = f" ({', '.join(costs)})" if costs else ""
             print(ui.color(f"\n  {key}. {option.get('label')}{cost_text}{suffix}", "GREEN" if affordable else "RED", True))
             ui.wrap(option.get("desc", ""), "GRAY")
         answer = ui.choice("\n  Решение Рима: ", valid)
         chosen = next((o for o in _list(event.get("options")) if str(o.get("key", "")).upper() == answer), None)
         if not isinstance(chosen, dict) or not BUILDINGS.can_execute(player, city, chosen, ctx):
-            ui.info("Выбранный подряд невозможно исполнить; проект отложен.", "GOLD")
-            chosen = next((o for o in _list(event.get("options")) if o.get("project_action") == "defer"), _list(event.get("options"))[-1])
+            alternative = _affordable_project_alternative(player, city, event, chosen, ctx)
+            if isinstance(alternative, dict):
+                previous = str(_dict(chosen).get("label", "выбранный вариант"))
+                ui.info(
+                    f"«{previous}» сейчас недоступен; применён доступный подряд: «{alternative.get('label')}».",
+                    "GOLD",
+                )
+                chosen = alternative
+            else:
+                reasons = _project_blockers(player, city, _dict(chosen), ctx) if isinstance(chosen, dict) else []
+                detail = f" Причина: {'; '.join(reasons)}." if reasons else ""
+                ui.info(f"Ни один строительный подряд невозможно исполнить; проект отложен.{detail}", "GOLD")
+                chosen = next((o for o in _list(event.get("options")) if o.get("project_action") == "defer"), _list(event.get("options"))[-1])
         result = resolve_event(player, event, chosen, ctx)
         ui.section("Постановление исполнено", "GREEN")
         ui.wrap(result, "GREEN")

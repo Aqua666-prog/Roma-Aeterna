@@ -15,7 +15,7 @@ import math
 import random
 from typing import Any
 
-MODULE_VERSION = "1.0.1-opera-publica-balance"
+MODULE_VERSION = "1.0.2-opera-publica-purchase-fix"
 SCHEMA_VERSION = 2
 PROJECT_COOLDOWN_DECLINED = 7
 PROJECT_COOLDOWN_DEFERRED = 2
@@ -4906,13 +4906,45 @@ def make_project_event(player: Any, province: dict, city: dict, building: dict, 
     }
 
 
+def execution_blockers(player: Any, city: dict, option: dict, ctx: dict | None = None) -> list[str]:
+    """Return human-readable reasons why a municipal option cannot run.
+
+    ``build_buy`` is an emergency procurement contract: only its quoted gold
+    price is required.  Physical resources listed in an old/stale saved event
+    must not block it, because the contractor delivers the missing materials.
+    """
+    action = str(option.get("project_action", ""))
+    req = _dict(option.get("requires"))
+    if action in {"defer", "decline"}:
+        return []
+
+    blockers: list[str] = []
+    gold_have = max(0, _i(getattr(player, "gold", 0)))
+    gold_need = max(0, _i(req.get("gold", 0)))
+    if gold_have < gold_need:
+        blockers.append(f"золото: нужно {gold_need}, есть {gold_have}")
+
+    grain_have = max(0, _i(getattr(player, "grain", 0)))
+    grain_need = max(0, _i(req.get("grain", 0)))
+    if grain_have < grain_need:
+        blockers.append(f"зерно: нужно {grain_need}, есть {grain_have}")
+
+    # Emergency procurement pays for missing materials in gold.  This explicit
+    # branch also repairs projects already stored in older saves where the
+    # build_buy option accidentally retained a non-empty resources mapping.
+    if action != "build_buy":
+        state = _resource_state(player, ctx)
+        stock = _dict(state.get("stockpiles"))
+        for key, amount in _dict(req.get("resources")).items():
+            need = max(0.0, _f(amount))
+            have = max(0.0, _f(stock.get(key, 0.0)))
+            if have + 1e-6 < need:
+                blockers.append(f"{resource_name(str(key), ctx)}: нужно {need:g}, есть {have:g}")
+    return blockers
+
+
 def can_execute(player: Any, city: dict, option: dict, ctx: dict | None = None) -> bool:
-    action=str(option.get("project_action", "")); req=_dict(option.get("requires"))
-    if action in {"defer","decline"}: return True
-    if _i(getattr(player,"gold",0)) < _i(req.get("gold",0)): return False
-    if _i(getattr(player,"grain",0)) < _i(req.get("grain",0)): return False
-    state=_resource_state(player,ctx); stock=_dict(state.get("stockpiles"))
-    return all(_f(stock.get(k,0.0))+1e-6>=_f(v) for k,v in _dict(req.get("resources")).items())
+    return not execution_blockers(player, city, option, ctx)
 
 
 def _apply_city_metrics(city: dict, building: dict) -> None:
