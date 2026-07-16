@@ -1097,7 +1097,10 @@ def _macro_snapshot(player: Any, context: dict[str, Any], state: dict[str, Any],
         0.55,
     )
     unemployment = clamp(0.72 * state["unemployment"] + 0.28 * unemployment_target, 0.0, 0.75)
-    real_output = max(20.0, sectors["total_output"])
+    # Реальный ВВП должен точно совпадать с суммой отраслевого выпуска.
+    # Старый искусственный минимум 20 создавал бухгалтерское расхождение
+    # в тяжёлом кризисе, когда пять секторов вместе производили меньше 20.
+    real_output = max(1.0, sum(finite(value) for value in sectors["output"].values()))
     nominal_output = real_output * state["price_level"]
     per_capita = real_output / max(1.0, population)
     political_legitimacy = (senate + people) / 200.0

@@ -7,6 +7,7 @@ import random
 import unittest
 
 import roma_aeterna as game
+import roma_buildings as buildings
 
 
 class BellumOeconomicumTests(unittest.TestCase):
@@ -49,8 +50,28 @@ class BellumOeconomicumTests(unittest.TestCase):
     def test_schema_and_invariants(self) -> None:
         context = game.advanced_economy_context(self.player)
         state = game.ADVANCED_ECONOMY.ensure_economy_state(self.player, context)
-        self.assertEqual(state["version"], 4)
+        self.assertEqual(state["version"], game.ADVANCED_ECONOMY.ECONOMY_VERSION)
         self.assertEqual(game.ADVANCED_ECONOMY.audit_invariants(self.player, context), [])
+
+    def test_stone_bridge_is_available_in_river_city(self) -> None:
+        province, template = next(
+            (province, city)
+            for province in game.PROVINCES_DATA
+            if isinstance(province, dict)
+            for city in province.get("cities", [])
+            if isinstance(city, dict) and "реч" in str(city.get("type", "")).lower()
+        )
+        self.player.tech_researched = list(set(getattr(self.player, "tech_researched", [])) | {"concrete"})
+        city = {
+            "name": template.get("name", "Город"),
+            "type": template.get("type", "речной"),
+            "buildings": [],
+            "building_project_cooldowns": {},
+        }
+        ok, reason = buildings.eligibility(
+            self.player, province, city, buildings.BUILDING_CATALOG["bridge_stone"], {}
+        )
+        self.assertTrue(ok, reason)
 
     def test_serialization_preserves_policy(self) -> None:
         province = game.captured_province_copy(self.target["name"])
@@ -70,7 +91,7 @@ class BellumOeconomicumTests(unittest.TestCase):
         restored_province = next(p for p in restored.provinces if p.get("name") == province["name"])
         self.assertEqual(restored_province["economic_policy"], "military")
         self.assertIn(province["name"], restored.conquest_economy["claimed_provinces"])
-        self.assertEqual(restored.economy["version"], 4)
+        self.assertEqual(restored.economy["version"], game.ADVANCED_ECONOMY.ECONOMY_VERSION)
 
 
 if __name__ == "__main__":

@@ -118,6 +118,24 @@ class EconomyInvariantTests(unittest.TestCase):
         total = exp["consumption"] + exp["investment"] + exp["government"] + exp["net_exports"] + exp["statistical_discrepancy"]
         self.assertAlmostEqual(exp["gdp"], total, places=6)
 
+    def test_crisis_gdp_equals_sector_output_below_legacy_floor(self) -> None:
+        p = DummyPlayer()
+        context = make_context(1, unrest=100.0)
+        state = eco.ensure_economy_state(p, context)
+        output = {key: 2.5 for key in eco.SECTOR_KEYS}
+        sectors = {
+            "output": output,
+            "total_output": sum(output.values()),
+            "labor": {key: 1.0 for key in eco.SECTOR_KEYS},
+            "participation": 0.46,
+            "bottlenecks": {key: 1.0 for key in eco.SECTOR_KEYS},
+            "security_factor": 0.5,
+            "institution_factor": 0.5,
+        }
+        macro = eco._macro_snapshot(p, context, state, sectors)
+        self.assertLess(sum(output.values()), 20.0)
+        self.assertAlmostEqual(macro["real_output"], sum(output.values()), places=12)
+
     def test_budget_and_sector_shares(self) -> None:
         for seed in range(100):
             rng = random.Random(seed)

@@ -19,7 +19,7 @@
 **Большая историческая 4X-стратегия о Риме — в терминале, на чистом Python.**
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](#-системные-требования)
-![Version](https://img.shields.io/badge/version-3.5.0%20Economy%20Final-red)
+![Version](https://img.shields.io/badge/version-3.5.2%20Stability%20Fix-red)
 [![Status](https://img.shields.io/badge/status-playable-2E8B57)](#-быстрый-старт)
 [![Genre](https://img.shields.io/badge/genre-historical%204X-4B0082)](#-четыре-основания-4x)
 [![Interface](https://img.shields.io/badge/interface-ANSI%20%7C%20Rich%20%7C%20Textual-2F4F4F)](#-интерфейс)

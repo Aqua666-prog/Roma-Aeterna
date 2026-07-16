@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.5.1-project-purchase-fix"
+GAME_VERSION = "3.5.2-stability-fix"
 
 import random
 import ast
@@ -17512,6 +17512,10 @@ SAVE_SIGNATURE_VERSION = 2
 # Новые сохранения всегда используют текущую GAME_VERSION.
 SAVE_KEY_COMPAT_VERSIONS = (
     GAME_VERSION,
+    # Сейвы последних публичных сборок должны открываться после обновления.
+    "3.5.1-project-purchase-fix",
+    "3.5.0-economy-final",
+    "3.4.0-microformulae",
     "2.29.6-imperial-onefile",
     "2.29.5-imperial-ui",
     "2.29.4-runtime-guard",
