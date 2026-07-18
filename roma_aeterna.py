@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.5.2-stability-fix"
+GAME_VERSION = "3.5.3-voiceover"
 
 import random
 import ast
@@ -34,6 +34,19 @@ from dataclasses import dataclass, field, asdict
 from collections import deque
 from collections.abc import MutableMapping
 from typing import Any
+
+# ─── VOX ROMANA: ГОТОВАЯ ОЗВУЧКА ЦИТАТ ───────────────────────────────────────
+# WAV создаются отдельным generate_voiceover_silero.py. Игра не зависит от
+# Silero и не генерирует речь во время партии: она только проигрывает готовые
+# audio/tech, audio/great_people и audio/world_wonders.
+VOICEOVER_IMPORT_ERROR = ""
+try:
+    import roma_voice as VOICEOVER
+except Exception as _voiceover_import_error:
+    VOICEOVER = None
+    VOICEOVER_IMPORT_ERROR = (
+        f"{type(_voiceover_import_error).__name__}: {_voiceover_import_error}"
+    )
 
 # ─── ВНЕШНИЙ МОДУЛЬ ВАРВАРСКОГО МИРА ──────────────────────────────────────
 # Вся новая логика племён, лагерей, миграций, конфедераций и федератов живёт
@@ -1564,7 +1577,16 @@ DEFAULT_SETTINGS = {
     "advanced_battle_min_win_attrition": 1,
     "advanced_battle_max_win_attrition": 9,
     "advanced_battle_power_scale": "balanced_v2",
+
+    # ── Vox Romana: готовая озвучка цитат ─────────────────────────────
+    # Можно менять вручную в roma_settings.json. Громкость: 0..100.
+    "voiceover_enabled": True,
+    "voiceover_volume": 85,
+    "voiceover_interrupt_previous": True,
     "quote_text_mode": "quote",
+    # Встроенные игровые цитаты остаются текстом для интерфейса.
+    # Внешние JSON используются прежде всего генератором озвучки.
+    "quote_display_source": "builtin",
 }
 
 
@@ -1637,6 +1659,36 @@ def init_runtime_settings(path: str = SETTINGS_FILE) -> dict:
     global SETTINGS
     SETTINGS = APP.set_settings(load_settings(path))
     return SETTINGS
+
+
+def play_voiceover(category: str, entry_id: object) -> bool:
+    """Безопасный мост к roma_voice: отсутствие WAV/плеера не ломает игру."""
+    if VOICEOVER is None:
+        return False
+    try:
+        return bool(VOICEOVER.play_voiceover(
+            category,
+            entry_id,
+            enabled=bool(SETTINGS.get("voiceover_enabled", True)),
+            volume=safe_int(SETTINGS.get("voiceover_volume", 85), 85, 0, 100),
+            interrupt=bool(SETTINGS.get("voiceover_interrupt_previous", True)),
+        ))
+    except Exception as exc:
+        debug_log(
+            "Voiceover failed for %s/%s: %s",
+            category, entry_id, exc, exc_info=True, level=logging.WARNING,
+        )
+        return False
+
+
+def stop_voiceover() -> None:
+    """Останавливает реплику; оставлено как публичный хук для будущего меню."""
+    if VOICEOVER is None:
+        return
+    try:
+        VOICEOVER.stop_voiceover()
+    except Exception as exc:
+        debug_log("Voiceover stop failed: %s", exc, level=logging.WARNING)
 
 # ─── ДАННЫЕ: ПРОВИНЦИИ И КАРТА ────────────────────────────────────────────────
 # neighbors задаёт граф соседства: атаковать можно только провинцию,
@@ -4603,6 +4655,7 @@ def show_great_person_card(player: "Player", gid: str):
         print(clr("\n  Эффекты: " + format_effects_dict(person.get("effects", {})), C.GREEN))
         print(clr("  Разовый престиж: +слава при появлении", C.GOLD))
         print(clr("  ────────────────────────────────────────────────────────────", C.GOLD))
+    play_voiceover("great_people", gid)
 
 def award_great_person(player: "Player", gid: str):
     if not hasattr(player, "great_people_obtained") or not isinstance(player.great_people_obtained, list):
@@ -10139,6 +10192,7 @@ def show_wonder_completion_screen(player: "Player", wonder: dict):
         print(clr(f"\n  {wonder['name'].upper()}", C.BOLD + C.GOLD))
         ui_wrap(wonder.get("quote", ""), indent="  ❝ ", subsequent="    ", color=C.CYAN)
         print(clr(f"\n  Бафф: {wonder.get('desc', wonder_effects_text(wonder.get('effects', {})))}", C.GREEN))
+    play_voiceover("world_wonders", wonder.get("id", ""))
     pause()
 
 def apply_wonder_instant_effects(player: "Player", wonder: dict):
@@ -18983,6 +19037,20 @@ def _load_quote_json(filename: str) -> list[dict[str, Any]]:
     return [x for x in data if isinstance(x, dict)]
 
 
+def _strip_tts_stress_markup(text: object) -> str:
+    """Удаляет технические метки ударения Silero/StressRNN из экранного текста.
+
+    В WAV они уже не нужны, а в интерфейсе не должны появляться конструкции
+    вроде ``Р+имляне`` или ``м+еч``. Настоящие знаки сложения с пробелами и
+    числовые бонусы (например, ``+1``) функция не затрагивает.
+    """
+    value = unicodedata.normalize("NFD", str(text or ""))
+    value = value.replace("\u0301", "")
+    value = re.sub(r"\+(?=[А-Яа-яЁё])", "", value)
+    value = re.sub(r"(?<=[А-Яа-яЁё])\+(?=$|[^А-Яа-яЁё0-9])", "", value)
+    return unicodedata.normalize("NFC", value).strip()
+
+
 def _select_external_quote_text(row: dict[str, Any]) -> str:
     mode = str(SETTINGS.get("quote_text_mode", "quote")).strip().lower()
     fields = {
@@ -18998,7 +19066,7 @@ def _select_external_quote_text(row: dict[str, Any]) -> str:
     }
     primary = fields.get(mode, "quote")
     for field in (primary, "quote", "semantic_translation", "literal_translation", "original"):
-        value = str(row.get(field, "")).strip()
+        value = _strip_tts_stress_markup(row.get(field, ""))
         if value:
             return value
     return ""
@@ -19014,13 +19082,18 @@ def _quote_rows_by_id(filename: str) -> dict[str, dict[str, Any]]:
 
 
 def load_external_quote_files(strict: bool = False) -> None:
-    """Подгружает цитаты из data/quotes/*.json и накладывает их на игровые данные.
+    """Проверяет внешние JSON и при явной настройке подменяет ими экранный текст.
 
-    JSON не обязан заполнять поля original/literal/semantic сразу: если выбранное
-    поле пустое, игра безопасно берёт обычное quote. При отсутствии файлов игра
-    продолжает работать на встроенных цитатах.
+    По умолчанию интерфейс использует исходные встроенные цитаты из игры, а
+    ``data/quotes/*.json`` остаются отдельным материалом для Silero TTS. Это не
+    позволяет техническим ``+``-ударениям и TTS-перефразировкам попадать на экран.
+    Для прежнего поведения можно задать ``quote_display_source=external`` в
+    ``roma_settings.json``.
     """
     global TECH_QUOTES
+
+    display_source = str(SETTINGS.get("quote_display_source", "builtin")).strip().lower()
+    apply_external_text = display_source in {"external", "json", "tts"}
 
     tech_rows = _quote_rows_by_id("tech_quotes.json")
     if tech_rows:
@@ -19028,11 +19101,17 @@ def load_external_quote_files(strict: bool = False) -> None:
         extra = sorted(set(tech_rows) - set(TECH_TREE))
         if strict and (missing or extra):
             raise RuntimeError(f"tech_quotes.json mismatch. Missing: {missing}; Extra: {extra}")
-        for key, row in tech_rows.items():
-            if key in TECH_TREE:
-                text = _select_external_quote_text(row)
-                source = str(row.get("source", row.get("author", "Римская сентенция"))).strip()
-                TECH_QUOTES[key] = {"quote": text or "Sapientia vincit.", "author": source or "Римская сентенция"}
+        if apply_external_text:
+            for key, row in tech_rows.items():
+                if key in TECH_TREE:
+                    text = _select_external_quote_text(row)
+                    source = _strip_tts_stress_markup(
+                        row.get("source", row.get("author", "Римская сентенция"))
+                    )
+                    TECH_QUOTES[key] = {
+                        "quote": text or "Sapientia vincit.",
+                        "author": source or "Римская сентенция",
+                    }
 
     people_rows = _quote_rows_by_id("great_people_quotes.json")
     if people_rows:
@@ -19040,15 +19119,16 @@ def load_external_quote_files(strict: bool = False) -> None:
         extra = sorted(set(people_rows) - set(GREAT_PEOPLE))
         if strict and (missing or extra):
             raise RuntimeError(f"great_people_quotes.json mismatch. Missing: {missing}; Extra: {extra}")
-        for key, row in people_rows.items():
-            person = GREAT_PEOPLE.get(key)
-            if isinstance(person, dict):
-                text = _select_external_quote_text(row)
-                if text:
-                    person["quote"] = text
-                source = str(row.get("source", row.get("author", ""))).strip()
-                if source:
-                    person["source"] = source
+        if apply_external_text:
+            for key, row in people_rows.items():
+                person = GREAT_PEOPLE.get(key)
+                if isinstance(person, dict):
+                    text = _select_external_quote_text(row)
+                    if text:
+                        person["quote"] = text
+                    source = _strip_tts_stress_markup(row.get("source", row.get("author", "")))
+                    if source:
+                        person["source"] = source
 
     wonder_rows = _quote_rows_by_id("world_wonder_quotes.json")
     if wonder_rows:
@@ -19057,18 +19137,19 @@ def load_external_quote_files(strict: bool = False) -> None:
         extra = sorted(set(wonder_rows) - current_ids)
         if strict and (missing or extra):
             raise RuntimeError(f"world_wonder_quotes.json mismatch. Missing: {missing}; Extra: {extra}")
-        for wonder in WORLD_WONDERS:
-            if not isinstance(wonder, dict):
-                continue
-            key = str(wonder.get("id", ""))
-            row = wonder_rows.get(key)
-            if row:
-                text = _select_external_quote_text(row)
-                source = str(row.get("source", "")).strip()
-                if text and source and source not in text:
-                    wonder["quote"] = f"{text} — {source}"
-                elif text:
-                    wonder["quote"] = text
+        if apply_external_text:
+            for wonder in WORLD_WONDERS:
+                if not isinstance(wonder, dict):
+                    continue
+                key = str(wonder.get("id", ""))
+                row = wonder_rows.get(key)
+                if row:
+                    text = _select_external_quote_text(row)
+                    source = _strip_tts_stress_markup(row.get("source", ""))
+                    if text and source and source not in text:
+                        wonder["quote"] = f"{text} — {source}"
+                    elif text:
+                        wonder["quote"] = text
 
 
 
@@ -24914,6 +24995,7 @@ def show_tech_completion_card(player: "Player", key: str):
         print(clr("  Открывает:", C.PURPLE))
         for u in unlocks or ["постоянный державный эффект"]:
             print(clr(f"    • {u}", C.GRAY))
+    play_voiceover("tech", key)
 
 
 _complete_research_v2249 = complete_research

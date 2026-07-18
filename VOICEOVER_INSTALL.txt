@@ -1,0 +1,26 @@
+ROMA AETERNA — установка готовой озвучки
+
+1. Дождитесь завершения generate_voiceover_silero.py.
+2. Положите рядом в папку game:
+   - roma_aeterna.py
+   - roma_voice.py
+3. Скрипт генерации должен создать структуру:
+   game/audio/tech/*.wav
+   game/audio/great_people/*.wav
+   game/audio/world_wonders/*.wav
+4. В Termux установите плеер один раз:
+   pkg install mpv
+5. Запустите игру как обычно:
+   python roma_aeterna.py
+
+Озвучка включена автоматически для:
+- изученной технологии;
+- появившегося великого человека;
+- построенного чуда света.
+
+Настройки находятся в roma_settings.json:
+  "voiceover_enabled": true,
+  "voiceover_volume": 85,
+  "voiceover_interrupt_previous": true
+
+Если WAV или плеер отсутствуют, игра продолжает работать без падения.
