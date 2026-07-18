@@ -1,0 +1,3 @@
+great_people_stressed.txt: lines=144, missing_vocalic_words=0, malformed=0
+technologies_stressed.txt: lines=75, missing_vocalic_words=0, malformed=0
+world_wonders_stressed.txt: lines=75, missing_vocalic_words=0, malformed=0

@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.5.3-voiceover"
+GAME_VERSION = "3.5.4-full-autopilot"
 
 import random
 import ast
@@ -17566,6 +17566,8 @@ SAVE_SIGNATURE_VERSION = 2
 # Новые сохранения всегда используют текущую GAME_VERSION.
 SAVE_KEY_COMPAT_VERSIONS = (
     GAME_VERSION,
+    "3.5.3-voiceover",
+    "3.5.2-stability-fix",
     # Сейвы последних публичных сборок должны открываться после обновления.
     "3.5.1-project-purchase-fix",
     "3.5.0-economy-final",
@@ -28043,60 +28045,65 @@ def show_resource_economy_menu(player: Player) -> None:
 
 
 def _economy_automation_menu(player: Player) -> None:
-    """Настройка, которую можно выбрать один раз и больше не трогать."""
+    """Doctrine-driven administration of every controllable economic lever."""
     while True:
         context = advanced_economy_context(player)
         state = ADVANCED_ECONOMY.ensure_economy_state(player, context)
-        report = ADVANCED_ECONOMY.preview_turn(player, context)
         auto = safe_dict(state.get("automation"))
         current = str(auto.get("doctrine", "balanced"))
         spec = ADVANCED_ECONOMY.AUTOMATION_DOCTRINES.get(current, ADVANCED_ECONOMY.AUTOMATION_DOCTRINES["balanced"])
+        report = ADVANCED_ECONOMY.preview_turn(player, context)
         rui_screen_start()
-        rui_header("AUTOMATON FISCI — АВТОНОМНАЯ ЭКОНОМИКА", "⚙", C.GOLD)
+        rui_header("AUTOMATON FISCI — ПОЛНЫЙ ЭКОНОМИЧЕСКИЙ АВТОПИЛОТ", "⚙", C.GOLD)
         rui_info(
-            f"Автопилот: {'ВКЛЮЧЁН' if auto.get('enabled', True) else 'ВЫКЛЮЧЕН'} • "
-            f"доктрина: {spec.get('label', current)}",
+            f"Автопилот: {'ВКЛЮЧЁН' if auto.get('enabled', True) else 'ВЫКЛЮЧЕН'} • доктрина: {spec.get('label', current)}",
             C.GREEN if auto.get("enabled", True) else C.RED,
         )
         rui_info(
             f"Структурный баланс {safe_int(report.get('structural_balance', 0), 0):+}/ход • "
-            f"автоматическая стабилизация +{safe_int(report.get('automation', {}).get('stabilizer_income', 0), 0)} • "
+            f"чрезвычайный резерв +{safe_int(report.get('automation', {}).get('stabilizer_income', 0), 0)} • "
             f"итог {safe_int(report.get('overall_balance', 0), 0):+}/ход",
             C.CYAN,
         )
-        rows=[]
+        rui_table("Текущие автоматические настройки", ["Рычаг", "Значение"], [
+            ("Налоговая ставка", f"{state.get('tax_rate',0):.1%}"),
+            ("Таможенный тариф", f"{state.get('tariff_rate',0):.1%}"),
+            ("Бюджетная позиция", ADVANCED_ECONOMY.FISCAL_STANCES.get(state.get('fiscal_stance'),{}).get('label',state.get('fiscal_stance'))),
+            ("Монетный стандарт", ADVANCED_ECONOMY.COIN_STANDARDS.get(state.get('coin_standard'),{}).get('label',state.get('coin_standard'))),
+            ("Кредит", ADVANCED_ECONOMY.CREDIT_POLICIES.get(safe_dict(state.get('financial')).get('policy'),{}).get('label',safe_dict(state.get('financial')).get('policy'))),
+            ("Отрасли", ADVANCED_ECONOMY.SECTOR_POLICIES.get(state.get('sector_policy'),{}).get('label',state.get('sector_policy'))),
+            ("Зерновой резерв", f"{float(state.get('strategic_grain_target', 0) or 0):.1f} хода"),
+            ("Автопогашение долга", "да" if state.get('automatic_debt_repayment',True) else "нет"),
+        ], color=C.CYAN)
+        budget_rows=[(ADVANCED_ECONOMY.BUDGET_LABELS[k], f"{state.get('budget_shares',{}).get(k,0):.1%}") for k in ADVANCED_ECONOMY.BUDGET_KEYS]
+        rui_table("Автоматический бюджет", ["Ведомство", "Доля"], budget_rows, color=C.PURPLE)
+        actions=list(auto.get("last_actions", []))
+        rui_table("Последняя перенастройка", ["Действие"], [(x,) for x in actions] or [("Автопилот ещё не проводил перенастройку.",)], color=C.GREEN)
+
         keys=list(ADVANCED_ECONOMY.AUTOMATION_DOCTRINES)
+        rows=[]
         for i,key in enumerate(keys,1):
             row=ADVANCED_ECONOMY.AUTOMATION_DOCTRINES[key]
-            rows.append((
-                str(i),
-                row.get("label", key),
-                f"×{row.get('revenue_mult',1.0):.2f}",
-                f"×{row.get('customs_mult',1.0):.2f}",
-                f"×{row.get('commerce_mult',1.0):.2f}",
-                f"×{row.get('programme_mult',1.0):.2f}",
-                f"+{row.get('minimum_balance',0)}",
-                "ТЕКУЩАЯ" if key==current else "",
-            ))
-        rui_table(
-            "Доктрины",
-            ["#","Доктрина","Доход","Пошлины","Торговля","Программы","Мин. з/х",""],
-            rows,
-            color=C.CYAN,
-        )
+            rows.append((str(i), row.get("label",key), f"налог {row.get('tax_target',0):.0%}", f"тариф {row.get('tariff_target',0):.0%}", f"резерв +{row.get('minimum_balance',0)}", "ТЕКУЩАЯ" if key==current else ""))
+        rui_table("Доктрины", ["#","Доктрина","Налог","Тариф","Цель",""], rows, color=C.CYAN)
         rui_menu([
-            ("A", "Переключить автопилот", "экономика работает сама или полностью вручную", "⚙"),
+            ("A", "Переключить автопилот", "включить или вернуть полностью ручное управление", "⚙"),
+            ("R", "Перенастроить сейчас", "немедленно применить доктрину ко всем рычагам", "🔄"),
             ("Q", "Назад", "", "↩"),
-        ], title="Настройка один раз на партию")
-        valid=[str(i) for i in range(1,len(keys)+1)]+["A","Q"]
+        ], title="Автопилот управляет налогами, бюджетом, монетой, долгом, кредитом, отраслями, зерном и инвестициями")
+        valid=[str(i) for i in range(1,len(keys)+1)]+["A","R","Q"]
         choice=read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}",valid)
         if choice=="Q": return
         if choice=="A":
             enabled=ADVANCED_ECONOMY.set_economy_automation(player, not bool(auto.get("enabled",True)))
             print(clr(f"  ✓ Автопилот {'включён' if enabled else 'выключен'}.",C.GREEN)); pause(); continue
+        if choice=="R":
+            actions=ADVANCED_ECONOMY.run_economy_autopilot(player, context, force=True)
+            print(clr(f"  ✓ Перенастроено рычагов: {len(actions)}.", C.GREEN)); pause(); continue
         key=keys[int(choice)-1]
         ADVANCED_ECONOMY.set_automation_doctrine(player,key)
-        print(clr(f"  ✓ Доктрина: {ADVANCED_ECONOMY.AUTOMATION_DOCTRINES[key]['label']}.",C.GREEN)); pause()
+        actions=ADVANCED_ECONOMY.run_economy_autopilot(player, context, force=True)
+        print(clr(f"  ✓ Доктрина: {ADVANCED_ECONOMY.AUTOMATION_DOCTRINES[key]['label']}; изменений: {len(actions)}.",C.GREEN)); pause()
 
 
 def _economy_magic_help(player: Player) -> None:

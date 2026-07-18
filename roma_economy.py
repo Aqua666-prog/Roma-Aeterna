@@ -44,7 +44,7 @@ try:
 except (ImportError, SyntaxError):
     ECONOMY_DICTIONARY = None
 
-ECONOMY_VERSION = 10
+ECONOMY_VERSION = 11
 
 STARTING_BASE_REVENUE_MIN = 50
 STARTING_BASE_REVENUE_DEFAULT = 80
@@ -142,50 +142,81 @@ CREDIT_POLICIES = {
 AUTOMATION_DOCTRINES = {
     "balanced": {
         "label": "Стабильный фиск",
-        "revenue_mult": 1.00,
-        "customs_mult": 1.00,
-        "commerce_mult": 1.00,
-        "programme_mult": 1.00,
-        "military_upkeep_mult": 1.00,
         "minimum_balance": 15,
+        "emergency_limit": 8,
+        "tax_target": 0.24,
+        "tariff_target": 0.08,
+        "fiscal_stance": "balanced",
+        "coin_standard": "managed",
+        "credit_policy": "neutral",
+        "sector_policy": "balanced",
+        "grain_target": 4.0,
+        "reserve_turns": 2.2,
+        "budget": {"administration": .21, "military": .22, "infrastructure": .23, "welfare": .15, "science": .13, "religion": .06},
+        "investment_rate": 0.08,
     },
     "treasury": {
         "label": "Приоритет казны",
-        "revenue_mult": 1.12,
-        "customs_mult": 1.05,
-        "commerce_mult": 1.05,
-        "programme_mult": 0.82,
-        "military_upkeep_mult": 1.00,
         "minimum_balance": 35,
+        "emergency_limit": 12,
+        "tax_target": 0.29,
+        "tariff_target": 0.11,
+        "fiscal_stance": "austerity",
+        "coin_standard": "sound",
+        "credit_policy": "tight",
+        "sector_policy": "balanced",
+        "grain_target": 3.5,
+        "reserve_turns": 3.2,
+        "budget": {"administration": .25, "military": .20, "infrastructure": .18, "welfare": .13, "science": .09, "religion": .05},
+        "investment_rate": 0.04,
     },
     "mercantile": {
         "label": "Средиземноморская торговля",
-        "revenue_mult": 1.03,
-        "customs_mult": 1.35,
-        "commerce_mult": 1.25,
-        "programme_mult": 0.95,
-        "military_upkeep_mult": 1.00,
         "minimum_balance": 25,
+        "emergency_limit": 10,
+        "tax_target": 0.22,
+        "tariff_target": 0.10,
+        "fiscal_stance": "balanced",
+        "coin_standard": "sound",
+        "credit_policy": "easy",
+        "sector_policy": "mercantile",
+        "grain_target": 4.5,
+        "reserve_turns": 2.5,
+        "budget": {"administration": .20, "military": .18, "infrastructure": .25, "welfare": .13, "science": .17, "religion": .07},
+        "investment_rate": 0.09,
     },
     "development": {
         "label": "Имперское развитие",
-        "revenue_mult": 1.05,
-        "customs_mult": 1.00,
-        "commerce_mult": 1.05,
-        "programme_mult": 1.18,
-        "military_upkeep_mult": 1.00,
         "minimum_balance": 10,
+        "emergency_limit": 6,
+        "tax_target": 0.23,
+        "tariff_target": 0.07,
+        "fiscal_stance": "development",
+        "coin_standard": "managed",
+        "credit_policy": "easy",
+        "sector_policy": "public_works",
+        "grain_target": 5.0,
+        "reserve_turns": 1.8,
+        "budget": {"administration": .18, "military": .17, "infrastructure": .31, "welfare": .13, "science": .16, "religion": .05},
+        "investment_rate": 0.13,
     },
     "war": {
         "label": "Военная экономика",
-        "revenue_mult": 1.06,
-        "customs_mult": 0.95,
-        "commerce_mult": 0.95,
-        "programme_mult": 1.02,
-        "military_upkeep_mult": 0.88,
         "minimum_balance": 5,
+        "emergency_limit": 15,
+        "tax_target": 0.31,
+        "tariff_target": 0.12,
+        "fiscal_stance": "war",
+        "coin_standard": "managed",
+        "credit_policy": "tight",
+        "sector_policy": "workshops",
+        "grain_target": 6.0,
+        "reserve_turns": 1.5,
+        "budget": {"administration": .17, "military": .39, "infrastructure": .18, "welfare": .12, "science": .09, "religion": .05},
+        "investment_rate": 0.07,
     },
 }
+
 
 REVENUE_KEYS = (
     "direct_tax", "customs", "domains", "tribute", "commerce", "base_revenue",
@@ -1533,18 +1564,19 @@ def _doctrine_income(state: dict[str, Any], revenues: dict[str, float]) -> float
 
 
 def _apply_automatic_spending(state: dict[str, Any], expenditures: dict[str, Any]) -> None:
+    """Recompute totals after the autopilot changed real budget shares.
+
+    Older builds multiplied whole expenditure blocks invisibly.  The new
+    autopilot changes the same public levers as the player (budget shares,
+    fiscal stance, taxes, credit, coin and sector policy), so no hidden blanket
+    multiplier is required here.
+    """
     automation = state.get("automation") if isinstance(state.get("automation"), dict) else {}
     if not bool(automation.get("enabled", True)):
         return
-    spec = _automation_spec(state)
-    programme_mult = clamp(finite(spec.get("programme_mult", 1.0), 1.0), 0.25, 2.0)
-    military_mult = clamp(finite(spec.get("military_upkeep_mult", 1.0), 1.0), 0.50, 1.50)
-    expenditures["programmes"] = {
-        key: max(0.0, finite(value)) * programme_mult
-        for key, value in expenditures.get("programmes", {}).items()
-    }
-    expenditures["military_upkeep"] = max(0.0, finite(expenditures.get("military_upkeep", 0.0))) * military_mult
-    expenditures["programme_total"] = sum(expenditures["programmes"].values())
+    expenditures["programme_total"] = sum(
+        max(0.0, finite(value)) for value in expenditures.get("programmes", {}).values()
+    )
     expenditures["mandatory_total"] = sum(max(0.0, finite(expenditures.get(key, 0.0))) for key in (
         "administration", "military_upkeep", "fleet_upkeep", "auxiliary_upkeep",
         "artillery_upkeep", "garrison_upkeep", "municipal_building_upkeep",
@@ -1567,6 +1599,189 @@ def set_automation_doctrine(player: Any, doctrine: str) -> str:
     state.setdefault("automation", {})["doctrine"] = doctrine
     state["automation"]["last_reconfigured_turn"] = int(getattr(player, "turn", 1))
     return doctrine
+
+
+def _blend_map(current: dict[str, float], target: dict[str, float], speed: float) -> dict[str, float]:
+    speed = clamp(finite(speed), 0.0, 1.0)
+    return {key: finite(current.get(key, target[key])) * (1.0 - speed) + target[key] * speed for key in target}
+
+
+def _autopilot_action(actions: list[str], label: str, old: Any, new: Any, *, percent: bool = False) -> None:
+    if isinstance(old, (int, float)) and isinstance(new, (int, float)):
+        if abs(finite(new) - finite(old)) < (0.002 if percent else 0.01):
+            return
+        if percent:
+            actions.append(f"{label}: {finite(old):.1%} → {finite(new):.1%}")
+        else:
+            actions.append(f"{label}: {finite(old):.2f} → {finite(new):.2f}")
+    elif old != new:
+        actions.append(f"{label}: {old} → {new}")
+
+
+def run_economy_autopilot(player: Any, context: dict[str, Any] | None = None, *, force: bool = False) -> list[str]:
+    """Adapt every controllable economic lever to the selected doctrine.
+
+    The routine uses only public state variables also exposed in Consilium
+    Oeconomicum.  It does not change conquests or manufacture favourable shocks;
+    instead it changes the fiscal, monetary, sectoral, credit, grain and social
+    response to those circumstances.
+    """
+    context = context or {}
+    state = ensure_economy_state(player, context)
+    automation = state.setdefault("automation", {})
+    if not bool(automation.get("enabled", True)):
+        return []
+    turn = int(getattr(player, "turn", 1))
+    if not force and int(automation.get("last_policy_turn", -1)) == turn:
+        return list(automation.get("last_actions", []))
+
+    doctrine = str(automation.get("doctrine", "balanced"))
+    spec = AUTOMATION_DOCTRINES.get(doctrine, AUTOMATION_DOCTRINES["balanced"])
+    report = preview_turn(player, context)
+    macro = report.get("macro", {})
+    grain = report.get("grain", {})
+    finance = report.get("finance", {})
+    trade = report.get("trade", {})
+    actions: list[str] = []
+
+    nominal = max(1.0, finite(macro.get("nominal_output", 1.0)))
+    debt_ratio = finite(state.get("debt", 0.0)) / nominal
+    inflation = finite(state.get("inflation", 0.0))
+    confidence = clamp(finite(state.get("confidence", 0.5)), 0.0, 1.0)
+    banking = clamp(finite(finance.get("banking_health", state.get("financial", {}).get("banking_health", 0.5))), 0.0, 1.0)
+    import_dependency = clamp(finite(trade.get("import_dependency", 0.0)), 0.0, 2.0)
+    trade_balance = finite(trade.get("trade_balance", 0.0))
+    grain_cover = finite(grain.get("reserve_turns", grain.get("coverage_turns", 0.0)))
+    if grain_cover <= 0:
+        grain_cover = finite(getattr(player, "grain", 0.0)) / max(1.0, finite(report.get("upkeep_grain", 1.0)))
+    unrest = clamp(finite(getattr(player, "unrest", 0.0)) / 100.0, 0.0, 1.0)
+    corruption = clamp(finite(state.get("corruption", 0.12)), 0.0, 1.0)
+
+    # 1–2. Tax and customs: move gradually, respecting Laffer capacity and trade stress.
+    elasticity = 2.40 + 1.80 * (1.0 - clamp(finite(state.get("tax_capacity", .48)), 0.0, 1.0)) + 0.65 * corruption
+    laffer_peak = clamp(1.0 / max(1.0, elasticity), 0.16, 0.38)
+    tax_target = 0.55 * finite(spec.get("tax_target", .24)) + 0.45 * laffer_peak
+    if debt_ratio > 0.90: tax_target += 0.025
+    if unrest > 0.55 or confidence < 0.35: tax_target -= 0.025
+    tax_target = clamp(tax_target, 0.08, 0.46)
+    old = state["tax_rate"]; state["tax_rate"] = clamp(old + clamp(tax_target-old, -.025, .025), 0.0, .65)
+    _autopilot_action(actions, "Налог", old, state["tax_rate"], percent=True)
+
+    tariff_target = finite(spec.get("tariff_target", .08))
+    if import_dependency > .45: tariff_target += .025
+    if trade_balance < -nominal * .08: tariff_target += .015
+    if trade_balance > nominal * .10 or doctrine == "mercantile": tariff_target -= .015
+    if state.get("trade", {}).get("embargo_turns", 0): tariff_target = max(tariff_target, .14)
+    tariff_target = clamp(tariff_target, .02, .24)
+    old = state["tariff_rate"]; state["tariff_rate"] = clamp(old + clamp(tariff_target-old, -.02, .02), 0.0, .45)
+    _autopilot_action(actions, "Тариф", old, state["tariff_rate"], percent=True)
+
+    # 3–4. Budget and stance react to grain, unrest, corruption, war and shocks.
+    target_budget = dict(spec.get("budget", DEFAULT_BUDGET_SHARES))
+    active_kinds = {str(x.get("kind", "")) for x in state.get("active_shocks", []) if isinstance(x, dict)}
+    if grain_cover < 2.0 or active_kinds & {"drought", "locusts", "flood"}:
+        target_budget["welfare"] += .07; target_budget["infrastructure"] += .02
+    if unrest > .45 or "slave_revolt" in active_kinds:
+        target_budget["welfare"] += .05; target_budget["administration"] += .03
+    if corruption > .28:
+        target_budget["administration"] += .05
+    if "epidemic" in active_kinds:
+        target_budget["welfare"] += .06; target_budget["science"] += .02
+    if "currency_crisis" in active_kinds or "banking_panic" in active_kinds:
+        target_budget["administration"] += .04
+    if doctrine == "war" or finite(context.get("legion_count", 0)) > finite(context.get("legion_force_limit", 1)) * .85:
+        target_budget["military"] += .05
+    target_budget = normalize_budget_shares(target_budget)
+    old_budget = dict(state["budget_shares"])
+    state["budget_shares"] = normalize_budget_shares(_blend_map(old_budget, target_budget, .45))
+    if any(abs(state["budget_shares"][k]-old_budget.get(k,0)) >= .004 for k in BUDGET_KEYS):
+        actions.append("Бюджет перераспределён: " + ", ".join(f"{BUDGET_LABELS[k]} {state['budget_shares'][k]:.0%}" for k in BUDGET_KEYS))
+
+    stance = str(spec.get("fiscal_stance", "balanced"))
+    if debt_ratio > 1.20 and doctrine != "war": stance = "austerity"
+    elif report.get("structural_balance", 0) > spec.get("minimum_balance", 0) + 25 and doctrine in {"balanced","development"}: stance = "development"
+    old = state["fiscal_stance"]; state["fiscal_stance"] = stance
+    _autopilot_action(actions, "Бюджетная позиция", FISCAL_STANCES.get(old,{}).get("label",old), FISCAL_STANCES.get(stance,{}).get("label",stance))
+
+    # 5, 8. Coin standard and minting. Minting is emergency-only and recorded.
+    standard = str(spec.get("coin_standard", "managed"))
+    if inflation > .10 or confidence < .38: standard = "sound"
+    elif doctrine == "war" and inflation < .035 and debt_ratio > 1.0: standard = "debased"
+    old = state["coin_standard"]; state["coin_standard"] = standard
+    _autopilot_action(actions, "Монета", COIN_STANDARDS.get(old,{}).get("label",old), COIN_STANDARDS.get(standard,{}).get("label",standard))
+
+    # 9/A. Capital investment and sector/labour allocation.
+    sector_policy = str(spec.get("sector_policy", "balanced"))
+    bottlenecks = report.get("sectors", {}).get("bottlenecks", {})
+    if grain_cover < 1.5: sector_policy = "bread"
+    elif bottlenecks and min(bottlenecks, key=lambda k: finite(bottlenecks[k], 1.0)) == "mining": sector_policy = "extractive"
+    old = state["sector_policy"]; state["sector_policy"] = sector_policy
+    _autopilot_action(actions, "Отраслевая политика", SECTOR_POLICIES.get(old,{}).get("label",old), SECTOR_POLICIES.get(sector_policy,{}).get("label",sector_policy))
+    weights = SECTOR_POLICIES[sector_policy]["weights"]
+    profit = report.get("sectors", {}).get("profitability", {})
+    desired_labor = normalize_sector_shares({k: DEFAULT_SECTOR_LABOR_SHARES[k] * weights[k] * max(.45, finite(profit.get(k,1.0))) for k in SECTOR_KEYS}, DEFAULT_SECTOR_LABOR_SHARES)
+    state["sectoral_labor_share"] = normalize_sector_shares(_blend_map(state["sectoral_labor_share"], desired_labor, .18), DEFAULT_SECTOR_LABOR_SHARES)
+
+    # C. Credit market.
+    credit = str(spec.get("credit_policy", "neutral"))
+    if inflation > .09 or banking < .38: credit = "tight"
+    elif confidence > .68 and inflation < .04 and doctrine in {"development","mercantile"}: credit = "easy"
+    old = state["financial"]["policy"]; state["financial"]["policy"] = credit
+    _autopilot_action(actions, "Кредит", CREDIT_POLICIES.get(old,{}).get("label",old), CREDIT_POLICIES.get(credit,{}).get("label",credit))
+    old_cap = finite(state["financial"].get("usury_cap", .12))
+    target_cap = .10 if credit == "easy" else (.18 if credit == "tight" else .12)
+    state["financial"]["usury_cap"] = clamp(old_cap + clamp(target_cap-old_cap, -.015, .015), .03, .50)
+    _autopilot_action(actions, "Предел процента", old_cap, state["financial"]["usury_cap"], percent=True)
+
+    # G/D/J/K/T. Grain, demography, groups, shocks and trade are managed through real levers.
+    old_target = finite(state.get("strategic_grain_target", 4.0))
+    target_grain = finite(spec.get("grain_target", 4.0)) + (1.5 if grain_cover < 2.0 else 0.0)
+    state["strategic_grain_target"] = clamp(old_target + clamp(target_grain-old_target, -.75, .75), 0.0, 20.0)
+    state["grain_subsidy"] = bool(grain_cover < state["strategic_grain_target"] or unrest > .40)
+    _autopilot_action(actions, "Зерновой резерв", old_target, state["strategic_grain_target"])
+
+    # 6–7 and capital investments: preserve a treasury reserve, borrow only for a real gap,
+    # repay excess debt and invest genuine surplus rather than printing a magic balance.
+    reserve = max(100.0, finite(report.get("expense_total", 0.0)) * finite(spec.get("reserve_turns", 2.0)))
+    gold = max(0.0, finite(getattr(player, "gold", 0.0)))
+    structural = finite(report.get("structural_balance", report.get("overall_balance", 0.0)))
+    state["automatic_debt_repayment"] = doctrine != "development" or debt_ratio > .65
+    if gold < reserve * .45 and structural < 0 and debt_ratio < 1.75:
+        issue = min(reserve * .35 - gold, nominal * .08)
+        if issue > 1:
+            state["pending_bond_issue"] = max(finite(state.get("pending_bond_issue", 0.0)), money(issue))
+            actions.append(f"Облигации запланированы: +{money(issue)} золота")
+    elif gold > reserve * 1.35 and state["debt"] > 0:
+        repay = min(state["debt"], (gold-reserve) * .30)
+        state["pending_debt_repayment"] = max(finite(state.get("pending_debt_repayment", 0.0)), money(repay))
+        if repay > 1: actions.append(f"Погашение долга запланировано: {money(repay)}")
+
+    if gold > reserve * 1.15 and structural >= 0:
+        amount = min((gold-reserve) * finite(spec.get("investment_rate", .08)), nominal * .025)
+        if amount >= 5:
+            target = "infrastructure"
+            if corruption > .25: target = "administration"
+            elif banking < .45: target = "banking"
+            elif doctrine == "development": target = "human_capital"
+            elif grain_cover < 2.0: target = "agriculture"
+            invested = direct_investment(player, target, amount)
+            if invested: actions.append(f"Капитальные вложения: {target}, {invested} золота")
+
+    if gold < 20 and structural < -max(20.0, nominal*.08) and debt_ratio >= 1.65 and inflation < .07:
+        minted = mint_currency(player, min(25.0, nominal*.015))
+        if minted: actions.append(f"Чрезвычайная чеканка: {minted} золота")
+
+    automation["last_policy_turn"] = turn
+    automation["last_reconfigured_turn"] = turn
+    automation["last_actions"] = actions[-16:]
+    automation["last_plan"] = {
+        "tax_rate": state["tax_rate"], "tariff_rate": state["tariff_rate"],
+        "fiscal_stance": state["fiscal_stance"], "coin_standard": state["coin_standard"],
+        "credit_policy": state["financial"]["policy"], "sector_policy": state["sector_policy"],
+        "grain_target": state["strategic_grain_target"], "budget_shares": dict(state["budget_shares"]),
+        "reserve_gold": money(reserve), "debt_ratio": round(debt_ratio, 4),
+    }
+    return list(actions)
 
 
 def _tax_revenue(
@@ -2182,7 +2397,11 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
     doctrine_key = str(automation.get("doctrine", "balanced"))
     doctrine_spec = AUTOMATION_DOCTRINES.get(doctrine_key, AUTOMATION_DOCTRINES["balanced"])
     target_floor = int(finite(doctrine_spec.get("minimum_balance", 0))) if bool(automation.get("enabled", True)) else -10**9
-    stabilizer_income = max(0.0, target_floor - structural_balance) if bool(automation.get("enabled", True)) else 0.0
+    emergency_limit = max(0.0, finite(doctrine_spec.get("emergency_limit", 0.0)))
+    stabilizer_income = min(
+        emergency_limit,
+        max(0.0, target_floor - structural_balance),
+    ) if bool(automation.get("enabled", True)) else 0.0
     revenues["automatic_stabilizer"] = stabilizer_income
     revenue_total = revenue_total_before_stabilizer + stabilizer_income
     primary_balance = revenue_total - (expenditures["total"] - expenditures["interest"])
@@ -2233,7 +2452,7 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         {"key": "base_revenue", "label": "Доход столицы и казённых служб", "amount": int(revenue_payload["base_revenue"]), "note": "устойчивая налоговая база"},
         {"key": "micro_income", "label": "Наноэкономические модификаторы", "amount": int(revenue_payload.get("micro_income", 0)), "note": "ВВП, маржа, ликвидность, дороги и ещё много непонятной магии"},
         {"key": "doctrine_income", "label": "Доход экономической доктрины", "amount": int(revenue_payload.get("doctrine_income", 0)), "note": doctrine_spec.get("label", doctrine_key)},
-        {"key": "automatic_stabilizer", "label": "Автоматическая фискальная стабилизация", "amount": int(revenue_payload.get("automatic_stabilizer", 0)), "note": "автономные налоги, отсрочки и казначейские меры"},
+        {"key": "automatic_stabilizer", "label": "Автоматическая фискальная стабилизация", "amount": int(revenue_payload.get("automatic_stabilizer", 0)), "note": "ограниченный чрезвычайный резерв после реальной перенастройки политики"},
     ]
     rows = [row for row in rows if row["amount"]]
 
@@ -2899,6 +3118,7 @@ def apply_economic_shocks(player: Any, context: dict[str, Any], state: dict[str,
 
 def apply_turn(player: Any, context: dict[str, Any]) -> str | None:
     state = ensure_economy_state(player, context)
+    run_economy_autopilot(player, context)
     statement = build_statement(player, context, mutate=True)
     _post_statement_ledger(player, state, statement)
 

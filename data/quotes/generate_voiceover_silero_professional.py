@@ -7,8 +7,8 @@
 2. Ручные ударения вынесены в stress_dictionary.json.
 3. Латинские слова и выражения перед озвучкой заменяются кириллическим
    произношением из stress_dictionary.json.
-4. Источники читаются отдельно и естественнее: «Источник...», римские и
-   арабские ссылки превращаются в устную форму.
+4. Источники читаются через reference_formatter.py: книга, том, глава,
+   параграф, стих, строка и надпись проговариваются единообразно.
 5. Паузы на тире, двоеточиях и точках с запятой сделаны более дикторскими.
 6. Для отдельного текста озвучки поддерживаются поля tts_quote/voice_quote;
    обычное поле quote может оставаться чистым и красивым для интерфейса.
@@ -28,13 +28,13 @@
 встроенные ударения Silero TTS.
 
 Запуск:
-    python generate_voiceover_silero_fixed.py
+    python generate_voiceover_silero_professional.py
 
 Перегенерировать уже существующие WAV:
-    python generate_voiceover_silero_fixed.py --overwrite
+    python generate_voiceover_silero_professional.py --overwrite
 
 Посмотреть подготовленный текст без генерации звука:
-    python generate_voiceover_silero_fixed.py --preview 3
+    python generate_voiceover_silero_professional.py --preview 3
 """
 
 from __future__ import annotations
@@ -50,12 +50,29 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable
 
+try:
+    from reference_formatter import (
+        find_unlabelled_reference_segments,
+        format_source_reference,
+        run_self_test as reference_formatter_self_test,
+    )
+except ImportError as exc:
+    raise SystemExit(
+        "Не найден reference_formatter.py. Положите его рядом с генератором."
+    ) from exc
+
 # ---------------------------------------------------------------------------
 # НАСТРОЙКИ
 # ---------------------------------------------------------------------------
-SPEAKER = "eugene"
+# «aidar» — самый дикторский мужской голос Silero: ровный, низкий, чёткая
+# артикуляция. Альтернативы: "eugene" (мягче), "baya"/"kseniya" (женские).
+SPEAKER = "aidar"
 SAMPLE_RATE = 48000
-DEEPEN = 0.92
+# Замедление через подмену частоты дискретизации одновременно понижает тон и
+# «размазывает» согласные — на 0.82 голос звучал как замедленная плёнка.
+# Профессиональный диктор говорит размеренно, но не заторможенно: 0.95 даёт
+# лёгкую весомость без искажений. 1.0 = без замедления.
+DEEPEN = 0.95
 
 # Новая русская модель лучше различает омографы. Если она не загрузится,
 # скрипт автоматически вернётся к вашей прежней v4_ru.
@@ -65,8 +82,9 @@ FALLBACK_MODEL_IDS = ("v5_3_ru", "v4_ru")
 DICTIONARY_FILE = "stress_dictionary.json"
 
 # Паузы создаются только пунктуацией: это надёжнее SSML на разных версиях
-# Silero и не ломает Termux.
-PAUSE_SHORT = ", ... "
+# Silero и не ломает Termux. Диктор держит паузы короткими и ровными:
+# затянутые «... ... ...» звучали театрально, а не профессионально.
+PAUSE_SHORT = ", "
 PAUSE_MEDIUM = ". ... "
 PAUSE_LONG = ". ... ... "
 
@@ -79,6 +97,8 @@ SOURCES = [
 QUOTE_RE = re.compile(r'^[«"]?(.*?)[»"]?$', re.DOTALL)
 ROMAN_TOKEN_RE = re.compile(r"\b[IVXLCM]{1,8}\b")
 CYRILLIC_VOWELS = "аеёиоуыэюяАЕЁИОУЫЭЮЯ"
+WORD_REPLACEMENT_RE = re.compile(r"[0-9A-Za-zА-Яа-яЁё_-]+")
+_REPLACEMENT_CACHE: dict[int, tuple[dict[str, str], list[tuple[str, str]]]] = {}
 
 ROMAN_VALUES = [
     (1000, "M"), (900, "CM"), (500, "D"), (400, "CD"),
@@ -256,24 +276,64 @@ def _replacement_pattern(key: str) -> re.Pattern[str]:
     return re.compile(left + re.escape(key) + right)
 
 
+def _classified_replacements(
+    replacements: dict[str, str],
+) -> tuple[dict[str, str], list[tuple[str, str]]]:
+    """Разделяет словарь на слова и фразы и кэширует результат.
+
+    В новом словаре несколько тысяч слов. Последовательный запуск тысяч
+    регулярных выражений для каждой цитаты был бы слишком медленным, поэтому
+    отдельные слова заменяются одним проходом по токенам.
+    """
+    cache_key = id(replacements)
+    cached = _REPLACEMENT_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    words: dict[str, str] = {}
+    phrases: list[tuple[str, str]] = []
+    for key, value in replacements.items():
+        if re.fullmatch(r"[0-9A-Za-zА-Яа-яЁё_-]+", key):
+            words[key] = value
+        else:
+            phrases.append((key, value))
+    phrases.sort(key=lambda item: len(item[0]), reverse=True)
+    cached = (words, phrases)
+    _REPLACEMENT_CACHE[cache_key] = cached
+    return cached
+
+
 def protect_replacements(
     text: str,
     replacements: dict[str, str],
     protected: dict[str, str],
     prefix: str,
 ) -> str:
-    """Заменяет словарные фрагменты маркерами, чтобы автоакцентор их не испортил."""
-    for key in sorted(replacements, key=len, reverse=True):
-        replacement = replacements[key]
+    """Заменяет словарные фрагменты маркерами до запуска автоакцентора."""
+    words, phrases = _classified_replacements(replacements)
+
+    # Сначала многословные и контекстные замены. Их немного, поэтому для них
+    # сохраняются строгие границы исходной реализации.
+    for key, replacement in phrases:
         pattern = _replacement_pattern(key)
 
-        def repl(_: re.Match[str], value: str = replacement) -> str:
+        def phrase_repl(_: re.Match[str], value: str = replacement) -> str:
             marker = f"ZXQ{prefix}{len(protected):05d}QXZ"
             protected[marker] = value
             return marker
 
-        text = pattern.sub(repl, text)
-    return text
+        text = pattern.sub(phrase_repl, text)
+
+    # Затем все одиночные слова обрабатываются одним линейным проходом.
+    def word_repl(match: re.Match[str]) -> str:
+        replacement = words.get(match.group(0))
+        if replacement is None:
+            return match.group(0)
+        marker = f"ZXQ{prefix}{len(protected):05d}QXZ"
+        protected[marker] = replacement
+        return marker
+
+    return WORD_REPLACEMENT_RE.sub(word_repl, text)
 
 
 def restore_protected(text: str, protected: dict[str, str]) -> str:
@@ -470,9 +530,11 @@ def normalize_reference_numbers(text: str) -> str:
 def add_natural_pauses(text: str) -> str:
     """Паузы без SSML: одинаково работают на v4/v5 и в Termux."""
     text = text.replace("…", "...")
-    text = re.sub(r"\s*[—–]\s*", PAUSE_SHORT, text)
+    text = re.sub(r"\s*[—–]\s*", PAUSE_MEDIUM, text)
     text = re.sub(r"\s*;\s*", PAUSE_MEDIUM, text)
-    text = re.sub(r"\s*:\s*", PAUSE_SHORT, text)
+    text = re.sub(r"\s*:\s*", PAUSE_LONG, text)
+    text = re.sub(r"([.!?])\s+", lambda m: m.group(1)+PAUSE_LONG, text)
+    text = re.sub(r"(?<=[а-яёА-ЯЁa-zA-Z])\s+(ибо|однако|но|ведь|поэтому|если)\b", lambda m: PAUSE_SHORT+m.group(1), text, flags=re.IGNORECASE)
     text = re.sub(r"\.{4,}", "...", text)
     text = re.sub(r"\s*\.\.\.\s*", " ... ", text)
     text = re.sub(r"\s{2,}", " ", text)
@@ -561,16 +623,10 @@ def process_text(
         text = re.sub(r"\b\d+\b", lambda m: int_to_words(int(m.group(0))), text)
 
     if is_source:
-        text = re.sub(r"^[—–-]\s*", "", text)
-        text = text.replace("«", "").replace("»", "")
-        text = re.sub(r"\bср\.\s*", "для сравнения ", text, flags=re.IGNORECASE)
-        text = re.sub(r"\b1\s+Kings\b", "Первая книга Царств", text, flags=re.IGNORECASE)
-        text = re.sub(r"\b2\s+Kings\b", "Вторая книга Царств", text, flags=re.IGNORECASE)
-        text = re.sub(r"\s*/\s*", ". или ", text)
-        text = normalize_reference_numbers(text)
-        # Автор, название и ссылка должны звучать как отдельные такты.
-        text = re.sub(r",\s*", ". ", text)
-        text = "Ист+очник. " + text
+        # reference_formatter.py понимает и старые разнородные ссылки, и уже
+        # нормализованное поле tts_source. Функция идемпотентна.
+        text = format_source_reference(text)
+        text = "Источник. " + text
 
     text = add_natural_pauses(text)
     text = prepare_pronunciation(text, dictionary, accentor)
@@ -639,6 +695,15 @@ def entry_voice_quote(entry: dict) -> str:
     return ""
 
 
+def entry_voice_source(entry: dict) -> str:
+    """Берёт подготовленный источник, не меняя красивое поле source."""
+    for field in ("tts_source", "voice_source", "source"):
+        value = str(entry.get(field, "")).strip()
+        if value:
+            return value
+    return ""
+
+
 def project_root_for(base_dir: Path) -> Path:
     """Определяет корень игры для стандартной схемы game/data/quotes."""
     if base_dir.name == "quotes" and base_dir.parent.name == "data":
@@ -653,7 +718,7 @@ def compose_entry_text(
 ) -> str:
     raw_quote, raw_source = split_embedded_source(
         entry_voice_quote(entry),
-        str(entry.get("source", "")),
+        entry_voice_source(entry),
     )
     quote = clean_quote(raw_quote, dictionary, accentor).rstrip(" .;,")
     source = clean_source(raw_source, dictionary, accentor)
@@ -717,8 +782,21 @@ def synth_one(model, text: str, out_path: Path) -> bool:
         )
 
         samples = audio.detach().cpu().numpy() if hasattr(audio, "detach") else audio.numpy()
-        samples_int16 = np.clip(samples, -1.0, 1.0)
-        samples_int16 = (samples_int16 * 32767).astype(np.int16)
+        samples = np.clip(samples.astype(np.float32), -1.0, 1.0)
+
+        # Пиковая нормализация до -1.5 dBFS: все реплики получают одинаковую,
+        # «студийную» громкость — без этого файлы заметно гуляют по уровню.
+        peak = float(np.max(np.abs(samples)))
+        if peak > 1e-6:
+            samples = samples * (10 ** (-1.5 / 20) / peak)
+
+        # Короткая тишина в начале и «воздух» в конце — профессиональная подача
+        # вместо обрубленного звука.
+        lead = np.zeros(int(0.15 * SAMPLE_RATE), dtype=np.float32)
+        tail = np.zeros(int(0.35 * SAMPLE_RATE), dtype=np.float32)
+        samples = np.concatenate([lead, samples, tail])
+
+        samples_int16 = (samples * 32767).astype(np.int16)
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
         with wave.open(str(out_path), "wb") as wav_file:
@@ -815,6 +893,120 @@ def process_file(
     )
 
 
+def validate_project_files(base_dir: Path) -> int:
+    """Проверяет JSON, идентификаторы, словарь и форматирование источников."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    try:
+        reference_formatter_self_test()
+    except Exception as exc:
+        errors.append(f"reference_formatter.py: {exc}")
+
+    dictionary_path = base_dir / DICTIONARY_FILE
+    dictionary = load_pronunciation_dictionary(base_dir)
+    if not dictionary_path.exists():
+        errors.append(f"Не найден {DICTIONARY_FILE}")
+    if not dictionary.stress_overrides:
+        errors.append("Словарь stress_overrides пуст")
+
+    global_ids: dict[str, str] = {}
+    total = 0
+    for json_name, _category in SOURCES:
+        path = base_dir / json_name
+        entries = read_entries(path)
+        if not entries:
+            errors.append(f"{json_name}: нет записей или файл не читается")
+            continue
+
+        local_ids: set[str] = set()
+        for index, entry in enumerate(entries, 1):
+            total += 1
+            entry_id = str(entry.get("id", "")).strip()
+            quote = entry_voice_quote(entry)
+            source = entry_voice_source(entry)
+            if not entry_id:
+                errors.append(f"{json_name}[{index}]: отсутствует id")
+                continue
+            if entry_id in local_ids:
+                errors.append(f"{json_name}: повтор id {entry_id}")
+            local_ids.add(entry_id)
+            if entry_id in global_ids:
+                warnings.append(
+                    f"id {entry_id} встречается и в {global_ids[entry_id]}, и в {json_name}"
+                )
+            else:
+                global_ids[entry_id] = json_name
+            if not quote:
+                errors.append(f"{json_name}:{entry_id}: отсутствует quote/tts_quote")
+            if not source:
+                warnings.append(f"{json_name}:{entry_id}: отсутствует source")
+                continue
+
+            formatted = format_source_reference(source)
+            leftovers = find_unlabelled_reference_segments(source)
+            if leftovers:
+                errors.append(
+                    f"{json_name}:{entry_id}: непомеченные числовые уровни {leftovers}"
+                )
+            if re.search(r"\bномер\b", formatted, flags=re.IGNORECASE):
+                errors.append(f"{json_name}:{entry_id}: осталось слово «номер»: {formatted}")
+
+    print(f"Проверено записей: {total}")
+    print(
+        f"Словарь: {len(dictionary.stress_overrides)} ударений, "
+        f"{len(dictionary.latin_pronunciation)} латинских замен."
+    )
+    for warning in warnings:
+        print(f"ПРЕДУПРЕЖДЕНИЕ: {warning}")
+    for error in errors:
+        print(f"ОШИБКА: {error}")
+    if errors:
+        print(f"Проверка не пройдена: ошибок {len(errors)}, предупреждений {len(warnings)}.")
+        return 1
+    print(f"Проверка пройдена: ошибок 0, предупреждений {len(warnings)}.")
+    return 0
+
+
+def sync_tts_sources(base_dir: Path) -> int:
+    """Добавляет/обновляет tts_source во всех трёх JSON без изменения source."""
+    changed = 0
+    for json_name, _category in SOURCES:
+        path = base_dir / json_name
+        entries = read_entries(path)
+        if not entries:
+            continue
+        file_changed = 0
+        updated_entries: list[dict] = []
+        for entry in entries:
+            source = str(entry.get("source", "")).strip()
+            formatted = format_source_reference(source) if source else ""
+            new_entry: dict = {}
+            for key, value in entry.items():
+                # Старое поле пропускается, иначе оно затрёт только что
+                # пересчитанный tts_source при повторной синхронизации.
+                if key == "tts_source":
+                    continue
+                new_entry[key] = value
+                if key == "source" and formatted:
+                    if entry.get("tts_source") != formatted:
+                        file_changed += 1
+                    new_entry["tts_source"] = formatted
+            if "source" not in entry and formatted:
+                if entry.get("tts_source") != formatted:
+                    file_changed += 1
+                new_entry["tts_source"] = formatted
+            updated_entries.append(new_entry)
+        path.write_text(
+            json.dumps(updated_entries, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        changed += file_changed
+        print(f"{json_name}: обновлено tts_source у {file_changed} записей")
+    print(f"Всего обновлено: {changed}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Озвучка цитат Roma Aeterna через Silero")
     parser.add_argument(
@@ -838,6 +1030,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_MODEL_ID,
         help=f"модель Silero TTS (по умолчанию {DEFAULT_MODEL_ID})",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="проверить JSON, словарь и формат ссылок без загрузки TTS",
+    )
+    parser.add_argument(
+        "--sync-tts-sources",
+        action="store_true",
+        help="обновить поле tts_source во всех JSON и завершить работу",
+    )
     return parser
 
 
@@ -846,6 +1048,11 @@ def main(argv: Iterable[str] | None = None) -> int:
     base_dir = Path(__file__).resolve().parent
     project_root = project_root_for(base_dir)
     audio_root = project_root / "audio"
+
+    if args.sync_tts_sources:
+        return sync_tts_sources(base_dir)
+    if args.check:
+        return validate_project_files(base_dir)
 
     dictionary = load_pronunciation_dictionary(base_dir)
     print(
