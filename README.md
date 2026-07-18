@@ -34,7 +34,7 @@
 [![Stars](https://img.shields.io/github/stars/Aqua666-prog/Roma-Aeterna?style=flat&logo=github)](https://github.com/Aqua666-prog/Roma-Aeterna/stargazers)
 [![Forks](https://img.shields.io/github/forks/Aqua666-prog/Roma-Aeterna?style=flat&logo=github)](https://github.com/Aqua666-prog/Roma-Aeterna/forks)
 [![Issues](https://img.shields.io/github/issues/Aqua666-prog/Roma-Aeterna?logo=github)](https://github.com/Aqua666-prog/Roma-Aeterna/issues)
-[![Development](https://img.shields.io/badge/development-author--directed%20%7C%20AI--assisted-1565C0)](#авторский-и-ai-assisted-путь)
+![Made by Human](assets/made-by-human-v2.svg)
 
 [**🎮 itch.io**](https://aqua666-prog.itch.io/roma-aeterna)
 &nbsp;·&nbsp;
