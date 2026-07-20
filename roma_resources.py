@@ -365,6 +365,45 @@ def _sector_factor(resource: str, context: dict[str, Any]) -> float:
     return clamp((0.72 + 0.28 * prod) * output_factor, 0.45, 2.2)
 
 
+
+
+# ─── SCIENTIA ET ARS: производственные эффекты технологий ────────────────
+try:
+    from roma_technology_overhaul import RESOURCE_TECH_RULES as _RESOURCE_TECH_RULES
+except Exception:
+    _RESOURCE_TECH_RULES = {}
+
+
+def _researched_techs(context: dict[str, Any]) -> set[str]:
+    raw = context.get("tech_researched", [])
+    if isinstance(raw, (list, tuple, set)):
+        return {str(value) for value in raw}
+    return set()
+
+
+def _resource_technology_multiplier(resource: str, context: dict[str, Any]) -> float:
+    multiplier = 1.0
+    researched = _researched_techs(context)
+    for tech_id, rule in _RESOURCE_TECH_RULES.items():
+        if tech_id not in researched or not isinstance(rule, dict):
+            continue
+        values = rule.get("resource_multipliers", {})
+        if isinstance(values, dict):
+            multiplier *= max(0.10, finite(values.get(resource, 1.0), 1.0))
+    return clamp(multiplier, 0.25, 3.0)
+
+
+def _derived_technology_multiplier(output: str, context: dict[str, Any]) -> float:
+    multiplier = 1.0
+    researched = _researched_techs(context)
+    for tech_id, rule in _RESOURCE_TECH_RULES.items():
+        if tech_id not in researched or not isinstance(rule, dict):
+            continue
+        values = rule.get("derived_capacity", {})
+        if isinstance(values, dict):
+            multiplier *= max(0.10, finite(values.get(output, 1.0), 1.0))
+    return clamp(multiplier, 0.25, 3.0)
+
 def _primary_production(player: Any, context: dict[str, Any], state: dict[str, Any]) -> dict[str, float]:
     production = {key: 0.0 for key in RESOURCE_CATALOG}
     rng = _rng(player, "production")
@@ -386,7 +425,7 @@ def _primary_production(player: Any, context: dict[str, Any], state: dict[str, A
                 continue
             level = state["production_levels"].get(resource, 1.0)
             investment_factor = 1.0 + 0.16 * math.log1p(max(0.0, level - 1.0))
-            yield_amount = base * efficiency * local_variation * investment_factor * _sector_factor(resource, context)
+            yield_amount = base * efficiency * local_variation * investment_factor * _sector_factor(resource, context) * _resource_technology_multiplier(resource, context)
             production[resource] += max(0.0, yield_amount)
 
     # Opera Publica: permanent municipal buildings contribute directly to the
@@ -477,9 +516,9 @@ def _process_derived_goods(context: dict[str, Any], state: dict[str, Any], deman
 
     capacity = 1.5 + 0.055 * max(0.0, finite((context.get("sectoral_output") or {}).get("manufacturing", 0.0) if isinstance(context.get("sectoral_output"), dict) else 0.0))
     capacity *= manufacturing_factor
-    convert("steel", {"iron": 0.78, "timber": 0.18}, capacity * 0.48)
-    convert("bronze", {"copper": 0.76, "tin": 0.24}, capacity * 0.30)
-    convert("leather", {"livestock": 0.55, "salt": 0.08}, capacity * 0.35)
+    convert("steel", {"iron": 0.78, "timber": 0.18}, capacity * 0.48 * _derived_technology_multiplier("steel", context))
+    convert("bronze", {"copper": 0.76, "tin": 0.24}, capacity * 0.30 * _derived_technology_multiplier("bronze", context))
+    convert("leather", {"livestock": 0.55, "salt": 0.08}, capacity * 0.35 * _derived_technology_multiplier("leather", context))
     return produced, used
 
 

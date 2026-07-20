@@ -1,980 +1,2098 @@
--- ROMA AETERNA Lua content file. Edit this file to mod game data.
+-- ROMA AETERNA: SCIENTIA ET ARS — 100 technologies.
+-- Chronology ends in 476 CE. Existing IDs are retained for save and WAV compatibility.
 return {
-    gladius_hispaniensis = {
-        name = "Gladius Hispaniensis",
-        cost = 50,
-        prereq = {},
-        category = "military",
-        desc = "Испанский меч: +1 к атаке легионов",
-        effects = {
-            battle_attack = 1
-        }
-    },
+    centuriate_levy = {
+            name = "Центуриатский набор",
+            cost = 40,
+            prereq = {},
+            category = "legion",
+            desc = "Имущественные разряды определяют вооружение и место гражданина в боевом строю; открывает ранние гражданские легионы.",
+            effects = {
+                battle_attack = 1,
+            },
+            era = 1,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Гражданский легион ранней Республики",
+                "здание: Казармы",
+            },
+        },
+    equites_census = {
+            name = "Конный ценз",
+            cost = 43,
+            prereq = {
+                "centuriate_levy",
+            },
+            category = "frontier",
+            desc = "Государство учитывает всадников и выдаёт им средства на коня; открывает римских equites и конные дворы.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 1,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Римские equites",
+                "здание: Ветеринарий",
+                "здание: Конный завод",
+            },
+        },
     manipular_drill = {
-        name = "Манипулярная муштра",
-        cost = 60,
-        prereq = {
-            "gladius_hispaniensis"
+            name = "Манипулярная муштра",
+            cost = 46,
+            prereq = {
+                "centuriate_levy",
+            },
+            category = "legion",
+            desc = "Легион делится на самостоятельные манипулы с интервалами, сменой линий и сигналами центурионов.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 1,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "здание: Марсово поле",
+            },
         },
-        category = "military",
-        desc = "Гибкий строй манипул: +1 атака, +1 защита",
-        effects = {
-            battle_attack = 1,
-            battle_defense = 1
-        }
-    },
-    testudo = {
-        name = "Testudo (черепаха)",
-        cost = 65,
-        prereq = {
-            "manipular_drill"
-        },
-        category = "military",
-        desc = "Тактика «черепахи»: +3 защита и тактика №5 в бою",
-        effects = {
-            battle_defense = 3
-        }
-    },
-    siege_engines = {
-        name = "Осадные машины",
-        cost = 90,
-        prereq = {
-            "testudo"
-        },
-        category = "military",
-        desc = "Тараны и баллисты: +6 атака при завоевании провинций",
-        effects = {
-            battle_siege = 6
-        }
-    },
     castra_aestiva = {
-        name = "Летние лагеря",
-        cost = 85,
-        prereq = {
-            "manipular_drill"
+            name = "Регламентированный походный лагерь",
+            cost = 49,
+            prereq = {
+                "manipular_drill",
+                "groma_surveying",
+            },
+            category = "frontier",
+            desc = "Каждая колонна завершает марш рвом, валом, воротами и сеткой улиц; открывает палисады и полевые лагеря.",
+            effects = {
+                province_unrest_control = 1,
+            },
+            era = 1,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "здание: Палисад",
+                "здание: Ров",
+                "здание: Сторожевая башня",
+            },
         },
-        category = "military",
-        desc = "Полевые лагеря: +2 защита, меньше провинциальных волнений",
-        effects = {
-            battle_defense = 2,
-            province_unrest_control = 1
-        }
-    },
-    professional_centurions = {
-        name = "Профессиональные центурионы",
-        cost = 110,
-        prereq = {
-            "castra_aestiva",
-            "siege_engines"
+    siege_engines = {
+            name = "Таранно-башенный осадный комплекс",
+            cost = 48,
+            prereq = {
+                "bronze_molds",
+                "groma_surveying",
+            },
+            category = "artillery",
+            desc = "Плотники собирают тараны, навесы и многоярусные башни по единым чертежам.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 1,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Осадная башня",
+                "артиллерия: Иудейские стенобитные тараны",
+                "артиллерия: Самнитские стенобои",
+                "здание: Городские стены",
+                "здание: Надвратное укрепление",
+                "здание: Осадная мастерская",
+                "чудо света: Сервиева стена",
+            },
         },
-        category = "military",
-        desc = "Центурионы держат строй: +2 атака и -5% содержание легионов",
-        effects = {
-            battle_attack = 2,
-            upkeep_percent = -0.05
-        }
-    },
-    eagle_standards = {
-        name = "Орлиные штандарты",
-        cost = 120,
-        prereq = {
-            "professional_centurions"
-        },
-        category = "military",
-        desc = "Aquila поднимает дух: +10 морали и +1 атака",
-        effects = {
-            battle_attack = 1,
-            morale_cap_bonus = 10
-        }
-    },
-    marian_reform = {
-        name = "Марианская реформа",
-        cost = 150,
-        prereq = {
-            "eagle_standards"
-        },
-        category = "military",
-        desc = "Профессиональная армия: -10% содержание и +2 атака",
-        effects = {
-            battle_attack = 2,
-            upkeep_percent = -0.1
-        }
-    },
-    ballista_corps = {
-        name = "Корпуса баллист",
-        cost = 140,
-        prereq = {
-            "siege_engines"
-        },
-        category = "military",
-        desc = "Тяжёлая артиллерия: +4 осадная атака",
-        effects = {
-            battle_siege = 4
-        }
-    },
-    frontier_limes = {
-        name = "Limes Romanus",
-        cost = 160,
-        prereq = {
-            "castra_aestiva",
-            "via_appia"
-        },
-        category = "military",
-        desc = "Пограничная линия: -1 волнений в провинциях и +2 защита",
-        effects = {
-            battle_defense = 2,
-            province_unrest_control = 1
-        }
-    },
-    via_appia = {
-        name = "Via Appia",
-        cost = 60,
-        prereq = {},
-        category = "economic",
-        desc = "Дороги: +1 золото за провинцию",
-        effects = {
-            gold_per_province = 1
-        }
-    },
-    currency_reform = {
-        name = "Денежная реформа",
-        cost = 55,
-        prereq = {
-            "via_appia"
-        },
-        category = "economic",
-        desc = "Стандартизация денария: -15% содержание легионов",
-        effects = {
-            upkeep_percent = -0.15
-        }
-    },
-    tax_census = {
-        name = "Ценз и налоговые списки",
-        cost = 75,
-        prereq = {
-            "currency_reform"
-        },
-        category = "economic",
-        desc = "Перепись имущества: +1 золото за провинцию",
-        effects = {
-            gold_per_province = 1
-        }
-    },
-    banking = {
-        name = "Банковское дело",
-        cost = 85,
-        prereq = {
-            "currency_reform"
-        },
-        category = "economic",
-        desc = "Менялы и кредиторы: +10% дохода золота",
-        effects = {
-            gold_percent = 0.1
-        }
-    },
-    latifundia = {
-        name = "Латифундии",
-        cost = 100,
-        prereq = {
-            "tax_census"
-        },
-        category = "economic",
-        desc = "Крупные хозяйства: +25 золота/ход",
-        effects = {
-            gold_flat = 25
-        }
-    },
-    merchant_collegia = {
-        name = "Коллегии торговцев",
-        cost = 95,
-        prereq = {
-            "banking"
-        },
-        category = "economic",
-        desc = "Торговые корпорации: +15 золота/ход",
-        effects = {
-            gold_flat = 15
-        }
-    },
-    customs_posts = {
-        name = "Таможенные посты",
-        cost = 110,
-        prereq = {
-            "merchant_collegia"
-        },
-        category = "economic",
-        desc = "Пошлины на дорогах и портах: +2 золота за провинцию",
-        effects = {
-            gold_per_province = 2
-        }
-    },
-    state_mints = {
-        name = "Государственные монетные дворы",
-        cost = 130,
-        prereq = {
-            "banking",
-            "tax_census"
-        },
-        category = "economic",
-        desc = "Контроль чеканки: +8% дохода золота",
-        effects = {
-            gold_percent = 0.08
-        }
-    },
-    grain_contracts = {
-        name = "Зерновые контракты",
-        cost = 120,
-        prereq = {
-            "latifundia"
-        },
-        category = "economic",
-        desc = "Поставки хлеба: +20 зерна/ход",
-        effects = {
-            grain_flat = 20
-        }
-    },
-    imperial_treasury = {
-        name = "Fiscus Imperialis",
-        cost = 170,
-        prereq = {
-            "state_mints",
-            "customs_posts"
-        },
-        category = "economic",
-        desc = "Имперская казна: +12% дохода золота и +30 золота/ход",
-        effects = {
-            gold_percent = 0.12,
-            gold_flat = 30
-        }
-    },
-    aqueduct = {
-        name = "Aqua Marcia (акведук)",
-        cost = 70,
-        prereq = {
-            "via_appia"
-        },
-        category = "civil",
-        desc = "Акведук: -10 базовых волнений, +10 зерна/ход",
-        effects = {
-            unrest_reduction = 10,
-            grain_flat = 10
-        }
-    },
-    concrete = {
-        name = "Opus Caementicium",
-        cost = 85,
-        prereq = {
-            "aqueduct"
-        },
-        category = "civil",
-        desc = "Римский бетон: укрепления дешевле и +1 защита",
-        effects = {
-            garrison_discount = 0.1,
-            battle_defense = 1
-        }
-    },
-    public_baths = {
-        name = "Общественные термы",
-        cost = 95,
-        prereq = {
-            "aqueduct"
-        },
-        category = "civil",
-        desc = "Термы успокаивают городскую толпу: -5 волнений",
-        effects = {
-            unrest_reduction = 5
-        }
-    },
-    forum_maximum = {
-        name = "Forum Maximum",
-        cost = 80,
-        prereq = {
-            "aqueduct"
-        },
-        category = "civil",
-        desc = "Главный форум: +5 репутации Сената за закон",
-        effects = {
-            senate_law_bonus = 5
-        }
-    },
-    granaries = {
-        name = "Государственные амбары",
-        cost = 90,
-        prereq = {
-            "aqueduct"
-        },
-        category = "civil",
-        desc = "Запасы зерна: +15 зерна/ход",
-        effects = {
-            grain_flat = 15
-        }
-    },
-    stone_roads = {
-        name = "Каменные дороги",
-        cost = 105,
-        prereq = {
-            "via_appia",
-            "concrete"
-        },
-        category = "civil",
-        desc = "Мощёные дороги: +1 золото за провинцию, -1 провинциальных волнений",
-        effects = {
-            gold_per_province = 1,
-            province_unrest_control = 1
-        }
-    },
-    harbor_cranes = {
-        name = "Портовые краны",
-        cost = 115,
-        prereq = {
-            "concrete",
-            "naval_quinquereme"
-        },
-        category = "civil",
-        desc = "Портовая механизация: +12 золота и +10 зерна/ход",
-        effects = {
-            gold_flat = 12,
-            grain_flat = 10
-        }
-    },
-    military_roads = {
-        name = "Военные дороги",
-        cost = 125,
-        prereq = {
-            "stone_roads",
-            "castra_aestiva"
-        },
-        category = "civil",
-        desc = "Маршевые трассы: +2 атака и +1 защита",
-        effects = {
-            battle_attack = 2,
-            battle_defense = 1
-        }
-    },
-    provincial_archives = {
-        name = "Провинциальные архивы",
-        cost = 135,
-        prereq = {
-            "forum_maximum",
-            "tax_census"
-        },
-        category = "civil",
-        desc = "Документы и кадастры: романизация дешевле, наместники лояльнее",
-        effects = {
-            romanization_discount = 0.15,
-            governor_loyalty_bonus = 1
-        }
-    },
-    great_building_program = {
-        name = "Великая строительная программа",
-        cost = 180,
-        prereq = {
-            "provincial_archives",
-            "harbor_cranes"
-        },
-        category = "civil",
-        desc = "Монументальное строительство: +20 славы за ход и -5 волнений",
-        effects = {
-            glory_per_turn = 20,
-            unrest_reduction = 5
-        }
-    },
-    naval_quinquereme = {
-        name = "Квинкверема",
-        cost = 75,
-        prereq = {
-            "gladius_hispaniensis"
-        },
-        category = "naval",
-        desc = "Военный флот: +2 защита от набегов и морских войн",
-        effects = {
-            battle_defense = 2
-        }
-    },
-    corvus_bridge = {
-        name = "Corvus",
-        cost = 85,
-        prereq = {
-            "naval_quinquereme"
-        },
-        category = "naval",
-        desc = "Абордажный мостик: +2 атака",
-        effects = {
-            battle_attack = 2
-        }
-    },
-    naval_supply = {
-        name = "Морское снабжение",
-        cost = 100,
-        prereq = {
-            "naval_quinquereme",
-            "grain_contracts"
-        },
-        category = "naval",
-        desc = "Флот снабжения: -2 зерна содержания армии и +10 зерна/ход",
-        effects = {
-            grain_flat = 10,
-            grain_upkeep_flat = -2
-        }
-    },
-    admiralty = {
-        name = "Адмиралтейство",
-        cost = 120,
-        prereq = {
-            "corvus_bridge"
-        },
-        category = "naval",
-        desc = "Управление флотом: +1 атака и +1 защита",
-        effects = {
-            battle_attack = 1,
-            battle_defense = 1
-        }
-    },
-    pirate_suppression = {
-        name = "Подавление пиратов",
-        cost = 115,
-        prereq = {
-            "admiralty"
-        },
-        category = "naval",
-        desc = "Чистое море: +15 золота/ход",
-        effects = {
-            gold_flat = 15
-        }
-    },
-    mare_nostrum = {
-        name = "Mare Nostrum",
-        cost = 155,
-        prereq = {
-            "pirate_suppression",
-            "harbor_cranes"
-        },
-        category = "naval",
-        desc = "Средиземное море наше: +2 золота за провинцию и +2 атака",
-        effects = {
-            gold_per_province = 2,
-            battle_attack = 2
-        }
-    },
-    fleet_bases = {
-        name = "Военно-морские базы",
-        cost = 130,
-        prereq = {
-            "naval_supply"
-        },
-        category = "naval",
-        desc = "Базы флота: +2 защита, гарнизоны дешевле",
-        effects = {
-            battle_defense = 2,
-            garrison_discount = 0.1
-        }
-    },
-    grain_fleet = {
-        name = "Annona — зерновой флот",
-        cost = 145,
-        prereq = {
-            "fleet_bases",
-            "granaries"
-        },
-        category = "naval",
-        desc = "Египетский хлеб: +30 зерна/ход",
-        effects = {
-            grain_flat = 30
-        }
-    },
-    lighthouse_network = {
-        name = "Сеть маяков",
-        cost = 135,
-        prereq = {
-            "fleet_bases"
-        },
-        category = "naval",
-        desc = "Маяки и сигналы: +10 золота, +10 зерна",
-        effects = {
-            gold_flat = 10,
-            grain_flat = 10
-        }
-    },
-    deepwater_harbors = {
-        name = "Глубоководные гавани",
-        cost = 165,
-        prereq = {
-            "lighthouse_network",
-            "mare_nostrum"
-        },
-        category = "naval",
-        desc = "Большие гавани: +10% золота и +20 зерна",
-        effects = {
-            gold_percent = 0.1,
-            grain_flat = 20
-        }
-    },
     twelve_tables = {
-        name = "Законы XII таблиц",
-        cost = 65,
-        prereq = {},
-        category = "administration",
-        desc = "Писаное право: -5 волнений",
-        effects = {
-            unrest_reduction = 5
-        }
-    },
-    provincial_law = {
-        name = "Провинциальное право",
-        cost = 90,
-        prereq = {
-            "twelve_tables"
+            name = "Публичный свод XII таблиц",
+            cost = 51,
+            prereq = {},
+            category = "administration",
+            desc = "Правовые нормы записываются и выставляются для всеобщего обозрения; открывает суд и раннюю канцелярию.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 1,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Судебная базилика",
+            },
         },
-        category = "administration",
-        desc = "Правовые формулы для провинций: романизация дешевле",
-        effects = {
-            romanization_discount = 0.1
-        }
-    },
-    citizenship_grants = {
-        name = "Дарование гражданства",
-        cost = 110,
-        prereq = {
-            "provincial_law"
+    tax_census = {
+            name = "Имущественный ценз и кадастр",
+            cost = 54,
+            prereq = {
+                "centuriate_levy",
+                "scribal_bureau",
+            },
+            category = "economy",
+            desc = "Цензоры связывают имущество, воинскую обязанность и налоговые списки в единый реестр.",
+            effects = {
+                gold_percent = 0.01,
+            },
+            era = 1,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Контора публиканов",
+                "здание: Цензовая контора",
+            },
         },
-        category = "administration",
-        desc = "Муниципальная элита получает статус: +2 золота за провинцию",
-        effects = {
-            gold_per_province = 2
-        }
-    },
-    governor_audits = {
-        name = "Проверки наместников",
-        cost = 105,
-        prereq = {
-            "provincial_archives"
-        },
-        category = "administration",
-        desc = "Контроль коррупции: наместники теряют меньше лояльности",
-        effects = {
-            governor_loyalty_bonus = 1,
-            province_unrest_control = 1
-        }
-    },
-    imperial_couriers = {
-        name = "Cursus Publicus",
-        cost = 125,
-        prereq = {
-            "stone_roads",
-            "provincial_law"
-        },
-        category = "administration",
-        desc = "Имперская почта: +1 золото за провинцию, +1 защита",
-        effects = {
-            gold_per_province = 1,
-            battle_defense = 1
-        }
-    },
-    roman_schools = {
-        name = "Римские школы",
-        cost = 115,
-        prereq = {
-            "citizenship_grants"
-        },
-        category = "administration",
-        desc = "Латинская paideia: романизация дешевле и -5 волнений",
-        effects = {
-            romanization_discount = 0.1,
-            unrest_reduction = 5
-        }
-    },
-    senatorial_commissions = {
-        name = "Сенатские комиссии",
-        cost = 125,
-        prereq = {
-            "governor_audits",
-            "forum_maximum"
-        },
-        category = "administration",
-        desc = "Комиссии Сената: +5 к бонусу за законы",
-        effects = {
-            senate_law_bonus = 5
-        }
-    },
-    imperial_cult = {
-        name = "Имперский культ",
-        cost = 140,
-        prereq = {
-            "roman_schools",
-            "great_building_program"
-        },
-        category = "administration",
-        desc = "Культ Рима и власти: +15 славы/ход, -5 волнений",
-        effects = {
-            glory_per_turn = 15,
-            unrest_reduction = 5
-        }
-    },
-    universal_citizenship = {
-        name = "Всеобщее гражданство",
-        cost = 170,
-        prereq = {
-            "imperial_cult",
-            "citizenship_grants"
-        },
-        category = "administration",
-        desc = "Все свободные жители — граждане: +10% дохода",
-        effects = {
-            gold_percent = 0.1
-        }
-    },
-    pax_romana = {
-        name = "Pax Romana",
-        cost = 220,
-        prereq = {
-            "universal_citizenship",
-            "imperial_treasury",
-            "mare_nostrum",
-            "marian_reform"
-        },
-        category = "administration",
-        desc = "Высшая имперская стабильность: +25 славы/ход, -10 волнений, +10% золота",
-        effects = {
-            glory_per_turn = 25,
-            unrest_reduction = 10,
-            gold_percent = 0.1
-        }
-    },
-    iron_armories = {
-        name = "Государственные оружейные",
-        cost = 90,
-        prereq = {
-            "gladius_hispaniensis"
-        },
-        category = "military",
-        desc = "Оружейные мастерские снабжают легионы и открывают бронированные ауксилии.",
-        effects = {
-            battle_attack = 1,
-            aux_training_bonus = 1
-        }
-    },
-    pila_mass_production = {
-        name = "Массовое производство пилумов",
-        cost = 100,
-        prereq = {
-            "iron_armories"
-        },
-        category = "military",
-        desc = "Пилумы становятся штатным оружием: сильнее первый удар легионов.",
-        effects = {
-            battle_attack = 1
-        }
-    },
-    cohort_tactics = {
-        name = "Когортная тактика",
-        cost = 120,
-        prereq = {
-            "manipular_drill",
-            "pila_mass_production"
-        },
-        category = "military",
-        desc = "Когорты дают легиону плотность, резерв и устойчивость.",
-        effects = {
-            battle_attack = 1,
-            battle_defense = 2
-        }
-    },
-    field_medicine = {
-        name = "Полевая медицина",
-        cost = 110,
-        prereq = {
-            "castra_aestiva"
-        },
-        category = "military",
-        desc = "Военные врачи и перевязочные пункты уменьшают цену победы.",
-        effects = {
-            army_loss_reduction = 0.08
-        }
-    },
-    veteran_colonies = {
-        name = "Ветеранские колонии",
-        cost = 125,
-        prereq = {
-            "marian_reform"
-        },
-        category = "administration",
-        desc = "Ветераны получают землю и превращают границу в римскую опору.",
-        effects = {
-            unrest_reduction = 1,
-            glory_per_turn = 1
-        }
-    },
-    auxiliary_recruitment = {
-        name = "Штатная вербовка ауксилий",
-        cost = 115,
-        prereq = {
-            "citizenship_grants"
-        },
-        category = "military",
-        desc = "Провинциальные отряды становятся частью регулярной армии.",
-        effects = {
-            aux_training_bonus = 2,
-            battle_defense = 1
-        }
-    },
-    siege_doctrine = {
-        name = "Осадная доктрина",
-        cost = 115,
-        prereq = {
-            "siege_engines"
-        },
-        category = "military",
-        desc = "Осада превращается из ярости в расчёт.",
-        effects = {
-            battle_siege = 2
-        }
-    },
-    torsion_artillery = {
-        name = "Торсионная артиллерия",
-        cost = 135,
-        prereq = {
-            "siege_doctrine",
-            "iron_armories"
-        },
-        category = "engineering",
-        desc = "Баллисты и скорпионы усиливают полевые и осадные армии.",
-        effects = {
-            battle_siege = 2,
-            artillery_power_percent = 0.08
-        }
-    },
-    legionary_workshops = {
-        name = "Легионные мастерские",
-        cost = 125,
-        prereq = {
-            "castra_aestiva",
-            "iron_armories"
-        },
-        category = "engineering",
-        desc = "Fabri чинят оружие, машины и дороги прямо в походе.",
-        effects = {
-            battle_siege = 1,
-            artillery_discount = -0.05
-        }
-    },
-    counterweight_engines = {
-        name = "Противовесные машины",
-        cost = 155,
-        prereq = {
-            "torsion_artillery",
-            "harbor_cranes"
-        },
-        category = "engineering",
-        desc = "Тяжёлые метательные машины ломают стены быстрее.",
-        effects = {
-            battle_siege = 3,
-            artillery_power_percent = 0.1
-        }
-    },
-    incendiary_munitions = {
-        name = "Зажигательные боеприпасы",
-        cost = 145,
-        prereq = {
-            "torsion_artillery"
-        },
-        category = "engineering",
-        desc = "Смола, сера и огненные снаряды помогают против башен и лагерей.",
-        effects = {
-            battle_siege = 2,
-            artillery_power_percent = 0.06
-        }
-    },
-    mobile_field_artillery = {
-        name = "Мобильная полевая артиллерия",
-        cost = 160,
-        prereq = {
-            "legionary_workshops",
-            "torsion_artillery"
-        },
-        category = "engineering",
-        desc = "Скорпионы и лёгкие баллисты идут вместе с легионом.",
-        effects = {
-            battle_attack = 1,
-            battle_siege = 2
-        }
-    },
-    repeating_artillery = {
-        name = "Повторяющаяся артиллерия",
-        cost = 190,
-        prereq = {
-            "alexandrian_mechanics",
-            "mobile_field_artillery"
-        },
-        category = "engineering",
-        desc = "Полиболы дают поздней армии плотный механический огонь.",
-        effects = {
-            battle_attack = 2,
-            battle_siege = 3,
-            artillery_power_percent = 0.12
-        }
-    },
-    naval_artillery = {
-        name = "Корабельная артиллерия",
-        cost = 150,
-        prereq = {
-            "admiralty",
-            "torsion_artillery"
-        },
-        category = "naval",
-        desc = "Катапульты и скорпионы превращают корабль в крепость.",
-        effects = {
-            navy_power = 2,
-            battle_siege = 1
-        }
-    },
-    scribal_bureau = {
-        name = "Писцовые бюро",
-        cost = 90,
-        prereq = {
-            "tax_census"
-        },
-        category = "administration",
-        desc = "Писцы, архивы и реестры ускоряют управление державой.",
-        effects = {
-            science_flat = 2,
-            gold_per_province = 1
-        }
-    },
-    latin_libraries = {
-        name = "Латинские библиотеки",
-        cost = 110,
-        prereq = {
-            "roman_schools",
-            "scribal_bureau"
-        },
-        category = "science",
-        desc = "Библиотеки хранят память и ускоряют исследования.",
-        effects = {
-            science_flat = 3,
-            research_percent = 0.05
-        }
-    },
-    greek_tutors = {
-        name = "Греческие наставники",
-        cost = 100,
-        prereq = {
-            "roman_schools"
-        },
-        category = "science",
-        desc = "Греческая paideia усиливает римскую элиту.",
-        effects = {
-            research_percent = 0.05,
-            great_person_chance_bonus = 0.02
-        }
-    },
-    alexandrian_mechanics = {
-        name = "Александрийская механика",
-        cost = 170,
-        prereq = {
-            "greek_tutors",
-            "harbor_cranes"
-        },
-        category = "science",
-        desc = "Школа механиков открывает сложные машины и инженерные чудеса.",
-        effects = {
-            science_flat = 4,
-            artillery_power_percent = 0.08
-        }
-    },
-    imperial_academies = {
-        name = "Имперские академии",
-        cost = 180,
-        prereq = {
-            "latin_libraries",
-            "greek_tutors"
-        },
-        category = "science",
-        desc = "Академии готовят юристов, врачей, инженеров и чиновников.",
-        effects = {
-            research_percent = 0.08,
-            great_person_chance_bonus = 0.03
-        }
-    },
-    jurists_chancery = {
-        name = "Канцелярия юристов",
-        cost = 120,
-        prereq = {
-            "twelve_tables",
-            "scribal_bureau"
-        },
-        category = "administration",
-        desc = "Responsa юристов превращают управление в систему права.",
-        effects = {
-            senate_law_bonus = 2,
-            province_unrest_control = 1
-        }
-    },
-    augural_colleges = {
-        name = "Авгурские коллегии",
-        cost = 95,
-        prereq = {
-            "twelve_tables"
-        },
-        category = "religion",
-        desc = "Священные коллегии укрепляют легитимность решений.",
-        effects = {
-            faith_flat = 2,
-            morale_cap_bonus = 2
-        }
-    },
     sacred_calendar = {
-        name = "Священный календарь",
-        cost = 105,
-        prereq = {
-            "augural_colleges"
+            name = "Публичные fasti",
+            cost = 57,
+            prereq = {},
+            category = "society",
+            desc = "Календарные таблицы отделяют судебные, праздничные и запретные дни и синхронизируют жизнь общины.",
+            effects = {
+                faith_flat = 2,
+            },
+            era = 1,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "отряд: Священные знаменосцы",
+                "здание: Асклепион",
+                "здание: Храм Весты",
+                "здание: Храм Исиды",
+                "здание: Храм Меркурия",
+                "здание: Храм Нептуна",
+                "здание: Храм Цереры",
+                "чудо света: Капитолийские фасты",
+            },
         },
-        category = "religion",
-        desc = "Fasti упорядочивают праздники, суды, войны и ритуалы.",
-        effects = {
-            faith_flat = 3,
-            unrest_reduction = 1
-        }
-    },
-    monument_commissions = {
-        name = "Монументальные комиссии",
-        cost = 130,
-        prereq = {
-            "forum_maximum",
-            "concrete"
+    augural_colleges = {
+            name = "Регламентированные ауспиции",
+            cost = 56,
+            prereq = {
+                "sacred_calendar",
+            },
+            category = "society",
+            desc = "Коллегии жрецов фиксируют порядок гаданий, освящения должностей и объявления войны.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 1,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Капитолийский храм",
+                "здание: Коллегия авгуров",
+                "здание: Храм Марса",
+                "чудо света: Дом авгуров",
+                "чудо света: Статуя Зевса Олимпийского",
+                "чудо света: Храм Аполлона Палатинского",
+                "чудо света: Храм Артемиды в Эфесе",
+                "чудо света: Храм Юпитера Капитолийского",
+            },
         },
-        category = "engineering",
-        desc = "Государство строит храмы, арки, колонны и зрелищные комплексы.",
-        effects = {
-            wonder_discount = -0.05,
-            glory_per_turn = 1
-        }
-    },
+    scribal_bureau = {
+            name = "Штат государственных писцов",
+            cost = 59,
+            prereq = {
+                "twelve_tables",
+            },
+            category = "science",
+            desc = "Писцы ведут сенатские постановления, договоры, цензовые списки и храмовые счета.",
+            effects = {
+                science_flat = 2,
+            },
+            era = 1,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Папирусная мануфактура",
+                "здание: Скрипторий",
+                "чудо света: Капитолийские фасты",
+                "чудо света: Табуларий",
+            },
+        },
+    via_appia = {
+            name = "Многослойная магистраль Via Appia",
+            cost = 62,
+            prereq = {
+                "groma_surveying",
+            },
+            category = "infrastructure",
+            desc = "Дорожное полотно получает основание, щебёночные слои, водоотвод и размеченные дистанции.",
+            effects = {
+                grain_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "отряд: Дорожные инженеры",
+                "здание: Мильный столб",
+                "здание: Царица дорог",
+                "чудо света: Аппиева дорога",
+            },
+        },
+    groma_surveying = {
+            name = "Громатическое межевание",
+            cost = 65,
+            prereq = {},
+            category = "infrastructure",
+            desc = "Грома, мерные шесты и прямоугольная сетка позволяют точно разбивать дороги, лагеря и земельные участки.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Кардо и декуманус",
+                "здание: Контора землемеров",
+                "здание: Оросительные каналы",
+                "здание: Осушение болот",
+                "чудо света: Аква Клавдия",
+                "чудо света: Аква Марция",
+                "чудо света: Акведук Аппия",
+                "чудо света: Акведук Сеговии",
+            },
+        },
+    lined_cisterns = {
+            name = "Водонепроницаемые цистерны",
+            cost = 64,
+            prereq = {
+                "groma_surveying",
+            },
+            category = "infrastructure",
+            desc = "Известково-керамическая обмазка удерживает дождевую воду и создаёт городской резерв на засуху и осаду.",
+            effects = {
+                grain_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Цистерна",
+                "чудо света: Висячие сады",
+            },
+        },
+    cloaca_vaulting = {
+            name = "Сводчатая канализация",
+            cost = 67,
+            prereq = {
+                "lined_cisterns",
+            },
+            category = "infrastructure",
+            desc = "Каменные коллекторы перекрываются прочным сводом и отводят воду из низин и городских кварталов.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Клоака",
+                "здание: Общественные уборные",
+                "здание: Осушение болот",
+                "чудо света: Клоака Максима",
+            },
+        },
+    iron_ploughshares = {
+            name = "Железные сошники и лемехи",
+            cost = 70,
+            prereq = {},
+            category = "production",
+            desc = "Железная рабочая кромка глубже режет тяжёлую почву и повышает устойчивость земледелия.",
+            effects = {
+                grain_flat = 4,
+            },
+            era = 1,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Хутор",
+                "ресурсный эффект: +10% добычи пшеницы и +4% скота",
+            },
+        },
+    bronze_molds = {
+            name = "Составные формы для бронзы",
+            cost = 73,
+            prereq = {
+                "iron_ploughshares",
+            },
+            category = "production",
+            desc = "Разъёмные литейные формы и контроль сплава позволяют серийно отливать инструменты, детали и статуи.",
+            effects = {
+                gold_flat = 3,
+            },
+            era = 1,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Бронзолитейня",
+                "здание: Кузница",
+                "здание: Медный рудник",
+                "здание: Оловянный рудник",
+                "чудо света: Колосс Родосский",
+                "чудо света: Статуя Зевса Олимпийского",
+                "ресурсный эффект: +25% мощности переработки бронзы",
+            },
+        },
+    merchant_collegia = {
+            name = "Коллегии ремесла и торговли",
+            cost = 72,
+            prereq = {},
+            category = "economy",
+            desc = "Купцы и мастера объединяют кассы, стандарты, обучение и совместные поставки.",
+            effects = {
+                gold_flat = 3,
+            },
+            era = 1,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Биржа пряностей",
+                "здание: Бычий рынок",
+                "здание: Коллегия купцов",
+                "здание: Коллегия ремесленников",
+                "здание: Эмпорий",
+                "чудо света: Большой рынок — Macellum Magnum",
+                "чудо света: Рынки Траяна",
+            },
+        },
+    stone_roads = {
+            name = "Каменное мощение и водоотвод",
+            cost = 75,
+            prereq = {
+                "via_appia",
+            },
+            category = "infrastructure",
+            desc = "Крупные плиты, бордюры, кюветы и мостовые трубы превращают дорогу во всепогодную инфраструктуру.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Каменный мост",
+                "здание: Мощёные улицы",
+                "здание: Царица дорог",
+                "чудо света: Аппиева дорога",
+                "чудо света: Сервиева стена",
+                "чудо света: Станции cursus publicus",
+                "чудо света: Форум Романум",
+            },
+        },
+    aqueduct = {
+            name = "Самотечный акведук",
+            cost = 78,
+            prereq = {
+                "lined_cisterns",
+                "groma_surveying",
+            },
+            category = "infrastructure",
+            desc = "Точная нивелировка удерживает малый уклон канала на десятках километров и подаёт воду в город без насосов.",
+            effects = {
+                grain_flat = 2,
+            },
+            era = 1,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Большой акведук",
+                "здание: Водораспределитель",
+                "здание: Малый акведук",
+                "здание: Нимфей-фонтан",
+                "здание: Оросительные каналы",
+                "здание: Служба водомеров",
+                "чудо света: Аква Клавдия",
+                "чудо света: Аква Марция",
+            },
+        },
+    mortise_tenon_hulls = {
+            name = "Корпус на шиповых соединениях",
+            cost = 81,
+            prereq = {
+                "bronze_molds",
+            },
+            category = "naval",
+            desc = "Доски обшивки связываются шипами, пазами и нагелями, образуя прочный средиземноморский корабельный корпус.",
+            effects = {
+                navy_power = 1,
+            },
+            era = 1,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Либурнская патрульная флотилия",
+                "здание: Верфи",
+                "здание: Верфь квинкверем",
+                "здание: Речная пристань",
+                "чудо света: Navalia — верфи Рима",
+            },
+        },
+    gladius_hispaniensis = {
+            name = "Принятие Gladius Hispaniensis",
+            cost = 85,
+            prereq = {
+                "manipular_drill",
+            },
+            category = "legion",
+            desc = "Испанский клинок стандартизируется для короткого колющего боя в тесном строю.",
+            effects = {
+                battle_attack = 1,
+            },
+            era = 2,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Легионеры с gladius Hispaniensis",
+            },
+        },
+    pila_mass_production = {
+            name = "Стандартизированное производство пилумов",
+            cost = 88,
+            prereq = {
+                "gladius_hispaniensis",
+            },
+            category = "legion",
+            desc = "Кузницы выпускают древки, втулки и железные стержни по единым размерам для снабжения целых легионов.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 2,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Метатели пилумов",
+            },
+        },
+    naval_quinquereme = {
+            name = "Серийная постройка квинкверем",
+            cost = 91,
+            prereq = {
+                "mortise_tenon_hulls",
+                "state_mints",
+            },
+            category = "naval",
+            desc = "Шаблоны, нумерация деталей и крупные эллинско-пунические корпуса открывают тяжёлую линейную эскадру.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 2,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "отряд: Морская пехота",
+                "эскадра: Линия квинкверем",
+                "здание: Верфь квинкверем",
+                "чудо света: Navalia — верфи Рима",
+            },
+        },
+    corvus_bridge = {
+            name = "Абордажный мост corvus",
+            cost = 94,
+            prereq = {
+                "naval_quinquereme",
+                "siege_engines",
+            },
+            category = "naval",
+            desc = "Поворотный мост с железным клювом цепляется за вражескую палубу и превращает морской бой в рукопашный.",
+            effects = {
+                navy_power = 1,
+            },
+            era = 2,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Абордажная эскадра с corvus",
+            },
+        },
+    torsion_artillery = {
+            name = "Торсионные пучки сухожилий",
+            cost = 93,
+            prereq = {
+                "siege_doctrine",
+                "bronze_molds",
+            },
+            category = "artillery",
+            desc = "Скрученные канаты из жил и волос запасают энергию для баллист, скорпионов и камнемётов.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 2,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "артиллерия: Ахейские литоболы",
+                "артиллерия: Киренайские торсионные машины",
+                "артиллерия: Лигурийские горные метатели",
+                "здание: Бастион",
+            },
+        },
+    siege_doctrine = {
+            name = "Инженерная осадная доктрина",
+            cost = 96,
+            prereq = {
+                "siege_engines",
+            },
+            category = "artillery",
+            desc = "Разведка стен, апроши, контрвалы, подкопы и расписание штурмов объединяются в единую систему.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 2,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "артиллерия: Карфагенские осадные башни",
+                "артиллерия: Македонский осадный поезд",
+                "артиллерия: Умбрийские пращники",
+                "здание: Осадная мастерская",
+            },
+        },
+    repeating_artillery = {
+            name = "Полибол с цепной подачей",
+            cost = 99,
+            prereq = {
+                "torsion_artillery",
+                "greek_tutors",
+            },
+            category = "artillery",
+            desc = "Вращаемый ворот приводит механизм, который последовательно подаёт болты и натягивает тетиву.",
+            effects = {
+                battle_siege = 2,
+                artillery_power_percent = 0.03,
+            },
+            era = 2,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "артиллерия: Малоазийские полиболы",
+                "артиллерия: Парфянские мобильные полиболы",
+                "чудо света: Мастерская Архимеда",
+            },
+        },
+    allied_alae = {
+            name = "Союзнические alae",
+            cost = 102,
+            prereq = {
+                "castra_aestiva",
+            },
+            category = "frontier",
+            desc = "Италийские союзники сводятся в отдельные крылья пехоты и конницы с римским командованием и нормами снабжения.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 2,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Союзническая ala",
+                "артиллерия: Балеарские funditores",
+            },
+        },
+    currency_reform = {
+            name = "Весовой стандарт денария",
+            cost = 101,
+            prereq = {
+                "tax_census",
+                "banking",
+            },
+            category = "economy",
+            desc = "Единый серебряный номинал, знаки стоимости и контролируемая проба упрощают жалование, налоги и дальнюю торговлю.",
+            effects = {
+                gold_percent = 0.01,
+            },
+            era = 2,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "чудо света: Капитолийский монетный двор",
+            },
+        },
+    state_mints = {
+            name = "Штемпельная монетная чеканка",
+            cost = 104,
+            prereq = {
+                "currency_reform",
+                "bronze_molds",
+            },
+            category = "economy",
+            desc = "Государственные мастерские контролируют металл, вес кружка, парные штемпели и выпуск серий монет.",
+            effects = {
+                gold_flat = 3,
+            },
+            era = 2,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Монетный двор",
+                "чудо света: Капитолийский монетный двор",
+                "чудо света: Храм Сатурна и Эрарий",
+            },
+        },
+    forum_maximum = {
+            name = "Базилика-форумный комплекс",
+            cost = 107,
+            prereq = {
+                "twelve_tables",
+                "stone_roads",
+            },
+            category = "society",
+            desc = "Крытые базилики рядом с форумом дают постоянное место судам, сделкам, архивам и публичным объявлениям.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 2,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Базилика",
+                "здание: Форум",
+                "чудо света: Базилика Ульпия",
+                "чудо света: Базилика Эмилия",
+                "чудо света: Форум Романум",
+                "чудо света: Форум Юлия",
+            },
+        },
+    granaries = {
+            name = "Вентилируемые horrea",
+            cost = 110,
+            prereq = {
+                "aqueduct",
+                "merchant_collegia",
+            },
+            category = "society",
+            desc = "Поднятые полы, вентиляционные каналы и разделённые кладовые уменьшают сырость, вредителей и потери зерна.",
+            effects = {
+                faith_flat = 2,
+            },
+            era = 2,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Большие зернохранилища",
+                "здание: Военный склад",
+                "здание: Склад",
+                "чудо света: Египетские зернохранилища",
+                "чудо света: Склады Гальбы",
+            },
+        },
+    banking = {
+            name = "Депозитные книги аргентариев",
+            cost = 109,
+            prereq = {
+                "merchant_collegia",
+                "scribal_bureau",
+            },
+            category = "economy",
+            desc = "Банкиры ведут счета, принимают вклады, переводят платежи и удостоверяют сделки записями в книгах.",
+            effects = {
+                gold_flat = 3,
+            },
+            era = 2,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Аукционный дом",
+                "здание: Банкирский стол",
+                "здание: Коллегия судовладельцев",
+            },
+        },
+    military_roads = {
+            name = "Маршевые дороги и станции",
+            cost = 112,
+            prereq = {
+                "stone_roads",
+                "castra_aestiva",
+            },
+            category = "infrastructure",
+            desc = "Стандартизированные мосты, милиарии, mansiones и mutationes ускоряют передвижение армии и почты.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 2,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Военный склад",
+                "здание: Мулий двор",
+                "здание: Царица дорог",
+                "чудо света: Сеть мильных камней",
+            },
+        },
+    harbor_cranes = {
+            name = "Поворотные краны и кабестаны",
+            cost = 115,
+            prereq = {
+                "mortise_tenon_hulls",
+                "siege_engines",
+            },
+            category = "infrastructure",
+            desc = "Блоки, вороты и поворотная стрела механизируют разгрузку камня, зерна, мачт и осадных машин.",
+            effects = {
+                grain_flat = 2,
+            },
+            era = 2,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "артиллерия: Родосские противовесные краны",
+                "здание: Гавань",
+                "здание: Портовый кран",
+                "чудо света: Порт Остии",
+                "чудо света: Рынки Траяна",
+            },
+        },
+    greek_tutors = {
+            name = "Греческая paideia",
+            cost = 118,
+            prereq = {
+                "scribal_bureau",
+                "forum_maximum",
+            },
+            category = "science",
+            desc = "Грамматика, риторика, геометрия и философия входят в подготовку римских командиров, юристов и инженеров.",
+            effects = {
+                research_percent = 0.01,
+            },
+            era = 2,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Грамматическая школа",
+                "здание: Одеон",
+                "здание: Палестра",
+                "здание: Стадион",
+                "чудо света: Атеней Адриана",
+                "чудо света: Школа риторов",
+            },
+        },
+    provincial_law = {
+            name = "Формулярное провинциальное судопроизводство",
+            cost = 117,
+            prereq = {
+                "twelve_tables",
+                "forum_maximum",
+            },
+            category = "administration",
+            desc = "Наместник применяет письменные формулы, эдикты и местные нормы в единой судебной процедуре.",
+            effects = {
+                governor_loyalty_bonus = 1,
+            },
+            era = 2,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Курия",
+                "здание: Судебная базилика",
+                "чудо света: Базилика Эмилия",
+                "чудо света: Курия Юлия",
+            },
+        },
+    iron_armories = {
+            name = "Централизованные fabricae вооружения",
+            cost = 120,
+            prereq = {
+                "bronze_molds",
+                "currency_reform",
+            },
+            category = "artillery",
+            desc = "Крупные оружейные мастерские распределяют железо, лекала и заказы между кузнецами и армейскими складами.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 2,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Бронированные ауксилии",
+                "здание: Арсенал",
+                "здание: Железный рудник",
+                "здание: Сыродутный горн",
+                "ресурсный эффект: +15% мощности обработки железа и стали",
+            },
+        },
+    naval_artillery = {
+            name = "Палубные баллисты и скорпионы",
+            cost = 123,
+            prereq = {
+                "naval_quinquereme",
+                "torsion_artillery",
+            },
+            category = "naval",
+            desc = "Метательные машины получают морские станки, крепления и расчёты для поражения экипажа и снастей.",
+            effects = {
+                navy_power = 1,
+            },
+            era = 2,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "отряд: Корабельные катапультарии",
+                "артиллерия: Киликийские корабельные катапульты",
+                "здание: Морской арт. двор",
+            },
+        },
+    naval_supply = {
+            name = "Снабженческий флот",
+            cost = 126,
+            prereq = {
+                "naval_quinquereme",
+                "granaries",
+            },
+            category = "naval",
+            desc = "Транспортные суда, амфоры, водяные запасы и распределительные гавани поддерживают армии вдали от Италии.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 2,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Classis transportaria",
+                "здание: Морской арсенал",
+            },
+        },
+    testudo = {
+            name = "Согласованная testudo",
+            cost = 125,
+            prereq = {
+                "manipular_drill",
+                "gladius_hispaniensis",
+            },
+            category = "legion",
+            desc = "Передние и верхние ряды соединяют щиты под командами, создавая подвижное прикрытие от стрел и камней.",
+            effects = {
+                battle_attack = 1,
+            },
+            era = 3,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Легион-черепаха",
+            },
+        },
+    cohort_tactics = {
+            name = "Когортная тактика",
+            cost = 128,
+            prereq = {
+                "pila_mass_production",
+                "testudo",
+            },
+            category = "legion",
+            desc = "Три манипула действуют как крупная когорта с собственным резервом, фронтом и устойчивым командованием.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 3,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Когортный резерв",
+                "чудо света: Марсово поле",
+            },
+        },
+    marian_reform = {
+            name = "Постоянный легионный набор",
+            cost = 131,
+            prereq = {
+                "cohort_tactics",
+                "tax_census",
+            },
+            category = "legion",
+            desc = "Длительная служба, государственное снабжение и единая подготовка заменяют краткий сезонный призыв.",
+            effects = {
+                upkeep_percent = -0.04,
+                battle_attack = 1,
+            },
+            era = 3,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Профессиональные легионеры",
+                "здание: Вербовочный пункт",
+            },
+        },
+    eagle_standards = {
+            name = "Единый легионный орёл",
+            cost = 134,
+            prereq = {
+                "marian_reform",
+            },
+            category = "legion",
+            desc = "Aquila становится главным знаменем и центром ритуала, идентичности и управления легионом.",
+            effects = {
+                morale_cap_bonus = 5,
+            },
+            era = 3,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Охрана легионного орла",
+                "чудо света: Храм Марса Мстителя",
+            },
+        },
+    veteran_colonies = {
+            name = "Плановые ветеранские колонии",
+            cost = 133,
+            prereq = {
+                "marian_reform",
+                "citizenship_grants",
+            },
+            category = "frontier",
+            desc = "Размежёванные наделы, городская сетка и коллективное поселение превращают демобилизацию в освоение провинций.",
+            effects = {
+                province_unrest_control = 1,
+            },
+            era = 3,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "здание: Колония ветеранов",
+            },
+        },
+    legionary_workshops = {
+            name = "Полевые fabricae legionis",
+            cost = 136,
+            prereq = {
+                "iron_armories",
+                "military_roads",
+            },
+            category = "artillery",
+            desc = "Штатные fabri ремонтируют оружие, повозки, мосты и осадные машины непосредственно при легионе.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 3,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Fabri legionis",
+                "здание: Легионная мастерская",
+            },
+        },
+    incendiary_munitions = {
+            name = "Стандартизированные зажигательные снаряды",
+            cost = 139,
+            prereq = {
+                "torsion_artillery",
+                "legionary_workshops",
+            },
+            category = "artillery",
+            desc = "Смола, пакля, сера и керамические сосуды превращаются в штатные боеприпасы для осады и флота.",
+            effects = {
+                battle_siege = 1,
+            },
+            era = 3,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "артиллерия: Апулийские огневые горшки",
+                "артиллерия: Понтийские огнемёты",
+                "здание: Арсенал зажигательных",
+            },
+        },
+    pirate_suppression = {
+            name = "Зональные морские патрули",
+            cost = 142,
+            prereq = {
+                "naval_supply",
+                "naval_artillery",
+            },
+            category = "naval",
+            desc = "Быстрые суда, разведка гаваней и постоянные маршруты перекрывают пиратам убежища и рынки сбыта.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 3,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "здание: Антипиратский патруль",
+                "здание: Портовая цепь",
+            },
+        },
+    deepwater_harbors = {
+            name = "Молы и глубоководные бассейны",
+            cost = 141,
+            prereq = {
+                "harbor_cranes",
+                "concrete",
+            },
+            category = "naval",
+            desc = "Кессоны, волноломы, дноуглубление и маячные входы позволяют принимать крупные корабли круглый год.",
+            effects = {
+                navy_power = 1,
+            },
+            era = 3,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Александрийский титан",
+                "здание: Александрийский маяк",
+                "здание: Глубоководный порт",
+                "здание: Ловля жемчуга",
+                "здание: Мол",
+                "чудо света: Великий маяк Александрии",
+                "чудо света: Порт Остии",
+            },
+        },
+    concrete = {
+            name = "Opus caementicium",
+            cost = 144,
+            prereq = {
+                "aqueduct",
+                "harbor_cranes",
+            },
+            category = "infrastructure",
+            desc = "Известковый раствор, каменный заполнитель и пуццолана создают монолитные стены, своды и подводные сооружения.",
+            effects = {
+                wonder_discount = 0.03,
+            },
+            era = 3,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Александрийский маяк",
+                "здание: Амфитеатр",
+                "здание: Базилика",
+                "здание: Бастион",
+                "здание: Большие зернохранилища",
+                "здание: Большой акведук",
+                "здание: Великие стены",
+                "здание: Глубоководный порт",
+            },
+        },
+    latifundia = {
+            name = "Товарная villa rustica",
+            cost = 147,
+            prereq = {
+                "iron_ploughshares",
+                "banking",
+            },
+            category = "production",
+            desc = "Жилой центр, склады, прессы, рабсилы и специализированные угодья объединяются в крупное рыночное хозяйство.",
+            effects = {
+                grain_flat = 3,
+            },
+            era = 3,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Винный пресс",
+                "здание: Латифундия",
+                "здание: Маслодавильня",
+                "здание: Сельская вилла",
+                "ресурсный эффект: +6% пшеницы, +10% вина и оливкового масла",
+            },
+        },
+    water_mills = {
+            name = "Колесная водяная мельница",
+            cost = 150,
+            prereq = {
+                "aqueduct",
+                "latifundia",
+            },
+            category = "production",
+            desc = "Поток вращает колесо и через передачу приводит жернова, заменяя постоянный труд людей и животных.",
+            effects = {
+                grain_flat = 5,
+            },
+            era = 3,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Водяная мельница",
+                "ресурсный эффект: +15% эффективного зернового производства",
+            },
+        },
+    glassblowing = {
+            name = "Выдувание стекла через трубку",
+            cost = 149,
+            prereq = {
+                "bronze_molds",
+                "greek_tutors",
+            },
+            category = "production",
+            desc = "Мастер формует горячую стеклянную массу воздухом и быстро производит тонкостенные сосуды сложной формы.",
+            effects = {
+                grain_flat = 3,
+            },
+            era = 3,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Стекольная мастерская",
+            },
+        },
+    citizenship_grants = {
+            name = "Муниципальное гражданство и латинское право",
+            cost = 152,
+            prereq = {
+                "provincial_law",
+                "senatorial_commissions",
+            },
+            category = "administration",
+            desc = "Правовой статус распространяется на союзные и провинциальные общины через муниципальные хартии.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 3,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Курия",
+            },
+        },
+    public_baths = {
+            name = "Термы с циркуляцией воды",
+            cost = 155,
+            prereq = {
+                "aqueduct",
+                "concrete",
+            },
+            category = "society",
+            desc = "Последовательность холодных, тёплых и горячих помещений объединяется с водопроводом, сливом и обслуживанием.",
+            effects = {
+                faith_flat = 2,
+            },
+            era = 3,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Императорские термы",
+                "здание: Малые бани",
+                "чудо света: Термы Каракаллы",
+            },
+        },
+    roman_schools = {
+            name = "Школы грамматики и риторики",
+            cost = 158,
+            prereq = {
+                "greek_tutors",
+                "citizenship_grants",
+            },
+            category = "science",
+            desc = "Последовательное обучение чтению, грамматике и публичной речи создаёт кадры для армии, суда и администрации.",
+            effects = {
+                science_flat = 2,
+            },
+            era = 3,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Грамматическая школа",
+                "здание: Начальная школа",
+                "здание: Риторская школа",
+                "чудо света: Школа риторов",
+            },
+        },
+    senatorial_commissions = {
+            name = "Постоянные судебные комиссии",
+            cost = 157,
+            prereq = {
+                "provincial_law",
+                "scribal_bureau",
+            },
+            category = "administration",
+            desc = "Quaestiones получают установленный состав, предмет расследования и процедуру рассмотрения государственных преступлений.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 3,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "чудо света: Курия Юлия",
+                "чудо света: Храм Согласия",
+            },
+        },
+    governor_audits = {
+            name = "Финансовые отчёты наместников",
+            cost = 160,
+            prereq = {
+                "senatorial_commissions",
+                "tax_census",
+            },
+            category = "administration",
+            desc = "Описи, книги сборов и судебные жалобы позволяют проверять провинциальную администрацию после срока службы.",
+            effects = {
+                governor_loyalty_bonus = 1,
+            },
+            era = 3,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Преторий",
+            },
+        },
+    customs_posts = {
+            name = "Портории и таможенные станции",
+            cost = 163,
+            prereq = {
+                "currency_reform",
+                "naval_supply",
+            },
+            category = "economy",
+            desc = "Пограничные и портовые пункты применяют тарифы, весы, пломбы и декларации к перевозимым товарам.",
+            effects = {
+                gold_percent = 0.01,
+            },
+            era = 3,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Биржа пряностей",
+                "здание: Караван-сарай",
+                "здание: Рынок благовоний",
+                "здание: Таможенная набережная",
+                "здание: Таможня",
+                "здание: Фактория Шёлкового пути",
+                "здание: Янтарный торг",
+                "чудо света: Большой рынок — Macellum Magnum",
+            },
+        },
+    mare_nostrum = {
+            name = "Единая система морских коммуникаций",
+            cost = 166,
+            prereq = {
+                "pirate_suppression",
+                "deepwater_harbors",
+            },
+            category = "naval",
+            desc = "Контроль проливов, баз, конвоев и навигационных маршрутов связывает Средиземноморье в одну стратегическую сеть.",
+            effects = {
+                navy_power = 2,
+                gold_per_province = 1,
+            },
+            era = 3,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "здание: Фактория Шёлкового пути",
+            },
+        },
+    admiralty = {
+            name = "Постоянные classis и префекты флота",
+            cost = 170,
+            prereq = {
+                "mare_nostrum",
+                "professional_centurions",
+            },
+            category = "naval",
+            desc = "Флоты закрепляются за базами, получают постоянные экипажи, командование и зоны ответственности.",
+            effects = {
+                navy_power = 2,
+            },
+            era = 4,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "здание: Морской арсенал",
+                "чудо света: Арсенал Мизена",
+                "чудо света: Гавань флота Равенны",
+            },
+        },
+    alexandrian_mechanics = {
+            name = "Александрийская прикладная механика",
+            cost = 173,
+            prereq = {
+                "greek_tutors",
+                "harbor_cranes",
+            },
+            category = "science",
+            desc = "Геометрия, пневматика, зубчатые передачи и теория машин переходят из трактатов в инженерные мастерские.",
+            effects = {
+                science_flat = 4,
+                artillery_power_percent = 0.03,
+            },
+            era = 4,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "эскадра: Александрийский титан",
+                "артиллерия: Александрийские катапульты",
+                "артиллерия: Македонский осадный поезд",
+                "здание: Инженерная школа",
+                "здание: Мастерская камнереза",
+                "здание: Машинная мастерская",
+                "здание: Обсерватория",
+                "здание: Служба водомеров",
+            },
+        },
+    auxiliary_diplomas = {
+            name = "Военные дипломы ауксилиев",
+            cost = 176,
+            prereq = {
+                "auxiliary_recruitment",
+                "citizenship_grants",
+            },
+            category = "frontier",
+            desc = "Бронзовый документ удостоверяет увольнение, службу и дарование гражданства ветерану вспомогательных войск.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 4,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Ветераны-дипломаты ауксилий",
+                "здание: Форт ауксилиев",
+            },
+        },
+    auxiliary_recruitment = {
+            name = "Штатная система ауксилий",
+            cost = 179,
+            prereq = {
+                "allied_alae",
+                "citizenship_grants",
+            },
+            category = "frontier",
+            desc = "Провинциальные когорты и алы получают постоянные номера, командиров, жалование и специализацию.",
+            effects = {
+                battle_defense = 1,
+            },
+            era = 4,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Имперская ауксилия",
+                "здание: Нумидийские конные заводы",
+                "здание: Форт ауксилиев",
+            },
+        },
+    carroballistae = {
+            name = "Карробаллисты на колёсных станках",
+            cost = 178,
+            prereq = {
+                "mobile_field_artillery",
+                "military_roads",
+            },
+            category = "artillery",
+            desc = "Компактная баллиста устанавливается на повозку и сопровождает полевую колонну без разборки.",
+            effects = {
+                battle_siege = 1,
+                artillery_power_percent = 0.02,
+            },
+            era = 4,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Карробаллистарии",
+                "артиллерия: Бриттские колесничные скорпионы",
+                "артиллерия: Нумидийские верблюжьи баллисты",
+                "артиллерия: Парфянские мобильные полиболы",
+                "здание: Артиллерийская площадка",
+            },
+        },
+    cheiroballistra = {
+            name = "Хиробаллистра с металлической рамой",
+            cost = 181,
+            prereq = {
+                "torsion_artillery",
+                "alexandrian_mechanics",
+            },
+            category = "artillery",
+            desc = "Металлические рамы и независимые торсионные узлы делают болтомёт компактнее, точнее и пригоднее для поля.",
+            effects = {
+                battle_siege = 1,
+                artillery_power_percent = 0.02,
+            },
+            era = 4,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Расчёты хиробаллистр",
+                "артиллерия: Латинские скорпионы",
+                "артиллерия: Этрусские аркбаллисты",
+                "здание: Баллистный двор",
+                "чудо света: Школа автоматов Герона",
+            },
+        },
+    field_medicine = {
+            name = "Valetudinaria и штат medici",
+            cost = 184,
+            prereq = {
+                "public_baths",
+                "permanent_legionary_camps",
+            },
+            category = "science",
+            desc = "Военные госпитали, врачи, санитары и наборы инструментов создают постоянную систему лечения раненых.",
+            effects = {
+                army_loss_reduction = 0.04,
+                morale_cap_bonus = 2,
+            },
+            era = 4,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "отряд: Полевые медики",
+                "здание: Асклепион",
+                "здание: Ветеринарий",
+                "здание: Военный госпиталь",
+                "здание: Медицинская школа",
+                "здание: Странноприимный дом",
+                "здание: Чумной дом",
+            },
+        },
+    fleet_bases = {
+            name = "Постоянные военно-морские базы",
+            cost = 187,
+            prereq = {
+                "admiralty",
+                "deepwater_harbors",
+            },
+            category = "naval",
+            desc = "Верфи, арсеналы, казармы гребцов и склады снабжения поддерживают флот вне сезона кампаний.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 4,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Флот снабжения и мастерских",
+                "здание: Военно-морская база",
+                "чудо света: Арсенал Мизена",
+                "чудо света: Гавань флота Равенны",
+            },
+        },
+    frontier_limes = {
+            name = "Эшелонированный limes",
+            cost = 186,
+            prereq = {
+                "permanent_legionary_camps",
+                "military_roads",
+            },
+            category = "frontier",
+            desc = "Дороги, башни, малые форты, легионные крепости и контролируемые переходы образуют глубоко эшелонированную границу.",
+            effects = {
+                province_unrest_control = 1,
+            },
+            era = 4,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "артиллерия: Германские лагерь-дробители",
+                "здание: Башня лимеса",
+                "здание: Великие стены",
+                "чудо света: Вал Адриана",
+                "чудо света: Германский лимес",
+                "чудо света: Порта Нигра",
+            },
+        },
+    hydraulic_mining = {
+            name = "Гидравлическая разработка руд",
+            cost = 189,
+            prereq = {
+                "aqueduct",
+                "alexandrian_mechanics",
+            },
+            category = "production",
+            desc = "Акведуки и резервуары направляют мощный поток для вскрытия россыпей, промывки и удаления пустой породы.",
+            effects = {
+                gold_flat = 6,
+            },
+            era = 4,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Британские оловянные копи",
+                "здание: Дакийские золотые прииски",
+                "здание: Золотой рудник",
+                "здание: Серебряный рудник",
+                "чудо света: Имперские карьеры Каррары",
+                "ресурсный эффект: усиливает рудники и каменоломни",
+            },
+        },
+    hypocaust_heating = {
+            name = "Гипокауст",
+            cost = 192,
+            prereq = {
+                "public_baths",
+                "concrete",
+            },
+            category = "infrastructure",
+            desc = "Горячий воздух проходит под поднятым полом и внутри стеновых каналов, равномерно обогревая помещения.",
+            effects = {
+                grain_flat = 2,
+            },
+            era = 4,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Императорские термы",
+                "здание: Малые бани",
+                "чудо света: Термы Каракаллы",
+            },
+        },
+    imperial_treasury = {
+            name = "Раздельный fiscus и государственные кассы",
+            cost = 195,
+            prereq = {
+                "state_mints",
+                "governor_audits",
+            },
+            category = "economy",
+            desc = "Императорские доходы, провинциальные счета и целевые фонды ведутся раздельно и регулярно сводятся.",
+            effects = {
+                gold_flat = 3,
+            },
+            era = 4,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Казначейство",
+                "чудо света: Храм Сатурна и Эрарий",
+            },
+        },
+    latin_libraries = {
+            name = "Публичные библиотеки со скрипториями",
+            cost = 194,
+            prereq = {
+                "roman_schools",
+                "scribal_bureau",
+            },
+            category = "science",
+            desc = "Каталоги, шкафы для свитков, переписчики и читальные залы превращают книги в городскую инфраструктуру.",
+            effects = {
+                research_percent = 0.01,
+            },
+            era = 4,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Библиотека",
+                "здание: Монастырь",
+                "чудо света: Александрийская библиотека",
+                "чудо света: Палатинская библиотека",
+                "чудо света: Храм Аполлона Палатинского",
+            },
+        },
     marble_quarries = {
-        name = "Мраморные карьеры",
-        cost = 145,
-        prereq = {
-            "stone_roads",
-            "monument_commissions"
+            name = "Императорская организация мраморных карьеров",
+            cost = 197,
+            prereq = {
+                "hydraulic_mining",
+                "military_roads",
+            },
+            category = "production",
+            desc = "Карьерные бригады, маркировка блоков, тяговые пути и морская доставка создают поток отделочного камня.",
+            effects = {
+                wonder_discount = 0.03,
+                gold_flat = 3,
+            },
+            era = 4,
+            branch = "Земледелие, добыча и ремесло",
+            unlocks = {
+                "здание: Мавзолей",
+                "здание: Мраморный карьер",
+                "здание: Пантеон",
+                "чудо света: Имперские карьеры Каррары",
+                "чудо света: Мавзолей в Галикарнасе",
+                "чудо света: Мраморный форум",
+                "чудо света: Палатинский дворец",
+                "чудо света: Пантеон",
+            },
         },
-        category = "engineering",
-        desc = "Каррарский мрамор удешевляет великие стройки.",
-        effects = {
-            wonder_discount = -0.08,
-            glory_per_turn = 1
-        }
-    },
+    mobile_field_artillery = {
+            name = "Штатная полевая артиллерия легиона",
+            cost = 200,
+            prereq = {
+                "legionary_workshops",
+                "torsion_artillery",
+            },
+            category = "artillery",
+            desc = "Лёгкие скорпионы распределяются по подразделениям и имеют собственные расчёты, боезапас и транспорт.",
+            effects = {
+                battle_siege = 1,
+                artillery_power_percent = 0.02,
+            },
+            era = 4,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Скорпионарии",
+                "артиллерия: Армянские высокогорные баллисты",
+            },
+        },
+    monumental_domical_vaulting = {
+            name = "Купольные бетонные своды",
+            cost = 203,
+            prereq = {
+                "concrete",
+                "alexandrian_mechanics",
+            },
+            category = "infrastructure",
+            desc = "Облегчённый заполнитель, кессоны и ступенчатая толщина позволяют перекрывать огромные круглые пространства.",
+            effects = {
+                wonder_discount = 0.04,
+            },
+            era = 4,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Императорские термы",
+                "здание: Пантеон",
+                "здание: Христианская базилика",
+                "чудо света: Базилика Ульпия",
+                "чудо света: Великий маяк Александрии",
+                "чудо света: Коллегия архитекторов Витрувия",
+                "чудо света: Палатинский дворец",
+                "чудо света: Пантеон",
+            },
+        },
+    permanent_legionary_camps = {
+            name = "Постоянные легионные крепости",
+            cost = 202,
+            prereq = {
+                "castra_aestiva",
+                "professional_centurions",
+            },
+            category = "frontier",
+            desc = "Деревянный лагерь превращается в каменную базу с principia, казармами, госпиталем, мастерскими и складами.",
+            effects = {
+                province_unrest_control = 1,
+            },
+            era = 4,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "здание: Легионный лагерь",
+                "чудо света: Вал Адриана",
+                "чудо света: Кастра претория",
+            },
+        },
+    professional_centurions = {
+            name = "Карьерный корпус центурионов",
+            cost = 205,
+            prereq = {
+                "eagle_standards",
+                "castra_aestiva",
+            },
+            category = "legion",
+            desc = "Продвижение по центуриям, служебный опыт и единая командная культура формируют профессиональный младший офицерский корпус.",
+            effects = {
+                battle_attack = 1,
+                battle_defense = 1,
+            },
+            era = 4,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Кадр центурионов",
+                "здание: Военная школа",
+                "здание: Лагерь преторианцев",
+                "чудо света: Кастра претория",
+                "чудо света: Колонна Траяна",
+                "чудо света: Марсово поле",
+            },
+        },
     urban_prefecture = {
-        name = "Городская префектура",
-        cost = 135,
-        prereq = {
-            "imperial_couriers",
-            "granaries"
+            name = "Префектура Города",
+            cost = 208,
+            prereq = {
+                "public_baths",
+                "governor_audits",
+            },
+            category = "administration",
+            desc = "Постоянное ведомство координирует порядок, пожарную охрану, снабжение и суд в крупнейшей столице.",
+            effects = {
+                governor_loyalty_bonus = 1,
+            },
+            era = 4,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Кардо и декуманус",
+                "здание: Пост вигилов",
+                "здание: Пост когорты",
+                "чудо света: Большой рынок — Macellum Magnum",
+                "чудо света: Большой цирк",
+                "чудо света: Клоака Максима",
+                "чудо света: Когорты вигилов",
+                "чудо света: Префектура Города",
+            },
         },
-        category = "administration",
-        desc = "Префект города следит за порядком, хлебом и инфраструктурой.",
-        effects = {
-            unrest_reduction = 2,
-            people_rep_flat = 3
-        }
-    }
+    pax_romana = {
+            name = "Единые имперские стандарты",
+            cost = 211,
+            prereq = {
+                "urban_prefecture",
+                "imperial_treasury",
+                "mare_nostrum",
+            },
+            category = "society",
+            desc = "Дороги, право, монета, почта и гарнизоны работают как совместимая система на всей территории державы.",
+            effects = {
+                unrest_reduction = 3,
+                gold_percent = 0.03,
+            },
+            era = 4,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "чудо света: Алтарь Мира",
+                "чудо света: Храм Согласия",
+            },
+        },
+    capitatio_iugatio = {
+            name = "Capitatio-iugatio",
+            cost = 220,
+            prereq = {
+                "tax_census",
+                "provincial_archives",
+            },
+            category = "economy",
+            desc = "Земельные участки, население и производительность сводятся в периодически обновляемые налоговые единицы.",
+            effects = {
+                gold_per_province = 1,
+            },
+            era = 5,
+            branch = "Торговля, деньги и снабжение",
+            unlocks = {
+                "здание: Земельный кадастр",
+            },
+        },
+    cataphractarii = {
+            name = "Полностью бронированные cataphractarii",
+            cost = 223,
+            prereq = {
+                "auxiliary_recruitment",
+                "iron_armories",
+            },
+            category = "frontier",
+            desc = "Всадник и конь получают тяжёлое защитное снаряжение, длинное копьё и тактику плотного ударного строя.",
+            effects = {
+                battle_attack = 2,
+            },
+            era = 5,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Римские катафрактарии",
+            },
+        },
+    codex_manuscript = {
+            name = "Кодексная книга",
+            cost = 226,
+            prereq = {
+                "latin_libraries",
+                "provincial_archives",
+            },
+            category = "science",
+            desc = "Сложенные тетради сшиваются по корешку, позволяют писать с обеих сторон и быстро находить нужное место.",
+            effects = {
+                science_flat = 3,
+                research_percent = 0.02,
+            },
+            era = 5,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Дом учения",
+                "здание: Кафедра епископа",
+                "здание: Монастырь",
+                "здание: Скрипторий",
+                "здание: Христианская базилика",
+                "чудо света: Имперские архивы",
+                "чудо света: Имперский скрипторий",
+                "чудо света: Палатинская библиотека",
+            },
+        },
+    comitatenses_field_army = {
+            name = "Полевая армия comitatenses",
+            cost = 229,
+            prereq = {
+                "professional_centurions",
+                "imperial_couriers",
+            },
+            category = "legion",
+            desc = "Подвижные части выводятся из пограничных гарнизонов в отдельный резерв для переброски между театрами войны.",
+            effects = {
+                battle_attack = 2,
+                battle_defense = 1,
+            },
+            era = 5,
+            branch = "Легионы и строевая тактика",
+            unlocks = {
+                "отряд: Полевые comitatenses",
+            },
+        },
+    counterweight_engines = {
+            name = "Онагр с пращевым рычагом",
+            cost = 228,
+            prereq = {
+                "cheiroballistra",
+                "alexandrian_mechanics",
+            },
+            category = "artillery",
+            desc = "Один мощный торсионный пучок и праща метают тяжёлый камень по высокой дуге; технический ID сохранён ради совместимости.",
+            effects = {
+                battle_siege = 2,
+                artillery_power_percent = 0.03,
+            },
+            era = 5,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "артиллерия: Кампанские онагры",
+                "здание: Парк онагров",
+            },
+        },
+    imperial_academies = {
+            name = "Императорские школы права и администрации",
+            cost = 231,
+            prereq = {
+                "latin_libraries",
+                "jurists_chancery",
+            },
+            category = "science",
+            desc = "Государственно поддерживаемые центры обучают юристов, врачей, риторов и чиновников по устойчивой программе.",
+            effects = {
+                science_flat = 5,
+                research_percent = 0.03,
+            },
+            era = 5,
+            branch = "Наука, образование и медицина",
+            unlocks = {
+                "здание: Академия",
+                "здание: Инженерная школа",
+                "здание: Медицинская школа",
+                "чудо света: Александрийская библиотека",
+                "чудо света: Атеней Адриана",
+                "чудо света: Мусейон Александрии",
+            },
+        },
+    late_roman_dromon = {
+            name = "Дромон позднеримского типа",
+            cost = 234,
+            prereq = {
+                "lighthouse_network",
+                "naval_artillery",
+            },
+            category = "naval",
+            desc = "Узкий быстроходный корпус, одна палуба гребцов, парус и усиленная морская пехота создают гибкий боевой корабль.",
+            effects = {
+                navy_power = 1,
+            },
+            era = 5,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "отряд: Морская пехота дромонов",
+                "эскадра: Крыло позднеримских дромонов",
+            },
+        },
+    limitanei_defense = {
+            name = "Пограничные войска limitanei",
+            cost = 237,
+            prereq = {
+                "frontier_limes",
+                "cataphractarii",
+            },
+            category = "frontier",
+            desc = "Постоянные местные части гарнизонируют цепь фортов, контролируют дороги и задерживают вторжения до подхода резерва.",
+            effects = {
+                battle_defense = 2,
+                province_unrest_control = 1,
+            },
+            era = 5,
+            branch = "Кавалерия, ауксилии и граница",
+            unlocks = {
+                "отряд: Пограничные limitanei",
+                "здание: Башня лимеса",
+                "здание: Сигнальный маяк",
+                "чудо света: Германский лимес",
+            },
+        },
+    universal_citizenship = {
+            name = "Constitutio Antoniniana",
+            cost = 236,
+            prereq = {
+                "jurists_chancery",
+                "capitatio_iugatio",
+            },
+            category = "administration",
+            desc = "Почти все свободные жители империи получают римское гражданство и входят в единое поле частного права и налогов.",
+            effects = {
+                gold_percent = 0.02,
+                unrest_reduction = 1,
+            },
+            era = 5,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "чудо света: Таблицы гражданства Каракаллы",
+            },
+        },
+    water_powered_sawmills = {
+            name = "Вододействующие пилорамы",
+            cost = 239,
+            prereq = {
+                "water_mills",
+                "alexandrian_mechanics",
+            },
+            category = "infrastructure",
+            desc = "Кривошипно-шатунный механизм превращает вращение водяного колеса в возвратно-поступательное движение пил.",
+            effects = {
+                gold_flat = 4,
+            },
+            era = 5,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Лесопилка",
+                "ресурсный эффект: +22% заготовки древесины",
+            },
+        },
+    great_building_program = {
+            name = "Позднеимперские строительные корпорации",
+            cost = 242,
+            prereq = {
+                "monument_commissions",
+                "water_powered_sawmills",
+            },
+            category = "infrastructure",
+            desc = "Государство закрепляет мастеров, поставки и повинности за крупными крепостными, дворцовыми и церковными проектами.",
+            effects = {
+                wonder_discount = 0.05,
+                glory_per_turn = 2,
+            },
+            era = 5,
+            branch = "Дороги, вода и строительство",
+            unlocks = {
+                "здание: Амфитеатр",
+                "здание: Колизей",
+                "здание: Судоходный канал",
+                "здание: Царица дорог",
+                "здание: Цирк",
+                "чудо света: Арка Константина",
+                "чудо света: Большой цирк",
+                "чудо света: Колизей",
+            },
+        },
+    jurists_chancery = {
+            name = "Канцелярия императорских конституций",
+            cost = 245,
+            prereq = {
+                "provincial_archives",
+                "provincial_law",
+            },
+            category = "administration",
+            desc = "Рескрипты, указы и правовые заключения систематизируются, копируются и рассылаются как обязательные нормы.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 5,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Имперский архив",
+                "здание: Кафедра епископа",
+                "здание: Школа права",
+                "чудо света: Базилика Ульпия",
+                "чудо света: Преторская канцелярия",
+                "чудо света: Таблицы гражданства Каракаллы",
+            },
+        },
+    imperial_cult = {
+            name = "Сакральная императорская монархия",
+            cost = 244,
+            prereq = {
+                "monument_commissions",
+                "universal_citizenship",
+            },
+            category = "society",
+            desc = "Дворцовый церемониал, изображения власти и государственный ритуал подчёркивают сверхобычный статус императора.",
+            effects = {
+                unrest_reduction = 1,
+            },
+            era = 5,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Митреум",
+                "здание: Странноприимный дом",
+                "здание: Храм божественного Августа",
+                "чудо света: Алтарь Мира",
+                "чудо света: Арка Константина",
+                "чудо света: Палатинский дворец",
+                "чудо света: Храм Венеры Прародительницы",
+                "чудо света: Храм Марса Мстителя",
+            },
+        },
+    provincial_archives = {
+            name = "Провинциальные реестры и кодексы",
+            cost = 247,
+            prereq = {
+                "imperial_couriers",
+                "governor_audits",
+            },
+            category = "administration",
+            desc = "Налоговые, судебные, кадровые и земельные записи сводятся в долговечные книги и регулярно обновляются.",
+            effects = {
+                governor_loyalty_bonus = 1,
+            },
+            era = 5,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Имперский архив",
+                "здание: Табуларий",
+                "чудо света: Имперские архивы",
+                "чудо света: Имперский скрипторий",
+                "чудо света: Преторская канцелярия",
+                "чудо света: Табуларий",
+            },
+        },
+    grain_fleet = {
+            name = "Государственные флоты annona",
+            cost = 250,
+            prereq = {
+                "fleet_bases",
+                "capitatio_iugatio",
+            },
+            category = "naval",
+            desc = "Зерновозы, контракты судовладельцев, охраняемые маршруты и распределительные порты образуют постоянную систему снабжения.",
+            effects = {
+                grain_flat = 8,
+            },
+            era = 5,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "эскадра: Annona — зерновой конвой",
+                "здание: Причал хлебного флота",
+                "чудо света: Египетские зернохранилища",
+            },
+        },
+    monument_commissions = {
+            name = "Императорские строительные комиссии",
+            cost = 253,
+            prereq = {
+                "monumental_domical_vaulting",
+                "imperial_treasury",
+            },
+            category = "society",
+            desc = "Архитекторы, procuratores, сметы и поставки материалов централизованно направляются на общественные сооружения.",
+            effects = {
+                wonder_discount = 0.04,
+                glory_per_turn = 1,
+            },
+            era = 5,
+            branch = "Религия, городское общество и идеология",
+            unlocks = {
+                "здание: Колизей",
+                "здание: Мавзолей",
+                "здание: Статуи на форуме",
+                "здание: Триумфальная арка",
+                "чудо света: Амфитеатр Помпей",
+                "чудо света: Висячие сады",
+                "чудо света: Колизей",
+                "чудо света: Колонна Траяна",
+            },
+        },
+    lighthouse_network = {
+            name = "Береговая сигнальная сеть",
+            cost = 252,
+            prereq = {
+                "fleet_bases",
+                "imperial_couriers",
+            },
+            category = "naval",
+            desc = "Маяки, огневые посты и наблюдательные башни передают предупреждения вдоль побережья и к военно-морским базам.",
+            effects = {
+                gold_flat = 2,
+            },
+            era = 5,
+            branch = "Флот, кораблестроение и навигация",
+            unlocks = {
+                "здание: Александрийский маяк",
+                "здание: Маяк",
+                "здание: Сигнальный маяк",
+                "чудо света: Великий маяк Александрии",
+            },
+        },
+    imperial_couriers = {
+            name = "Императорская почтовая разведка",
+            cost = 255,
+            prereq = {
+                "urban_prefecture",
+                "military_roads",
+            },
+            category = "administration",
+            desc = "Государственная почта и школа agentes in rebus объединяются: курьеры перевозят приказы, проверяют станции и передают двору сведения из провинций.",
+            effects = {
+                gold_per_province = 1,
+                province_unrest_control = 1,
+            },
+            era = 5,
+            branch = "Право и государственное управление",
+            unlocks = {
+                "здание: Дорожная станция",
+                "здание: Подстава лошадей",
+                "здание: Пост фрументариев",
+                "чудо света: Сеть мильных камней",
+                "чудо света: Станции cursus publicus",
+            },
+        },
+    grain_contracts = {
+            name = "Государственные оружейные фабрики (Fabricae)",
+            cost = 258,
+            prereq = {
+                "iron_armories",
+                "imperial_treasury",
+            },
+            category = "artillery",
+            desc = "Позднеимперские fabricae под управлением магистра оффиций централизуют выпуск щитов, панцирей, клинков, копий и деталей метательных машин.",
+            effects = {
+                battle_attack = 1,
+                artillery_power_percent = 0.05,
+            },
+            era = 5,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "здание: Арсенал",
+                "здание: Легионная мастерская",
+                "здание: Машинная мастерская",
+                "артиллерия: Галльские тяжёлые болтомёты",
+                "артиллерия: Сирийские баллисты",
+                "ресурсный эффект: +10% мощности обработки железа и стали",
+            },
+        },
+    ballista_corps = {
+            name = "Военная инженерия",
+            cost = 261,
+            prereq = {
+                "counterweight_engines",
+                "grain_contracts",
+                "comitatenses_field_army",
+            },
+            category = "artillery",
+            desc = "Военные инженеры сводят фортификацию, мосты, дороги, осадные машины, артиллерию и снабжение в единую профессиональную службу.",
+            effects = {
+                battle_attack = 1,
+                battle_defense = 1,
+                battle_siege = 3,
+                artillery_power_percent = 0.06,
+            },
+            era = 5,
+            branch = "Осадная техника и артиллерия",
+            unlocks = {
+                "отряд: Fabri legionis",
+                "здание: Инженерная школа",
+                "здание: Осадная мастерская",
+                "здание: Баллистный двор",
+                "здание: Морской арт. двор",
+            },
+        },
 }

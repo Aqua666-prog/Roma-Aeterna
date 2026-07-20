@@ -4653,6 +4653,21 @@ CITY_METRICS = ("prosperity", "order", "health", "infrastructure", "culture", "l
 SECTORS = ("agriculture", "mining", "manufacturing", "construction", "commerce")
 
 
+
+
+# ─── SCIENTIA ET ARS: требования дерева из 100 технологий ────────────────
+try:
+    from roma_technology_overhaul import BUILDING_TECH_PATCH as _BUILDING_TECH_PATCH
+except Exception as _technology_patch_error:
+    raise RuntimeError(
+        "Не удалось загрузить требования зданий Scientia et Ars: "
+        f"{type(_technology_patch_error).__name__}: {_technology_patch_error}"
+    ) from _technology_patch_error
+
+for _building_id, _required_techs in _BUILDING_TECH_PATCH.items():
+    if _building_id in BUILDING_CATALOG:
+        BUILDING_CATALOG[_building_id]["required_techs"] = list(_required_techs)
+
 def _i(value: Any, default: int = 0, low: int | None = None, high: int | None = None) -> int:
     try: value = int(round(float(value)))
     except (TypeError, ValueError, OverflowError): value = default

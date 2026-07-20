@@ -39,6 +39,7 @@ _AUDIO_DIRS: Final[dict[str, str]] = {
 
 _BASE_DIR = Path(__file__).resolve().parent
 _AUDIO_ROOTS: Final[tuple[Path, ...]] = (
+    _BASE_DIR / "data" / "quotes" / "audio_full",
     _BASE_DIR / "audio",
     _BASE_DIR / "data" / "quotes" / "audio",
 )
@@ -59,31 +60,41 @@ def _safe_id(value: object) -> str:
 
 
 def _voiceover_candidates(category: str, entry_id: object) -> list[Path]:
-    folder = _AUDIO_DIRS.get(str(category or "").strip().lower())
     safe_id = _safe_id(entry_id)
-    if not folder or not safe_id:
+    if not safe_id:
         return []
 
     candidates: list[Path] = []
     for root in _AUDIO_ROOTS:
         resolved_root = root.resolve()
-        path = (resolved_root / folder / f"{safe_id}.wav").resolve()
-        try:
-            path.relative_to(resolved_root)
-        except ValueError:
+
+        # audio_full: все файлы лежат прямо в корне
+        if resolved_root.name == "audio_full":
+            for ext in ("mp3","wav"):
+                candidates.append((resolved_root / f"{safe_id}.{ext}").resolve())
             continue
-        candidates.append(path)
+
+        folder = _AUDIO_DIRS.get(str(category or "").strip().lower())
+        if not folder:
+            continue
+        for ext in ("mp3","wav"):
+            candidates.append((resolved_root / folder / f"{safe_id}.{ext}").resolve())
     return candidates
 
 
 def voiceover_path(category: str, entry_id: object) -> Path | None:
-    """Возвращает существующий WAV из нового или прежнего каталога."""
+    """Возвращает существующий WAV или MP3."""
     candidates = _voiceover_candidates(category, entry_id)
     for path in candidates:
         if path.is_file() and path.stat().st_size > 44:
             return path
-    # Для диагностики возвращаем предпочтительный новый путь, даже если файла нет.
-    return candidates[0] if candidates else None
+    # Для диагностики возвращаем предпочтительный путь.
+    if candidates:
+        for p in candidates:
+            if p.suffix.lower() == ".mp3":
+                return p
+        return candidates[0]
+    return None
 
 
 def _detect_backend() -> str | None:
@@ -255,6 +266,7 @@ def diagnostics() -> dict[str, object]:
             directory = root / folder
             if directory.is_dir():
                 names.update(path.name for path in directory.glob("*.wav"))
+                names.update(path.name for path in directory.glob("*.mp3"))
         return len(names)
 
     existing_roots = [str(root) for root in _AUDIO_ROOTS if root.is_dir()]
