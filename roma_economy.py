@@ -44,7 +44,7 @@ try:
 except (ImportError, SyntaxError):
     ECONOMY_DICTIONARY = None
 
-ECONOMY_VERSION = 11
+ECONOMY_VERSION = 13
 
 STARTING_BASE_REVENUE_MIN = 50
 STARTING_BASE_REVENUE_DEFAULT = 80
@@ -219,9 +219,17 @@ AUTOMATION_DOCTRINES = {
 
 
 REVENUE_KEYS = (
-    "direct_tax", "customs", "domains", "tribute", "commerce", "base_revenue",
+    "direct_tax", "customs", "domains", "tribute", "commerce",
+    "trade_routes", "rare_resources", "caravans", "base_revenue",
     "micro_income", "doctrine_income", "automatic_stabilizer",
 )
+
+# Эти поступления уже выражены в фактическом золоте. Они не умножаются на
+# инфляцию, сложность или религиозные коэффициенты и не срезаются сглаживанием:
+# торговый путь +144 обязан дать казне ровно 144, а прибывший караван — свою
+# полную заявленную выручку. При этом проводка всё равно проходит через единое
+# ядро Roma Economica и попадает в общую ведомость/бухгалтерскую книгу.
+GUARANTEED_REVENUE_KEYS = ("trade_routes", "rare_resources", "caravans")
 
 SECTOR_KEYS = (
     "agriculture",
@@ -656,6 +664,7 @@ def _initial_state(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "last_real_output": initial_output,
         "fiscal": {
             "last_realized_revenue": 0.0,
+            "last_realized_stabilizable_revenue": 0.0,
             "last_realized_expense": 0.0,
             "last_realized_balance": 0.0,
             "last_candidate_revenue": 0.0,
@@ -1809,6 +1818,11 @@ def _tax_revenue(
     domains = max(0.0, finite(context.get("state_domain_income", 0.0))) * nominal_scale
     tribute = max(0.0, finite(context.get("tribute_income", 0.0))) * nominal_scale
     commerce = max(0.0, finite(context.get("special_gold_income", 0.0))) * nominal_scale
+    # Фактические денежные потоки приходят уже в игровых единицах золота.
+    # Их нельзя повторно индексировать уровнем цен или множителем сложности.
+    trade_routes = max(0.0, finite(context.get("trade_route_income", 0.0)))
+    rare_resources = max(0.0, finite(context.get("rare_resource_income", 0.0)))
+    caravans = max(0.0, finite(context.get("caravan_income", 0.0)))
     base_revenue = max(0.0, finite(context.get("base_revenue", STARTING_BASE_REVENUE_DEFAULT))) * nominal_scale
     difficulty = clamp(finite(context.get("income_mult", 1.0), 1.0), 0.20, 3.0)
     direct_tax *= difficulty
@@ -1822,6 +1836,9 @@ def _tax_revenue(
         "domains": domains,
         "tribute": tribute,
         "commerce": commerce,
+        "trade_routes": trade_routes,
+        "rare_resources": rare_resources,
+        "caravans": caravans,
         "base_revenue": base_revenue,
         "laffer_effective_rate": laffer_rate,
         "compliance": compliance,
@@ -1945,7 +1962,15 @@ def _stabilized_revenue(
     """Превращает волатильную макрооценку в реально собираемый доход казны."""
     candidate = max(0.0, finite(candidate))
     fiscal = state.setdefault("fiscal", {})
-    previous = max(0.0, finite(fiscal.get("last_realized_revenue", 0.0)))
+    previous = max(
+        0.0,
+        finite(
+            fiscal.get(
+                "last_realized_stabilizable_revenue",
+                fiscal.get("last_realized_revenue", 0.0),
+            )
+        ),
+    )
     signature = _fiscal_policy_signature(state, context)
     previous_signature = str(fiscal.get("last_policy_signature", ""))
     current_provinces = max(0, int(context.get("province_count", 0)))
@@ -2345,6 +2370,31 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
     finance = _financial_market(player, context, state, macro, sectors)
     trade = _external_trade(player, context, state, macro, sectors)
     revenues = _tax_revenue(context, state, macro, trade)
+
+    # Провинциальная религия изменяет реальные налоговые, торговые и мобилизационные
+    # возможности державы. Модуль опционален: старые сохранения и автономные тесты
+    # экономики продолжают работать без него.
+    religion_economy = {
+        "tax_multiplier": 1.0,
+        "levy_multiplier": 1.0,
+        "trade_multiplier": 1.0,
+        "minority_provinces": 0,
+        "details": [],
+    }
+    religion_engine = context.get("RELIGION_SYSTEM")
+    if religion_engine is not None and hasattr(religion_engine, "economy_modifiers"):
+        try:
+            candidate = religion_engine.economy_modifiers(player, context)
+            if isinstance(candidate, dict):
+                religion_economy.update(candidate)
+        except Exception:
+            pass
+    religion_tax = clamp(finite(religion_economy.get("tax_multiplier", 1.0), 1.0), 0.55, 1.25)
+    religion_trade = clamp(finite(religion_economy.get("trade_multiplier", 1.0), 1.0), 0.55, 1.35)
+    revenues["direct_tax"] = finite(revenues.get("direct_tax", 0.0)) * religion_tax
+    revenues["domains"] = finite(revenues.get("domains", 0.0)) * (0.65 + 0.35 * religion_tax)
+    revenues["commerce"] = finite(revenues.get("commerce", 0.0)) * religion_trade
+
     magic_rows = _economic_magic_modifiers(context, state, macro, sectors, finance, trade, revenues)
     candidate_micro_income = sum(finite(row.get("gold_per_turn", 0.0)) for row in magic_rows)
     revenues["micro_income"] = candidate_micro_income
@@ -2352,18 +2402,25 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
     revenues["automatic_stabilizer"] = 0.0
 
     candidate_revenue_total = sum(finite(revenues.get(key, 0.0)) for key in REVENUE_KEYS)
-    realized_revenue_total, fiscal_stabilization = _stabilized_revenue(
+    guaranteed_revenue_total = sum(
+        max(0.0, finite(revenues.get(key, 0.0))) for key in GUARANTEED_REVENUE_KEYS
+    )
+    stabilizable_candidate = max(0.0, candidate_revenue_total - guaranteed_revenue_total)
+    realized_stabilizable, fiscal_stabilization = _stabilized_revenue(
         state,
         context,
-        candidate_revenue_total,
+        stabilizable_candidate,
     )
-    if candidate_revenue_total > 0:
-        realization_factor = realized_revenue_total / candidate_revenue_total
+    if stabilizable_candidate > 0:
+        realization_factor = realized_stabilizable / stabilizable_candidate
         for key in REVENUE_KEYS:
-            if key != "automatic_stabilizer":
+            if key not in GUARANTEED_REVENUE_KEYS and key != "automatic_stabilizer":
                 revenues[key] = finite(revenues.get(key, 0.0)) * realization_factor
     else:
         realization_factor = 1.0
+    fiscal_stabilization["guaranteed"] = guaranteed_revenue_total
+    fiscal_stabilization["candidate_total"] = candidate_revenue_total
+    fiscal_stabilization["realized_total"] = realized_stabilizable + guaranteed_revenue_total
 
     # Keep the 306 visible rows and the realized treasury flow in exact accord.
     magic_rows = _realize_magic_rows(magic_rows, realization_factor)
@@ -2448,7 +2505,10 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         {"key": "customs", "label": "Пошлины и портовые сборы", "amount": int(revenue_payload["customs"]), "note": f"тариф {state['tariff_rate']:.0%}"},
         {"key": "domains", "label": "Доходы государственных владений", "amount": int(revenue_payload["domains"]), "note": "рудники, города, земля и монополии"},
         {"key": "tribute", "label": "Дань и союзные платежи", "amount": int(revenue_payload["tribute"]), "note": "внешние поступления"},
-        {"key": "commerce", "label": "Торговля и морские пути", "amount": int(revenue_payload["commerce"]), "note": "рынки, караваны, ресурсы"},
+        {"key": "commerce", "label": "Торговля и рынки", "amount": int(revenue_payload["commerce"]), "note": "внутренняя торговля и городские рынки"},
+        {"key": "trade_routes", "label": "Торговые пути", "amount": int(revenue_payload.get("trade_routes", 0)), "note": "полная заявленная прибыль действующих маршрутов"},
+        {"key": "rare_resources", "label": "Редкие ресурсы", "amount": int(revenue_payload.get("rare_resources", 0)), "note": "серебро, золото, пурпур, специи и драгоценности"},
+        {"key": "caravans", "label": "Прибывшие караваны", "amount": int(revenue_payload.get("caravans", 0)), "note": "разовое поступление этого хода"},
         {"key": "base_revenue", "label": "Доход столицы и казённых служб", "amount": int(revenue_payload["base_revenue"]), "note": "устойчивая налоговая база"},
         {"key": "micro_income", "label": "Наноэкономические модификаторы", "amount": int(revenue_payload.get("micro_income", 0)), "note": "ВВП, маржа, ликвидность, дороги и ещё много непонятной магии"},
         {"key": "doctrine_income", "label": "Доход экономической доктрины", "amount": int(revenue_payload.get("doctrine_income", 0)), "note": doctrine_spec.get("label", doctrine_key)},
@@ -2512,6 +2572,13 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
         "final_grain": money(grain["total_supply"]),
         "grain_consumption": money(grain["consumption"]),
         "revenues": revenue_payload,
+        "religion_economy": {
+            "tax_multiplier": round(religion_tax, 6),
+            "levy_multiplier": round(clamp(finite(religion_economy.get("levy_multiplier", 1.0), 1.0), 0.50, 1.25), 6),
+            "trade_multiplier": round(religion_trade, 6),
+            "minority_provinces": int(finite(religion_economy.get("minority_provinces", 0), 0)),
+            "details": religion_economy.get("details", []) if isinstance(religion_economy.get("details", []), list) else [],
+        },
         "expenditures": expenditure_payload,
         "macro": macro_payload,
         "sectors": {
@@ -2566,6 +2633,7 @@ def build_statement(player: Any, context: dict[str, Any], mutate: bool = False) 
             "realization_factor": round(realization_factor, 6),
         },
         "candidate_revenue_total": money(candidate_revenue_total),
+        "guaranteed_revenue_total": money(guaranteed_revenue_total),
         "revenue_total": revenue_total_game,
         "expense_total": expense_total_game,
         "primary_balance": primary_balance_game,
@@ -2964,6 +3032,9 @@ def _post_statement_ledger(player: Any, state: dict[str, Any], statement: dict[s
         "domains": "Доходы: государственные владения",
         "tribute": "Доходы: дань",
         "commerce": "Доходы: торговля",
+        "trade_routes": "Доходы: торговые пути",
+        "rare_resources": "Доходы: редкие ресурсы",
+        "caravans": "Доходы: караваны",
         "base_revenue": "Доходы: столица",
         "micro_income": "Доходы: наноэкономические модификаторы",
         "doctrine_income": "Доходы: экономическая доктрина",
@@ -3252,6 +3323,10 @@ def apply_turn(player: Any, context: dict[str, Any]) -> str | None:
     )
     fiscal = state.setdefault("fiscal", {})
     fiscal["last_realized_revenue"] = max(0.0, finite(statement["revenue_total"]) - finite(statement.get("automation", {}).get("stabilizer_income", 0.0)))
+    fiscal["last_realized_stabilizable_revenue"] = max(
+        0.0,
+        fiscal["last_realized_revenue"] - finite(statement.get("guaranteed_revenue_total", 0.0)),
+    )
     fiscal["last_realized_expense"] = max(0.0, finite(statement["expense_total"]))
     fiscal["last_realized_balance"] = finite(statement.get("structural_balance", statement["overall_balance"]))
     fiscal["last_candidate_revenue"] = max(
@@ -3584,6 +3659,61 @@ def grain_buy_price(player: Any) -> int:
 
 def grain_sell_price(player: Any) -> int:
     return max(1, money(grain_buy_price(player) * 0.72))
+
+
+def apply_cash_transaction(
+    player: Any,
+    amount: int | float,
+    label: str,
+    context: dict[str, Any] | None = None,
+    *,
+    category: str = "external",
+) -> dict[str, Any]:
+    """Единственная публичная дверь для внеходовых изменений казны.
+
+    Ресурсный модуль возвращает только ``gold_delta``; фактическую проводку,
+    проверку достаточности средств и запись в бухгалтерскую книгу выполняет
+    Roma Economica. Пассивный показатель ``gold_per_turn`` эта операция не
+    меняет, поскольку покупка/продажа является разовой транзакцией.
+    """
+    state = ensure_economy_state(player, context or {})
+    delta = money(amount)
+    before = max(0, int(getattr(player, "gold", 0)))
+    if delta < 0 and before < abs(delta):
+        return {
+            "ok": False,
+            "requested": delta,
+            "applied": 0,
+            "before": before,
+            "after": before,
+            "message": f"Недостаточно золота: требуется {abs(delta)}.",
+        }
+    after = max(0, before + delta)
+    setattr(player, "gold", after)
+    turn = int(getattr(player, "turn", 1))
+    account = f"Разовые операции: {category}"
+    if delta >= 0:
+        _ledger_post(state, turn, "Казна", account, delta, str(label))
+    else:
+        _ledger_post(state, turn, account, "Казна", abs(delta), str(label))
+    history = state.setdefault("cash_transactions", [])
+    history.append({
+        "turn": turn,
+        "category": str(category),
+        "label": str(label),
+        "delta": delta,
+        "before": before,
+        "after": after,
+    })
+    del history[:-160]
+    return {
+        "ok": True,
+        "requested": delta,
+        "applied": delta,
+        "before": before,
+        "after": after,
+        "message": str(label),
+    }
 
 
 def buy_grain(player: Any, units: int = 50) -> tuple[int, int]:

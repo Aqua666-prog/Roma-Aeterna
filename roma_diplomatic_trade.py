@@ -512,3 +512,17 @@ def open_menu(player: Any, ctx: dict | None = None) -> None:
                 ui.table("Последние записи", ["Ход", "Держава", "Событие", "Содержание"], [(h.get("turn"), _nation(ctx, h.get("power", "")).get("name", h.get("power") or "—"), h.get("title"), h.get("text")) for h in reversed(state["history"][-40:])], "CYAN")
             else: ui.info("Архив пуст.", "GRAY")
             ui.pause()
+
+
+# ─── RES PUBLICA ORBIS COMPATIBILITY ROUTE ────────────────────────────────
+# Старые прямые входы оставлены для сторонних модов и старых горячих клавиш,
+# но в актуальной сборке ведут в соответствующий раздел единого центра.
+_legacy_open_menu_before_world_politics = open_menu
+
+def open_menu(player: Any, ctx: dict | None = None) -> None:
+    context = _ctx(ctx)
+    facade = context.get("WORLD_POLITICS")
+    if facade is not None and hasattr(facade, "open_menu"):
+        facade.open_menu(player, context, start_section="trade")
+        return
+    return _legacy_open_menu_before_world_politics(player, context)

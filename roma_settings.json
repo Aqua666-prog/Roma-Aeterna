@@ -22,6 +22,8 @@
   "research_invest_amount": 20,
   "base_gold_income": 80,
   "base_grain_income": 20,
+  "resource_auto_buy_default": false,
+  "resource_auto_buy_budget_share": 0.02,
   "random_event_chance": 0.4,
   "choice_event_chance": 0.5,
   "province_unrest_growth_chance": 0.2,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Roma Aeterna 3.0 — BELLUM UNIVERSALE.
+"""Roma Aeterna 3.1 — BELLUM PROVINCIALE.
 
 Оперативный директор войн. Иностранные державы самостоятельно выбирают армии,
 провинции, города и морские зоны, планируют походы, навязывают Риму полевые и
@@ -12,6 +12,7 @@
     process_turn(player, ctx=None)
     handle_council_event(player, event, ctx, ui)
     expire_council_event(player, event, ctx)
+    open_province_menu(player, province_name, ctx=None)
     open_menu(player, ctx=None)
 """
 from __future__ import annotations
@@ -22,7 +23,7 @@ import textwrap
 import uuid
 from typing import Any
 
-MODULE_VERSION = "3.0.0-bellum-universale"
+MODULE_VERSION = "3.1.0-bellum-provinciale"
 SCHEMA_VERSION = 1
 MAX_HISTORY = 400
 MAX_CAMPAIGNS_PER_POWER = 2
@@ -646,7 +647,7 @@ def _naval_event(player: Any, event: dict, ctx: dict, ui: Any) -> bool:
         return _resolve_naval_battle(player, campaign, None, "avoid", ctx, ui)
     ui.screen(); ui.header("ПЛАН МОРСКОЙ БИТВЫ", "🌊", "III. Тактика римского флота")
     print("  1. Держать линию, использовать тараны и дисциплину эскадр")
-    print("  2. Сблизиться, применить абордаж и морскую пехоту армии")
+    print("  2. Сблизиться, применить corvus и абордажные команды кораблей")
     print("  3. Ударить по транспортам и уклоняться от тяжёлых кораблей")
     tactic = {"1": "line", "2": "boarding", "3": "transports"}[ui.choice("  План: ", ["1", "2", "3"])]
     ui.pause("Поднять сигналы и начать бой...")
@@ -671,6 +672,93 @@ def expire_council_event(player: Any, event: dict, ctx: dict | None = None) -> N
         _record(player, state, "Рим не явился к месту сражения", f"Город {campaign['city']} занят без генерального боя; результат: {result}.", campaign["power"], ctx, 5)
     campaign["pending_event"] = False; campaign["next_action_turn"] = _i(getattr(player, "turn", 1), 1) + 1
 
+
+
+def open_province_menu(player: Any, province_name: str, ctx: dict | None = None) -> None:
+    """Показывает вражеские кампании и оккупации, связанные с одной провинцией.
+
+    Это обзор оборонительного театра. Наступательные приказы римским группам
+    выдаются из меню провинций через ``roma_army_groups.open_province_operations``.
+    """
+    ctx = _ctx(ctx)
+    ui = UI(ctx)
+    state = ensure_state(player, ctx)
+    process_turn(player, ctx)
+    province_name = str(province_name or "").strip() or "Latium"
+    zone = _sea_zone_for(ctx, province_name)
+    zone_data = _dict(_dict(ctx.get("SEA_ZONES")).get(zone)) if zone else {}
+
+    campaigns = [
+        row for row in _list(state.get("campaigns"))
+        if isinstance(row, dict)
+        and row.get("status", "active") == "active"
+        and str(row.get("province", "")) == province_name
+    ]
+    occupied = _dict(_dict(state.get("occupied_cities")).get(province_name))
+    lost = _dict(_dict(state.get("lost_provinces")).get(province_name))
+    blockade = _dict(_dict(state.get("blockades")).get(zone)) if zone else {}
+
+    ui.screen()
+    ui.header(
+        f"BELLUM IN {province_name.upper()}",
+        "🛡",
+        "Вражеские кампании, оккупация городов и морское давление на выбранном театре",
+    )
+    ui.table("Оперативное состояние", ["Показатель", "Значение"], [
+        ("Активные кампании", len(campaigns)),
+        ("Оккупированные города", len(occupied)),
+        ("Статус провинции", "утрачена" if lost else "под контролем Рима / не завоёвана"),
+        ("Морская зона", zone_data.get("name", zone or "нет")),
+        ("Блокада", f"{blockade.get('strength', 0)} — {_nation(ctx, blockade.get('power', '')).get('name', blockade.get('power', ''))}" if blockade else "нет"),
+    ], "RED")
+
+    if campaigns:
+        ui.table("Кампании противника", ["Держава", "Тип", "Стадия", "Цель", "Итог", "След. ход"], [
+            (
+                _nation(ctx, row.get("power", "")).get("name", row.get("power", "")),
+                row.get("type", "land"),
+                row.get("stage", "planning"),
+                row.get("city", province_name),
+                row.get("last_result", "—"),
+                row.get("next_action_turn", "—"),
+            )
+            for row in campaigns
+        ], "RED")
+    else:
+        ui.info("На этой провинции нет активной наступательной кампании ИИ.", "GRAY")
+
+    if occupied:
+        ui.table("Оккупированные города", ["Город", "Оккупант", "С хода", "Побед"], [
+            (
+                city,
+                _nation(ctx, data.get("power", "")).get("name", data.get("power", "")),
+                data.get("since_turn", "—"),
+                data.get("victories", 0),
+            )
+            for city, data in occupied.items() if isinstance(data, dict)
+        ], "PURPLE")
+
+    relevant_history = [
+        item for item in _list(state.get("history"))
+        if isinstance(item, dict) and province_name.lower() in str(item.get("text", "")).lower()
+    ]
+    if relevant_history:
+        ui.table("Последние события театра", ["Ход", "Держава", "Событие", "Итог"], [
+            (
+                item.get("turn", "—"),
+                _nation(ctx, item.get("power", "")).get("name", item.get("power") or "—"),
+                item.get("title", "—"),
+                item.get("text", "—"),
+            )
+            for item in reversed(relevant_history[-12:])
+        ], "CYAN")
+
+    ui.wrap(
+        "Боевые приказы римским группам армий выдаются в карточке самой провинции. "
+        "Bellum Provinciale здесь показывает только действия противника и последствия войны.",
+        "CYAN",
+    )
+    ui.pause()
 
 def open_menu(player: Any, ctx: dict | None = None) -> None:
     ctx = _ctx(ctx); ui = UI(ctx); state = ensure_state(player, ctx)

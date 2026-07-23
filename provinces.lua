@@ -1,7 +1,22 @@
--- ROMA AETERNA Lua content file. Edit this file to mod game data.
+-- ROMA AETERNA — province roster with Religio Provinciarum fields.
+-- religion: текущая доминирующая вера
+-- religion_pressure: конкурирующее давление трёх религий
+-- conversion_progress: прогресс обращения в официальную религию
+-- religious_integrity: устойчивость местной религиозной структуры
+-- Campaign route fields (Roma Aeterna 4.1):
+-- campaign_access = "land" | "coastal" | "island"
+-- land_access: провинцию можно атаковать сухопутной группой с соседней территории
+-- sea_access: провинцию можно атаковать группой с прикреплённым флотом
+-- sea_zone / landing_difficulty: театр и сложность морской переброски
+
 return {
     {
         name = "Latium",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "tyrrhenian",
+        landing_difficulty = 22,
         wealth = 3,
         unrest = 0,
         cities = {
@@ -10,117 +25,130 @@ return {
                 population = 124,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ostia",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tibur",
                 population = 60,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Praeneste",
                 population = 48,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Antium",
                 population = 52,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ardea",
                 population = 43,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lanuvium",
                 population = 34,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gabii",
                 population = 34,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Velitrae",
                 population = 33,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cora",
                 population = 29,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lavinium",
                 population = 22,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tusculum",
                 population = 23,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Fidenae",
                 population = 20,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nomentum",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Setia",
                 population = 18,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
             "Etruria",
             "Umbria",
-            "Gallia"
+            "Gallia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Campania",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "tyrrhenian",
+        landing_difficulty = 24,
         wealth = 4,
         unrest = 0,
         cities = {
@@ -129,106 +157,106 @@ return {
                 population = 126,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Neapolis",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pompeii",
                 population = 64,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Herculaneum",
                 population = 58,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nola",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cumae",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Puteoli",
                 population = 43,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Salernum",
                 population = 40,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Atella",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Surrentum",
                 population = 28,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Beneventum",
                 population = 25,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Stabiae",
                 population = 26,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Baiae",
                 population = 27,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Liternum",
                 population = 18,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Suessula",
                 population = 18,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Latium",
@@ -236,12 +264,25 @@ return {
             "Apulia",
             "Bruttium",
             "Sicilia",
-            "Macedonia"
+            "Macedonia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Etruria",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "tyrrhenian",
+        landing_difficulty = 26,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -250,116 +291,127 @@ return {
                 population = 130,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tarquinii",
                 population = 78,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caere",
                 population = 61,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Volsinii",
                 population = 60,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Clusium",
                 population = 49,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arretium",
                 population = 43,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Perusia",
                 population = 43,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cortona",
                 population = 28,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Populonia",
                 population = 32,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vetulonia",
                 population = 29,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Falerii",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rusellae",
                 population = 23,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Volaterrae",
                 population = 27,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Saturnia",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sutrium",
                 population = 23,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Latium",
             "Umbria",
-            "Liguria"
+            "Liguria",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Umbria",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -368,117 +420,128 @@ return {
                 population = 128,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Narnia",
                 population = 79,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Iguvium",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tuder",
                 population = 51,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ameria",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mevania",
                 population = 48,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Interamna",
                 population = 44,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Asisium",
                 population = 35,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sena Gallica",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ariminum",
                 population = 23,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pisaurum",
                 population = 24,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Forum Sempronii",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ocriculum",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Matelica",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sentinum",
                 population = 25,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Latium",
             "Etruria",
             "Samnium",
-            "Liguria"
+            "Liguria",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Samnium",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -487,117 +550,130 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aufidena",
                 population = 81,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aesernia",
                 population = 67,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Saepinum",
                 population = 58,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Telesia",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Allifae",
                 population = 48,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cominium",
                 population = 43,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aquilonia",
                 population = 33,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Maleventum",
                 population = 29,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caudium",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cluviae",
                 population = 25,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Fagifulae",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Terventum",
                 population = 17,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Venafrum",
                 population = 21,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Abellinum",
                 population = 16,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
             "Umbria",
             "Apulia",
-            "Bruttium"
+            "Bruttium",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Apulia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "ionian",
+        landing_difficulty = 30,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -606,117 +682,130 @@ return {
                 population = 130,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tarentum",
                 population = 73,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Canusium",
                 population = 66,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Barium",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Luceria",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arpi",
                 population = 36,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sipontum",
                 population = 42,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Herdonia",
                 population = 34,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Venusia",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rudiae",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hydruntum",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Egnatia",
                 population = 30,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ausculum",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Salapia",
                 population = 16,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Callipolis",
                 population = 15,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
             "Samnium",
             "Bruttium",
-            "Illyricum"
+            "Illyricum",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Bruttium",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "sicilian",
+        landing_difficulty = 30,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -725,117 +814,130 @@ return {
                 population = 132,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Consentia",
                 population = 73,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Croton",
                 population = 66,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Locri",
                 population = 56,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Scyllacium",
                 population = 43,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vibo Valentia",
                 population = 39,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hipponium",
                 population = 43,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thurii",
                 population = 32,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Petelia",
                 population = 27,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Medma",
                 population = 29,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Terina",
                 population = 24,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Clampetia",
                 population = 27,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tempsa",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caulonia",
                 population = 24,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Laos",
                 population = 21,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
             "Samnium",
             "Apulia",
-            "Sicilia"
+            "Sicilia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Liguria",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "ligurian",
+        landing_difficulty = 34,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -844,117 +946,130 @@ return {
                 population = 123,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Luna",
                 population = 77,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vada Sabatia",
                 population = 59,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Albingaunum",
                 population = 54,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ticinum",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dertona",
                 population = 46,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hasta",
                 population = 41,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pollentia",
                 population = 38,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Segesta Tigulliorum",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Libarna",
                 population = 23,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Asta Pompeia",
                 population = 31,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aquae Statiellae",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cemenelum",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Velleia",
                 population = 27,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Forum Fulvii",
                 population = 24,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Etruria",
             "Umbria",
             "Gallia Narbonensis",
-            "Gallia"
+            "Gallia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Gallia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "ligurian",
+        landing_difficulty = 38,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -963,106 +1078,106 @@ return {
                 population = 121,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Avaricum",
                 population = 75,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gergovia",
                 population = 58,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Alesia",
                 population = 56,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bibracte",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vesontio",
                 population = 44,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tolosa",
                 population = 36,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Narbo",
                 population = 37,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Durocortorum",
                 population = 37,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nemetocenna",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cenabum",
                 population = 22,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Autessiodurum",
                 population = 26,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Divodurum",
                 population = 23,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Augustodunum",
                 population = 16,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Matisco",
                 population = 20,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Latium",
@@ -1071,12 +1186,25 @@ return {
             "Aquitania",
             "Belgica",
             "Britannia",
-            "Hispania"
+            "Hispania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Gallia Narbonensis",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "ligurian",
+        landing_difficulty = 36,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -1085,117 +1213,130 @@ return {
                 population = 128,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Narbo Martius",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arelate",
                 population = 66,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nemausus",
                 population = 59,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aquae Sextiae",
                 population = 46,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Avennio",
                 population = 46,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vienna",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Valentia",
                 population = 34,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Forum Iulii",
                 population = 30,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carpentorate",
                 population = 23,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Baeterrae",
                 population = 21,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Agatha",
                 population = 31,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vasio",
                 population = 25,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Glanum",
                 population = 24,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arausio",
                 population = 16,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Liguria",
             "Gallia",
             "Aquitania",
-            "Hispania"
+            "Hispania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Aquitania",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "atlantic",
+        landing_difficulty = 48,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -1204,117 +1345,130 @@ return {
                 population = 126,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Limonum",
                 population = 71,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mediolanum Santonum",
                 population = 58,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Elusa",
                 population = 55,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aginnum",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vesunna",
                 population = 36,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ausci",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Boiodurum",
                 population = 28,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cossio",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lapurdum",
                 population = 25,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Segora",
                 population = 23,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Civitas Convenarum",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aturri",
                 population = 17,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tarba",
                 population = 17,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Uxellodunum",
                 population = 17,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Gallia",
             "Gallia Narbonensis",
             "Hispania",
-            "Belgica"
+            "Belgica",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Belgica",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "britannic",
+        landing_difficulty = 58,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -1323,117 +1477,130 @@ return {
                 population = 123,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bagacum",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Samarobriva",
                 population = 61,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Augusta Treverorum",
                 population = 50,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Atuatuca",
                 population = 43,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nervia",
                 population = 39,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Noviodunum",
                 population = 39,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Virodunum",
                 population = 34,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tullum",
                 population = 36,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Divodurum",
                 population = 28,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cambrai",
                 population = 32,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Turnacum",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mediomatrici",
                 population = 25,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Icorigium",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Marcomagus",
                 population = 23,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Gallia",
             "Aquitania",
             "Germania Inferior",
-            "Britannia"
+            "Britannia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Germania Inferior",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "northern",
+        landing_difficulty = 64,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -1442,116 +1609,127 @@ return {
                 population = 131,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mogontiacum",
                 population = 70,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bonna",
                 population = 63,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vetera",
                 population = 51,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Noviomagus",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Traiectum",
                 population = 36,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Castra Herculis",
                 population = 41,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Asciburgium",
                 population = 32,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tolbiacum",
                 population = 26,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gelduba",
                 population = 28,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Novaesium",
                 population = 23,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Divitia",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rigomagus",
                 population = 18,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tungri",
                 population = 20,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Confluentes",
                 population = 18,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Belgica",
             "Germania Superior",
-            "Magna Germania"
+            "Magna Germania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Germania Superior",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -1560,117 +1738,128 @@ return {
                 population = 130,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vindonissa",
                 population = 77,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Augusta Raurica",
                 population = 64,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aquae Mattiacorum",
                 population = 58,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lopodunum",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nida",
                 population = 37,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tabernae",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Brigobannis",
                 population = 35,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arae Flaviae",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sumelocenna",
                 population = 26,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rottenburg",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Castra Regina",
                 population = 23,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sorviodurum",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Abnoba",
                 population = 19,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tenedo",
                 population = 15,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Germania Inferior",
             "Magna Germania",
             "Dacia",
-            "Illyricum"
+            "Illyricum",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Magna Germania",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -1679,117 +1868,130 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cherusca",
                 population = 72,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sueborum",
                 population = 62,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Marcomannia",
                 population = 51,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hermundurum",
                 population = 46,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Chattorum",
                 population = 47,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Albis Castra",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lupia",
                 population = 40,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Harzhorn",
                 population = 31,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Semnonia",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Langobardia",
                 population = 31,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Variscum",
                 population = 25,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rugium",
                 population = 21,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Silva Hercynia",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Boihaemum",
                 population = 15,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Germania Inferior",
             "Germania Superior",
             "Dacia",
-            "Caledonia"
+            "Caledonia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Hispania",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "western_med",
+        landing_difficulty = 42,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -1798,106 +2000,106 @@ return {
                 population = 130,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Corduba",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carthago Nova",
                 population = 64,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Numantia",
                 population = 53,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Saguntum",
                 population = 51,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Emerita",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gades",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Toletum",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caesaraugusta",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Asturica",
                 population = 27,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Segovia",
                 population = 28,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pallantia",
                 population = 25,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Osca",
                 population = 27,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bilbilis",
                 population = 22,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ilerda",
                 population = 23,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Gallia",
@@ -1905,12 +2107,25 @@ return {
             "Aquitania",
             "Lusitania",
             "Baetica",
-            "Carthago"
+            "Carthago",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Lusitania",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "atlantic",
+        landing_difficulty = 46,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -1919,115 +2134,128 @@ return {
                 population = 120,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Olisipo",
                 population = 75,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Scallabis",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ebora",
                 population = 48,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pax Iulia",
                 population = 48,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Norba Caesarina",
                 population = 45,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Conimbriga",
                 population = 32,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aeminium",
                 population = 30,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Myrtilis",
                 population = 26,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Balsa",
                 population = 27,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Salmantica",
                 population = 32,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caurium",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Capera",
                 population = 24,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Metellinum",
                 population = 21,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bracara",
                 population = 24,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Hispania",
-            "Baetica"
+            "Baetica",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Baetica",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "western_med",
+        landing_difficulty = 42,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -2036,117 +2264,130 @@ return {
                 population = 132,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hispalis",
                 population = 72,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gades",
                 population = 55,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Italica",
                 population = 55,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Astigi",
                 population = 44,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Malaca",
                 population = 43,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carteia",
                 population = 34,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carmo",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ilipa",
                 population = 25,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Munda",
                 population = 33,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Baelo Claudia",
                 population = 27,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Urso",
                 population = 29,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Obulco",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Acci",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ulia",
                 population = 13,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Hispania",
             "Lusitania",
             "Mauretania",
-            "Carthago"
+            "Carthago",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Britannia",
+        campaign_access = "island",
+        land_access = false,
+        sea_access = true,
+        sea_zone = "britannic",
+        landing_difficulty = 60,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -2155,117 +2396,130 @@ return {
                 population = 127,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Camulodunum",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Eboracum",
                 population = 64,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Verulamium",
                 population = 55,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Isca",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Deva",
                 population = 40,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aquae Sulis",
                 population = 39,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Durovernum",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Viroconium",
                 population = 27,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lindum",
                 population = 33,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Venta Belgarum",
                 population = 25,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Corinium",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Durnovaria",
                 population = 25,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ratae",
                 population = 24,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Glevum",
                 population = 15,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Gallia",
             "Belgica",
             "Caledonia",
-            "Hibernia"
+            "Hibernia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Caledonia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "britannic",
+        landing_difficulty = 66,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -2274,116 +2528,129 @@ return {
                 population = 129,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Alauna",
                 population = 76,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Victoria",
                 population = 59,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Orrea",
                 population = 59,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bremenium",
                 population = 52,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Blatobulgium",
                 population = 44,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Habitancum",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Coria",
                 population = 36,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Luguvalium",
                 population = 34,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Votadinia",
                 population = 32,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Taexalia",
                 population = 27,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pinnata Castra",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bannatia",
                 population = 18,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Segloes",
                 population = 19,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caledonum Silva",
                 population = 17,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Britannia",
             "Hibernia",
-            "Magna Germania"
+            "Magna Germania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Hibernia",
+        campaign_access = "island",
+        land_access = false,
+        sea_access = true,
+        sea_zone = "britannic",
+        landing_difficulty = 68,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -2392,115 +2659,128 @@ return {
                 population = 122,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ivernis",
                 population = 72,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rhaeba",
                 population = 60,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nagnata",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Regia",
                 population = 53,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Manapia",
                 population = 43,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Magnata",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dunum",
                 population = 33,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Usdia",
                 population = 33,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Laberus",
                 population = 34,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Luceni",
                 population = 30,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Brigantes Hiberni",
                 population = 20,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vodiae",
                 population = 17,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Darini",
                 population = 18,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Voluntii",
                 population = 21,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Britannia",
-            "Caledonia"
+            "Caledonia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Sicilia",
+        campaign_access = "island",
+        land_access = false,
+        sea_access = true,
+        sea_zone = "sicilian",
+        landing_difficulty = 32,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -2509,117 +2789,130 @@ return {
                 population = 120,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Panormus",
                 population = 80,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Messana",
                 population = 63,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Agrigentum",
                 population = 60,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lilybaeum",
                 population = 52,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Catana",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Enna",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gela",
                 population = 36,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Segesta",
                 population = 27,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Drepanum",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tyndaris",
                 population = 30,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tauromenium",
                 population = 30,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Camarina",
                 population = 20,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Himera",
                 population = 27,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Akrai",
                 population = 19,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
             "Bruttium",
             "Sardinia et Corsica",
-            "Carthago"
+            "Carthago",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Sardinia et Corsica",
+        campaign_access = "island",
+        land_access = false,
+        sea_access = true,
+        sea_zone = "sicilian",
+        landing_difficulty = 30,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -2628,116 +2921,129 @@ return {
                 population = 129,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nora",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sulci",
                 population = 55,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tharros",
                 population = 55,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Olbia",
                 population = 43,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Turris Libisonis",
                 population = 40,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cornus",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Forum Traiani",
                 population = 30,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aleria",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mariana",
                 population = 25,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Alalia",
                 population = 21,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Uselis",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bosa",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tibula",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Neapolis Sardiniae",
                 population = 14,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Sicilia",
             "Carthago",
-            "Mauretania"
+            "Mauretania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Carthago",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "african",
+        landing_difficulty = 48,
         wealth = 8,
         unrest = 4,
         cities = {
@@ -2746,106 +3052,106 @@ return {
                 population = 120,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Utica",
                 population = 81,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hadrumetum",
                 population = 60,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hippo Regius",
                 population = 48,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thapsus",
                 population = 50,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Leptis Magna",
                 population = 47,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cirta",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Zama",
                 population = 29,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Theveste",
                 population = 30,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bulla Regia",
                 population = 33,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sicca Veneria",
                 population = 21,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Capsa",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ruspina",
                 population = 22,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Acholla",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mactaris",
                 population = 18,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Sicilia",
@@ -2853,12 +3159,25 @@ return {
             "Hispania",
             "Baetica",
             "Numidia",
-            "Aegyptus"
+            "Aegyptus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 78,
+            christianity = 15,
+            judaism = 7,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Numidia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "african",
+        landing_difficulty = 46,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -2867,116 +3186,129 @@ return {
                 population = 122,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lambaesis",
                 population = 76,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thamugadi",
                 population = 67,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Theveste",
                 population = 58,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Calama",
                 population = 51,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Milevum",
                 population = 40,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hippo Regius",
                 population = 42,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vaga",
                 population = 37,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sitifis",
                 population = 37,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Diana Veteranorum",
                 population = 34,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cuicul",
                 population = 30,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Zarai",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tigisis",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thubursicum",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mascula",
                 population = 25,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Carthago",
             "Mauretania",
-            "Cyrenaica"
+            "Cyrenaica",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Mauretania",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "western_med",
+        landing_difficulty = 42,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -2985,116 +3317,129 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tingis",
                 population = 70,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Volubilis",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sala Colonia",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lixus",
                 population = 52,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Rusaddir",
                 population = 39,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Iol",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cartenna",
                 population = 35,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tipasa",
                 population = 37,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Oppidum Novum",
                 population = 32,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Banasa",
                 population = 23,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tocolosida",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tamuda",
                 population = 20,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Septem",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Portus Magnus",
                 population = 25,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Numidia",
             "Sardinia et Corsica",
-            "Baetica"
+            "Baetica",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Cyrenaica",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "eastern_med",
+        landing_difficulty = 48,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -3103,115 +3448,128 @@ return {
                 population = 132,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Berenice",
                 population = 76,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ptolemais",
                 population = 55,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Apollonia",
                 population = 56,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Teuchira",
                 population = 52,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Barca",
                 population = 45,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Balagrae",
                 population = 42,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Darnis",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Antipyrgos",
                 population = 33,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Euesperides",
                 population = 23,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arsinoe Libyae",
                 population = 27,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Phycus",
                 population = 26,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Azilis",
                 population = 24,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Chersonesus",
                 population = 20,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Catabathmus",
                 population = 14,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Numidia",
-            "Aegyptus"
+            "Aegyptus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Aegyptus",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "eastern_med",
+        landing_difficulty = 60,
         wealth = 7,
         unrest = 3,
         cities = {
@@ -3220,118 +3578,131 @@ return {
                 population = 128,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Memphis",
                 population = 73,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pelusium",
                 population = 58,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thebae",
                 population = 57,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Crocodilopolis",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hermopolis",
                 population = 42,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Oxyrhynchus",
                 population = 44,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Berenice",
                 population = 30,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Syene",
                 population = 27,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Naucratis",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Heliopolis",
                 population = 31,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Canopus",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ptolemais Hermiou",
                 population = 23,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Abydos",
                 population = 18,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Coptos",
                 population = 25,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Carthago",
             "Cyrenaica",
             "Judaea",
             "Syria",
-            "Asia Minor"
+            "Asia Minor",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 70,
+            judaism = 18,
+            christianity = 12,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Macedonia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "aegean",
+        landing_difficulty = 46,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -3340,106 +3711,106 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thessalonica",
                 population = 77,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Amphipolis",
                 population = 57,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Philippi",
                 population = 48,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dion",
                 population = 49,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Beroea",
                 population = 37,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Stobi",
                 population = 44,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Heraclea Lyncestis",
                 population = 37,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Edessa",
                 population = 30,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Potidaea",
                 population = 23,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Acanthus",
                 population = 32,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cassandreia",
                 population = 25,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Scotussa",
                 population = 27,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Larissa Cremaste",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Olynthus",
                 population = 22,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Campania",
@@ -3447,12 +3818,25 @@ return {
             "Epirus",
             "Achaea",
             "Thracia",
-            "Asia Minor"
+            "Asia Minor",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Achaea",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "aegean",
+        landing_difficulty = 44,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -3461,116 +3845,129 @@ return {
                 population = 122,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Corinthus",
                 population = 70,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sparta",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Argos",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Patrae",
                 population = 47,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Thebae",
                 population = 38,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Megara",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sicyon",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mantinea",
                 population = 37,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Olympia",
                 population = 35,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Elis",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tegea",
                 population = 29,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Epidaurus",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Naupactus",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Delphi",
                 population = 23,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Macedonia",
             "Epirus",
-            "Asia Minor"
+            "Asia Minor",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Epirus",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "ionian",
+        landing_difficulty = 42,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -3579,116 +3976,129 @@ return {
                 population = 124,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nicopolis",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dodona",
                 population = 63,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Buthrotum",
                 population = 56,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Apollonia",
                 population = 46,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Epidamnus",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Phoenice",
                 population = 41,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Antigoneia",
                 population = 31,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Oricum",
                 population = 25,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Byllis",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Passaron",
                 population = 26,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cassope",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Charadra",
                 population = 18,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gitana",
                 population = 27,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aulon",
                 population = 13,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Macedonia",
             "Achaea",
-            "Illyricum"
+            "Illyricum",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Illyricum",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "adriatic",
+        landing_difficulty = 44,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -3697,106 +4107,106 @@ return {
                 population = 131,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Scodra",
                 population = 73,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Narona",
                 population = 60,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Epidaurum",
                 population = 59,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Iader",
                 population = 47,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Siscia",
                 population = 39,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sirmium",
                 population = 34,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Emona",
                 population = 38,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Doclea",
                 population = 32,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dyrrhachium",
                 population = 24,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lissus",
                 population = 29,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ragusa",
                 population = 28,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Burnum",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Andetrium",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Delminium",
                 population = 22,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Apulia",
@@ -3804,12 +4214,25 @@ return {
             "Epirus",
             "Thracia",
             "Dacia",
-            "Germania Superior"
+            "Germania Superior",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Thracia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "aegean",
+        landing_difficulty = 52,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -3818,118 +4241,129 @@ return {
                 population = 132,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Philippopolis",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hadrianopolis",
                 population = 60,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Serdica",
                 population = 59,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Perinthus",
                 population = 51,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Anchialus",
                 population = 38,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mesembria",
                 population = 39,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Deultum",
                 population = 33,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cabyle",
                 population = 33,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Beroe Thraciae",
                 population = 33,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Traianopolis",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tomi",
                 population = 29,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Callatis",
                 population = 19,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Odessos",
                 population = 15,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Marcianopolis",
                 population = 24,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Macedonia",
             "Illyricum",
             "Dacia",
             "Bithynia",
-            "Asia Minor"
+            "Asia Minor",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Dacia",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -3938,117 +4372,130 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Apulum",
                 population = 72,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Napoca",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Porolissum",
                 population = 55,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Potaissa",
                 population = 42,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Drobeta",
                 population = 40,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tibiscum",
                 population = 34,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Romula",
                 population = 32,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Argidava",
                 population = 25,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Buridava",
                 population = 25,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cumidava",
                 population = 21,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Germisara",
                 population = 21,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dierna",
                 population = 21,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arcobadara",
                 population = 26,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carsium",
                 population = 19,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Illyricum",
             "Thracia",
             "Germania Superior",
-            "Magna Germania"
+            "Magna Germania",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Asia Minor",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "aegean",
+        landing_difficulty = 54,
         wealth = 9,
         unrest = 5,
         cities = {
@@ -4057,106 +4504,106 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pergamon",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Smyrna",
                 population = 57,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sardis",
                 population = 53,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Miletus",
                 population = 54,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Halicarnassus",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nicomedia",
                 population = 34,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ancyra",
                 population = 29,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tarsus",
                 population = 37,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Iconium",
                 population = 26,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tralles",
                 population = 30,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Laodicea",
                 population = 21,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Magnesia",
                 population = 20,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Priene",
                 population = 17,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Colossae",
                 population = 17,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Macedonia",
@@ -4165,12 +4612,25 @@ return {
             "Bithynia",
             "Galatia",
             "Cilicia",
-            "Aegyptus"
+            "Aegyptus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 70,
+            christianity = 20,
+            judaism = 10,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Bithynia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "black_sea",
+        landing_difficulty = 56,
         wealth = 3,
         unrest = 1,
         cities = {
@@ -4179,117 +4639,128 @@ return {
                 population = 124,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nicaea",
                 population = 77,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Chalcedon",
                 population = 56,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Prusa",
                 population = 54,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cius",
                 population = 54,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Heraclea Pontica",
                 population = 40,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Claudiopolis",
                 population = 39,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tium",
                 population = 30,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Apamea Myrlea",
                 population = 29,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bithynium",
                 population = 35,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Libyssa",
                 population = 29,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Prusias ad Hypium",
                 population = 27,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dadybra",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Modra",
                 population = 25,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Linoe",
                 population = 20,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Asia Minor",
             "Thracia",
             "Galatia",
-            "Pontus"
+            "Pontus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Galatia",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -4298,117 +4769,128 @@ return {
                 population = 120,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Pessinus",
                 population = 72,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tavium",
                 population = 59,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gordion",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Germa",
                 population = 51,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aspona",
                 population = 37,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Eccobriga",
                 population = 42,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gorbeus",
                 population = 32,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tolistobogii",
                 population = 25,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tectosages",
                 population = 29,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Trocmii",
                 population = 28,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Blucium",
                 population = 30,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sebasteia Galatiae",
                 population = 17,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Juliopolis",
                 population = 18,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Midaion",
                 population = 24,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Asia Minor",
             "Bithynia",
             "Cappadocia",
-            "Pontus"
+            "Pontus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Cappadocia",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -4417,118 +4899,131 @@ return {
                 population = 122,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tyana",
                 population = 78,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Melitene",
                 population = 55,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Comana",
                 population = 51,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sebasteia",
                 population = 43,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ariaratheia",
                 population = 47,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nyssa",
                 population = 37,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mokissos",
                 population = 29,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Podandos",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Faustinopolis",
                 population = 26,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Venasa",
                 population = 29,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nazianzus",
                 population = 21,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cybistra",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Soanda",
                 population = 21,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arabissus",
                 population = 18,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Galatia",
             "Pontus",
             "Cilicia",
             "Armenia",
-            "Syria"
+            "Syria",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Pontus",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "black_sea",
+        landing_difficulty = 62,
         wealth = 6,
         unrest = 4,
         cities = {
@@ -4537,117 +5032,130 @@ return {
                 population = 124,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sinope",
                 population = 79,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Trapezus",
                 population = 64,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Amisus",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cerasus",
                 population = 49,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Neocaesarea",
                 population = 48,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Zela",
                 population = 40,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Comana Pontica",
                 population = 38,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Polemonium",
                 population = 25,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sebastopolis",
                 population = 26,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Phazemon",
                 population = 33,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cabira",
                 population = 21,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Amastris",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tium Ponticum",
                 population = 26,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Themiskyra",
                 population = 22,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Bithynia",
             "Galatia",
             "Cappadocia",
-            "Armenia"
+            "Armenia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Cilicia",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "eastern_med",
+        landing_difficulty = 58,
         wealth = 7,
         unrest = 5,
         cities = {
@@ -4656,116 +5164,129 @@ return {
                 population = 125,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Anazarbus",
                 population = 73,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Seleucia ad Calycadnum",
                 population = 62,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Aegeae",
                 population = 60,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mopsuestia",
                 population = 49,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Issus",
                 population = 46,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Adana",
                 population = 38,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Corycus",
                 population = 33,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Olba",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Soli Pompeiopolis",
                 population = 26,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Mallus",
                 population = 22,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Epiphaneia",
                 population = 30,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Flaviopolis",
                 population = 20,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Castabala",
                 population = 23,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Elaeusa Sebaste",
                 population = 22,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Asia Minor",
             "Cappadocia",
-            "Syria"
+            "Syria",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Syria",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "levant",
+        landing_difficulty = 64,
         wealth = 5,
         unrest = 1,
         cities = {
@@ -4774,106 +5295,106 @@ return {
                 population = 129,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Damascus",
                 population = 82,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Apamea",
                 population = 65,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Emesa",
                 population = 49,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Palmyra",
                 population = 46,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Beroea Syriae",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Laodicea ad Mare",
                 population = 36,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Seleucia Pieria",
                 population = 28,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Chalcis",
                 population = 27,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Cyrrhus",
                 population = 30,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dura Europos",
                 population = 30,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Samosata",
                 population = 31,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Zeugma",
                 population = 29,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hierapolis Bambyce",
                 population = 16,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Raphanea",
                 population = 13,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Cilicia",
@@ -4881,12 +5402,25 @@ return {
             "Judaea",
             "Aegyptus",
             "Mesopotamia",
-            "Armenia"
+            "Armenia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 65,
+            judaism = 18,
+            christianity = 17,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Judaea",
+        campaign_access = "coastal",
+        land_access = true,
+        sea_access = true,
+        sea_zone = "levant",
+        landing_difficulty = 58,
         wealth = 4,
         unrest = 2,
         cities = {
@@ -4895,115 +5429,126 @@ return {
                 population = 130,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Caesarea Maritima",
                 population = 79,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Joppa",
                 population = 58,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Jericho",
                 population = 48,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hebron",
                 population = 54,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Bethlehem",
                 population = 39,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tiberias",
                 population = 40,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sepphoris",
                 population = 33,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Masada",
                 population = 36,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Gamla",
                 population = 32,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ashkelon",
                 population = 25,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ashdod",
                 population = 24,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Lydda",
                 population = 26,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Antipatris",
                 population = 15,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Scythopolis",
                 population = 21,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Syria",
-            "Aegyptus"
+            "Aegyptus",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "judaism",
+        religion_pressure = {
+            judaism = 82,
+            paganism = 12,
+            christianity = 6,
+        },
+        conversion_progress = 0,
+        religious_integrity = 62,
     },
     {
         name = "Armenia",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 5,
         unrest = 3,
         cities = {
@@ -5012,117 +5557,128 @@ return {
                 population = 122,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tigranocerta",
                 population = 71,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vagharshapat",
                 population = 62,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Erebuni",
                 population = 56,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Armavir",
                 population = 50,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Satala",
                 population = 47,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Theodosiopolis",
                 population = 41,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nisibis Armeniae",
                 population = 37,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arsamosata",
                 population = 36,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Tomisa",
                 population = 31,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Ani Kamakh",
                 population = 21,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Karin",
                 population = 30,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Vaspurakan",
                 population = 23,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dvin",
                 population = 26,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Van",
                 population = 19,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Pontus",
             "Cappadocia",
             "Syria",
-            "Mesopotamia"
+            "Mesopotamia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 85,
+            judaism = 7,
+            christianity = 8,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
     },
     {
         name = "Mesopotamia",
+        campaign_access = "land",
+        land_access = true,
+        sea_access = false,
         wealth = 8,
         unrest = 4,
         cities = {
@@ -5131,111 +5687,119 @@ return {
                 population = 126,
                 type = "столица",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Seleucia on Tigris",
                 population = 74,
                 type = "порт",
                 difficulty = 1,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nisibis",
                 population = 61,
                 type = "торговый",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Edessa",
                 population = 52,
                 type = "крепость",
                 difficulty = 2,
-                captured = false
+                captured = false,
             },
             {
                 name = "Carrhae",
                 population = 45,
                 type = "земледельческий",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Hatra",
                 population = 41,
                 type = "ремесленный",
                 difficulty = 3,
-                captured = false
+                captured = false,
             },
             {
                 name = "Babylon",
                 population = 42,
                 type = "военный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Dura",
                 population = 30,
                 type = "религиозный",
                 difficulty = 4,
-                captured = false
+                captured = false,
             },
             {
                 name = "Singara",
                 population = 35,
                 type = "административный",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Arbela",
                 population = 30,
                 type = "рудники",
                 difficulty = 5,
-                captured = false
+                captured = false,
             },
             {
                 name = "Charax Spasinu",
                 population = 23,
                 type = "племенной",
                 difficulty = 6,
-                captured = false
+                captured = false,
             },
             {
                 name = "Susa",
                 population = 19,
                 type = "речной",
                 difficulty = 7,
-                captured = false
+                captured = false,
             },
             {
                 name = "Opis",
                 population = 28,
                 type = "осадный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Sippar",
                 population = 24,
                 type = "пограничный",
                 difficulty = 8,
-                captured = false
+                captured = false,
             },
             {
                 name = "Nineveh",
                 population = 22,
                 type = "культурный",
                 difficulty = 9,
-                captured = false
-            }
+                captured = false,
+            },
         },
         neighbors = {
             "Syria",
-            "Armenia"
+            "Armenia",
         },
-        map_data_version = "2.21.1-city-rosters-v1"
-    }
+        map_data_version = "2.21.1-city-rosters-v1",
+        religion = "paganism",
+        religion_pressure = {
+            paganism = 65,
+            judaism = 25,
+            christianity = 10,
+        },
+        conversion_progress = 0,
+        religious_integrity = 55,
+    },
 }

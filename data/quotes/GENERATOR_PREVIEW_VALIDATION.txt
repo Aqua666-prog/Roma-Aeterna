@@ -1,3 +1,0 @@
-great_people_quotes.json: entries=144, final_preview_missing=0, final_preview_malformed=0
-tech_quotes.json: entries=75, final_preview_missing=0, final_preview_malformed=0
-world_wonder_quotes.json: entries=75, final_preview_missing=0, final_preview_malformed=0

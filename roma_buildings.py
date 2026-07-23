@@ -15,8 +15,8 @@ import math
 import random
 from typing import Any
 
-MODULE_VERSION = "1.0.2-opera-publica-purchase-fix"
-SCHEMA_VERSION = 2
+MODULE_VERSION = "1.1.0-religious-pressure"
+SCHEMA_VERSION = 3
 PROJECT_COOLDOWN_DECLINED = 7
 PROJECT_COOLDOWN_DEFERRED = 2
 
@@ -4647,6 +4647,42 @@ BUILDING_CATALOG: dict[str, dict[str, Any]] = {'well': {'index': 1,
                         'grain_cost': 0}}
 
 
+
+# ─── RELIGIO PROVINCIARUM: давление храмов и религиозная целостность ───────
+# ``official`` означает давление текущей государственной религии. Остальные
+# ключи направляют давление конкретной конфессии, даже если она является
+# меньшинством в провинции.
+RELIGIOUS_BUILDING_PROFILE: dict[str, dict[str, Any]] = {'shrine': {'official': 2, 'integrity': 1},
+ 'temple_capitoline': {'paganism': 7, 'integrity': 5},
+ 'temple_mars': {'paganism': 5, 'integrity': 3},
+ 'temple_vesta': {'paganism': 5, 'integrity': 5},
+ 'temple_ceres': {'paganism': 4, 'integrity': 3},
+ 'temple_mercury': {'paganism': 4, 'integrity': 2},
+ 'temple_neptune': {'paganism': 4, 'integrity': 2},
+ 'temple_isis': {'paganism': 5, 'integrity': 3},
+ 'mithraeum': {'paganism': 6, 'integrity': 3},
+ 'augural_college': {'paganism': 5, 'integrity': 4},
+ 'synagogue': {'judaism': 6, 'integrity': 4},
+ 'beth_midrash': {'judaism': 5, 'integrity': 6},
+ 'mikveh': {'judaism': 3, 'integrity': 4},
+ 'church_basilica': {'christianity': 6, 'integrity': 4},
+ 'bishop_seat': {'christianity': 8, 'integrity': 7},
+ 'monastery': {'christianity': 5, 'integrity': 6},
+ 'hospice': {'christianity': 2, 'integrity': 3},
+ 'pantheon': {'paganism': 10, 'integrity': 8}}
+
+for _building_id, _profile in RELIGIOUS_BUILDING_PROFILE.items():
+    if _building_id not in BUILDING_CATALOG:
+        continue
+    _row = BUILDING_CATALOG[_building_id]
+    _pressure = {
+        str(_key): float(_value)
+        for _key, _value in _profile.items()
+        if _key != "integrity" and float(_value) != 0.0
+    }
+    _row["religion_pressure"] = _pressure
+    _row["religion_integrity"] = int(_profile.get("integrity", 0))
+
 BUILDING_CATALOG["via_appia_terminus"]["city_types"] = ["столица", "административный"]
 
 CITY_METRICS = ("prosperity", "order", "health", "infrastructure", "culture", "loyalty", "food", "defense", "trade", "pollution")
@@ -4889,6 +4925,12 @@ def effects_text(building: dict, ctx: dict | None = None) -> str:
         if abs(_f(value))>1e-6: parts.append(f"{_f(value):+g} {resource_name(key,ctx)}/ход")
     for key,value in _dict(effects.get("city_metrics")).items():
         if value: parts.append(f"{key} {int(value):+d}")
+    pressure = _dict(building.get("religion_pressure"))
+    if pressure:
+        parts.append("религиозное давление " + ", ".join(f"{key} +{_f(value):g}" for key, value in pressure.items()))
+    integrity = _i(building.get("religion_integrity", 0))
+    if integrity:
+        parts.append(f"Integrity +{integrity}")
     return "; ".join(parts) or "долгосрочное развитие города"
 
 
@@ -5006,7 +5048,12 @@ def execute_project(player: Any, province: dict, city: dict, option: dict, ctx: 
 
 def economy_snapshot(player: Any, ctx: dict | None = None) -> dict:
     state=_dict(getattr(player,"city_system",{})); cities=[x for x in _dict(state.get("cities")).values() if isinstance(x,dict) and x.get("active")]
-    result={"gold_per_turn":0,"grain_per_turn":0,"science_per_turn":0,"faith_per_turn":0,"upkeep":0,"resource_output":{},"resource_input":{},"sector_bonuses":{},"province_sector_bonuses":{},"building_count":0}
+    result={
+        "gold_per_turn":0,"grain_per_turn":0,"science_per_turn":0,"faith_per_turn":0,
+        "upkeep":0,"resource_output":{},"resource_input":{},"sector_bonuses":{},
+        "province_sector_bonuses":{},"building_count":0,
+        "religion_pressure":{},"religion_integrity":{},
+    }
     for city in cities:
         ensure_city(city); province=str(city.get("province", "")); psec=result["province_sector_bonuses"].setdefault(province,{k:0.0 for k in SECTORS})
         for bid in city["buildings"]:
@@ -5015,6 +5062,12 @@ def economy_snapshot(player: Any, ctx: dict | None = None) -> dict:
             result["building_count"]+=1; result["upkeep"]+=_i(building.get("upkeep",0))
             effects=_dict(building.get("effects"))
             for key in ("gold_per_turn","grain_per_turn","science_per_turn","faith_per_turn"): result[key]+=_i(effects.get(key,0))
+            province_pressure=result["religion_pressure"].setdefault(province,{})
+            for religion_key,value in _dict(building.get("religion_pressure")).items():
+                province_pressure[str(religion_key)]=province_pressure.get(str(religion_key),0.0)+_f(value)
+            integrity=_i(building.get("religion_integrity",0))
+            if integrity:
+                result["religion_integrity"][province]=result["religion_integrity"].get(province,0)+integrity
             for key,value in _dict(effects.get("sector_bonuses")).items():
                 result["sector_bonuses"][key]=result["sector_bonuses"].get(key,0.0)+_f(value); psec[key]=psec.get(key,0.0)+_f(value)
             for key,value in _dict(effects.get("resource_yields")).items():

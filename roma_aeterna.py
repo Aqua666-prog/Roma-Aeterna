@@ -7,7 +7,7 @@ ROMA AETERNA — Стратегия про Рим.
 Полная история версий вынесена в CHANGELOG_ROMA_AETERNA_v2_24_4.md.
 """
 
-GAME_VERSION = "3.4.3-single-quote-source"
+GAME_VERSION = "4.3.0-aerarium-unicum"
 
 import random
 import ast
@@ -87,6 +87,16 @@ except Exception as _city_events_import_error:
     CITY_EVENTS = None
     CITY_EVENTS_IMPORT_ERROR = f"{type(_city_events_import_error).__name__}: {_city_events_import_error}"
 
+# ─── RELIGIO PROVINCIALIS: ДОГМАТЫ, ДОКТРИНЫ И ВЕРА ПРОВИНЦИЙ ────────────
+RELIGION_SYSTEM_IMPORT_ERROR = ""
+try:
+    import roma_religion as RELIGION_SYSTEM
+except Exception as _religion_system_import_error:
+    RELIGION_SYSTEM = None
+    RELIGION_SYSTEM_IMPORT_ERROR = (
+        f"{type(_religion_system_import_error).__name__}: {_religion_system_import_error}"
+    )
+
 # ─── ORBIS POLITICUS: СТРАТЕГИЧЕСКАЯ ДИПЛОМАТИЯ И ИИ ДЕРЖАВ ─────────────
 DIPLOMACY_AI_IMPORT_ERROR = ""
 try:
@@ -109,6 +119,14 @@ try:
 except Exception as _world_council_import_error:
     WORLD_COUNCIL = None
     WORLD_COUNCIL_IMPORT_ERROR = f"{type(_world_council_import_error).__name__}: {_world_council_import_error}"
+
+# ─── RES PUBLICA ORBIS: ЕДИНЫЙ ЦЕНТР МИРОВОЙ ПОЛИТИКИ ───────────────────
+WORLD_POLITICS_IMPORT_ERROR = ""
+try:
+    import roma_world_politics as WORLD_POLITICS
+except Exception as _world_politics_import_error:
+    WORLD_POLITICS = None
+    WORLD_POLITICS_IMPORT_ERROR = f"{type(_world_politics_import_error).__name__}: {_world_politics_import_error}"
 
 WARFARE_AI_IMPORT_ERROR = ""
 try:
@@ -594,7 +612,7 @@ try:
                 "🗺 Провинции",
                 f"{len(player.provinces)}/{len(PROVINCES_DATA)}"
             )
-            resources.add_row("⚔ Легионы", str(len(player.legions)))
+            resources.add_row("🦅 Группы армий", str(len(safe_list(getattr(player, "army_group_system", {}).get("groups", [])))))
             resources.add_row("⚖ Порядок", str(max(0, 100-player.effective_unrest())))
 
             console.print(
@@ -626,44 +644,49 @@ try:
                 return table
 
             console.print(menu_panel(
-                "⚔ Военная кампания",
+                "⚔ Кампания",
                 [
-                    ("1", "Провинции", "управление территориями"),
-                    ("2", "Легионы", "армия и командиры"),
-                    ("3", "Битвы", "сражения и победы"),
+                    ("1", "Провинции", "карта походов и управление"),
+                    ("M", "Города и муниципии", "население и городские события"),
+                    ("2", "Армии Рима", "группы, магазин и развитие"),
+                    ("4", "Завершить ход", "следующий год и события"),
+                    ("V", "Условия победы", "цели кампании"),
+                    ("N", "Летопись Империи", "события и причины"),
                 ]
             ))
 
             console.print(menu_panel(
                 "🏛 Государство",
                 [
-                    ("4", "Сенат", "политика и реформы"),
-                    ("5", "Дипломатия", "союзы и договоры"),
-                    ("6", "Религия", "вера и культы"),
+                    ("P", "Сенат и роды", "политика и реформы"),
+                    ("D", "Религия", "вера и культы"),
+                    ("C", "Советник Республики", "стратегические рекомендации"),
                 ]
             ))
 
             console.print(menu_panel(
-                "💰 Имперское управление",
+                "💰 Экономика",
                 [
-                    ("7", "Экономика", "доходы и торговля"),
-                    ("8", "Наука", "технологии и открытия"),
-                    ("9", "Архитектура", "города и великие здания"),
+                    ("5", "Экономика", "рынок, ресурсы и ведомость"),
                 ]
             ))
 
             console.print(menu_panel(
-                "⭐ Наследие Рима",
+                "⭐ Развитие и события",
                 [
+                    ("6", "Мировая политика", "державы, дипломатия и войны"),
+                    ("7", "Наука и стройки", "технологии и исследования"),
+                    ("9", "Баттл-пасс", "уровни и награды"),
                     ("L", "Великие люди", "личности и бонусы"),
                     ("W", "Чудеса мира", "великие сооружения"),
-                    ("V", "Победа", "цели кампании"),
+                    ("Y", "Пророчества", "знамения Республики"),
                 ]
             ))
 
             console.print(menu_panel(
                 "💾 Система",
                 [
+                    ("8", "Лог событий", "последние известия"),
                     ("S", "Сохранить", "записать кампанию"),
                     ("Q", "Выход", "завершить игру"),
                 ]
@@ -671,7 +694,7 @@ try:
 
             console.print(
                 "[italic bright_black]"
-                "Roma invicta • Выберите приказ империи"
+                "Roma invicta • Все атаки начинаются с выбора провинции"
                 "[/]"
             )
 
@@ -682,23 +705,28 @@ try:
             print(hr())
 
             print("  1 — Провинции")
-            print("  2 — Легионы")
-            print("  3 — Битвы")
-            print("  4 — Сенат")
-            print("  5 — Дипломатия")
-            print("  6 — Религия")
-            print("  7 — Экономика")
-            print("  8 — Наука")
-            print("  9 — Архитектура")
+            print("  M — Города и муниципии")
+            print("  2 — Армии Рима")
+            print("  4 — Завершить ход")
+            print("  V — Условия победы")
+            print("  N — Летопись Империи")
+            print("  P — Сенат и роды")
+            print("  D — Религия")
+            print("  C — Советник Республики")
+            print("  5 — Экономика")
+            print("  6 — Мировая политика")
+            print("  7 — Наука и стройки")
+            print("  9 — Баттл-пасс")
             print("  L — Великие люди")
             print("  W — Чудеса мира")
-            print("  V — Победа")
+            print("  Y — Пророчества")
+            print("  8 — Лог событий")
             print("  S — Сохранить")
             print("  Q — Выход")
 
         return read_choice_secret(
             "\n  ✦ Ваш имперский приказ: ",
-            ["1","2","3","4","5","6","7","8","9","L","W","V","S","Q"],
+            ["1","M","2","4","V","N","P","D","C","5","6","7","9","L","W","Y","8","S","Q"],
             SECRET_UNLOCK_CODE,
             "CHEAT"
         )
@@ -1482,6 +1510,10 @@ DEFAULT_SETTINGS = {
     "research_invest_amount": 20,
     "base_gold_income": 80,
     "base_grain_income": 20,
+    # Deprecated: Aerarium Unicum запрещает ресурсному модулю доступ к казне.
+    # Ключи оставлены только для чтения старых roma_settings.json.
+    "resource_auto_buy_default": False,
+    "resource_auto_buy_budget_share": 0.0,
     "random_event_chance": 0.4,
     "choice_event_chance": 0.5,
     "province_unrest_growth_chance": 0.2,
@@ -2550,7 +2582,90 @@ CITY_DIFFICULTY_LABELS = {
     9: "легендарная осада", 10: "сердце провинции",
 }
 
-MAP_DATA_VERSION = "2.21.1-city-rosters-v1"
+MAP_DATA_VERSION = "4.1.0-province-routes-v1"
+
+# ─── ROMA 4.1: МАРШРУТЫ ЗАВОЕВАНИЯ ПРОВИНЦИЙ ──────────────────────────────
+# Lua-файл является главным источником. Этот словарь — безопасный fallback для
+# встроенной карты и старых пользовательских provinces.lua.
+DEFAULT_PROVINCE_CAMPAIGN_ACCESS: dict[str, dict[str, Any]] = {
+    "Latium": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"tyrrhenian", "landing_difficulty":22},
+    "Campania": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"tyrrhenian", "landing_difficulty":24},
+    "Etruria": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"tyrrhenian", "landing_difficulty":26},
+    "Umbria": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Samnium": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Apulia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"ionian", "landing_difficulty":30},
+    "Bruttium": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"sicilian", "landing_difficulty":30},
+    "Liguria": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"ligurian", "landing_difficulty":34},
+    "Gallia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"ligurian", "landing_difficulty":38},
+    "Gallia Narbonensis": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"ligurian", "landing_difficulty":36},
+    "Aquitania": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"atlantic", "landing_difficulty":48},
+    "Belgica": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"britannic", "landing_difficulty":58},
+    "Germania Inferior": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"northern", "landing_difficulty":64},
+    "Germania Superior": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Magna Germania": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Hispania": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"western_med", "landing_difficulty":42},
+    "Lusitania": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"atlantic", "landing_difficulty":46},
+    "Baetica": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"western_med", "landing_difficulty":42},
+    "Britannia": {"campaign_access":"island", "land_access":False, "sea_access":True, "sea_zone":"britannic", "landing_difficulty":60},
+    "Caledonia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"britannic", "landing_difficulty":66},
+    "Hibernia": {"campaign_access":"island", "land_access":False, "sea_access":True, "sea_zone":"britannic", "landing_difficulty":68},
+    "Sicilia": {"campaign_access":"island", "land_access":False, "sea_access":True, "sea_zone":"sicilian", "landing_difficulty":32},
+    "Sardinia et Corsica": {"campaign_access":"island", "land_access":False, "sea_access":True, "sea_zone":"sicilian", "landing_difficulty":30},
+    "Carthago": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"african", "landing_difficulty":48},
+    "Numidia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"african", "landing_difficulty":46},
+    "Mauretania": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"western_med", "landing_difficulty":42},
+    "Cyrenaica": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"eastern_med", "landing_difficulty":48},
+    "Aegyptus": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"eastern_med", "landing_difficulty":60},
+    "Macedonia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"aegean", "landing_difficulty":46},
+    "Achaea": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"aegean", "landing_difficulty":44},
+    "Epirus": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"ionian", "landing_difficulty":42},
+    "Illyricum": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"adriatic", "landing_difficulty":44},
+    "Thracia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"aegean", "landing_difficulty":52},
+    "Dacia": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Asia Minor": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"aegean", "landing_difficulty":54},
+    "Bithynia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"black_sea", "landing_difficulty":56},
+    "Galatia": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Cappadocia": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Pontus": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"black_sea", "landing_difficulty":62},
+    "Cilicia": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"eastern_med", "landing_difficulty":58},
+    "Syria": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"levant", "landing_difficulty":64},
+    "Judaea": {"campaign_access":"coastal", "land_access":True, "sea_access":True, "sea_zone":"levant", "landing_difficulty":58},
+    "Armenia": {"campaign_access":"land", "land_access":True, "sea_access":False},
+    "Mesopotamia": {"campaign_access":"land", "land_access":True, "sea_access":False},
+}
+
+PROVINCE_ACCESS_LABELS = {
+    "land": "континентальная",
+    "coastal": "прибрежная",
+    "island": "островная",
+}
+
+
+def _normalize_province_route_fields(province: dict | None) -> dict:
+    if not isinstance(province, dict):
+        return {}
+    fallback = DEFAULT_PROVINCE_CAMPAIGN_ACCESS.get(str(province.get("name")), {})
+    access = str(province.get("campaign_access", fallback.get("campaign_access", "land"))).lower()
+    if access not in PROVINCE_ACCESS_LABELS:
+        access = "land"
+    province["campaign_access"] = access
+    province["land_access"] = bool(province.get("land_access", fallback.get("land_access", access != "island")))
+    province["sea_access"] = bool(province.get("sea_access", fallback.get("sea_access", access in {"coastal", "island"})))
+    zone = province.get("sea_zone", fallback.get("sea_zone"))
+    province["sea_zone"] = str(zone) if zone else None
+    province["landing_difficulty"] = safe_int(
+        province.get("landing_difficulty", fallback.get("landing_difficulty", 40)),
+        safe_int(fallback.get("landing_difficulty", 40), 40),
+        0,
+        100,
+    )
+    return province
+
+
+def normalize_province_route_data() -> None:
+    for province in PROVINCES_DATA if isinstance(PROVINCES_DATA, list) else []:
+        _normalize_province_route_fields(province)
+
 
 def normalize_province_city_data():
     """Каждая провинция получает до 15 городов с уровнем сложности 1-10."""
@@ -2571,8 +2686,10 @@ def normalize_province_city_data():
             })
         prov["cities"] = cities
         prov["map_data_version"] = MAP_DATA_VERSION
+        _normalize_province_route_fields(prov)
 
 normalize_province_city_data()
+normalize_province_route_data()
 
 def ensure_city_campaigns(player):
     if not hasattr(player, "city_campaigns") or not isinstance(player.city_campaigns, dict):
@@ -2776,21 +2893,133 @@ def captured_province_copy(name: str) -> dict:
     return prov
 
 def province_by_name(name: str) -> dict:
-    return next((p for p in PROVINCES_DATA if p["name"] == name), None)
+    province = next((p for p in PROVINCES_DATA if p["name"] == name), None)
+    return _normalize_province_route_fields(province) if province else None
+
+
+def province_access_spec(province_or_name: dict | str | None) -> dict[str, Any]:
+    province = province_or_name if isinstance(province_or_name, dict) else province_by_name(str(province_or_name or ""))
+    province = _normalize_province_route_fields(province)
+    access = str(province.get("campaign_access", "land")) if province else "land"
+    return {
+        "campaign_access": access,
+        "label": PROVINCE_ACCESS_LABELS.get(access, "континентальная"),
+        "land_access": bool(province.get("land_access", True)) if province else True,
+        "sea_access": bool(province.get("sea_access", False)) if province else False,
+        "sea_zone": province.get("sea_zone") if province else None,
+        "landing_difficulty": safe_int(province.get("landing_difficulty", 40), 40, 0, 100) if province else 40,
+    }
+
+
+def _owned_province_name_set(player) -> set[str]:
+    return {
+        str(p.get("name")) for p in safe_list(getattr(player, "provinces", []))
+        if isinstance(p, dict) and p.get("name")
+    }
+
+
+def province_land_reachable(player, province_or_name: dict | str) -> bool:
+    province = province_or_name if isinstance(province_or_name, dict) else province_by_name(str(province_or_name))
+    if not isinstance(province, dict) or not province_access_spec(province)["land_access"]:
+        return False
+    owned = _owned_province_name_set(player)
+    if str(province.get("name")) in owned:
+        return False
+    return bool(owned.intersection(str(x) for x in safe_list(province.get("neighbors"))))
+
+
+def _sea_zone_hops(start_zones: set[str], target_zone: str, max_hops: int) -> int | None:
+    if not target_zone or not start_zones:
+        return None
+    if target_zone in start_zones:
+        return 0
+    zones = globals().get("SEA_ZONES", {})
+    frontier = set(start_zones)
+    visited = set(start_zones)
+    for hop in range(1, max(0, max_hops) + 1):
+        nxt = set()
+        for zone in frontier:
+            for neighbor in safe_list(safe_dict(zones.get(zone)).get("neighbors")):
+                neighbor = str(neighbor)
+                if neighbor == target_zone:
+                    return hop
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    nxt.add(neighbor)
+        frontier = nxt
+        if not frontier:
+            break
+    return None
+
+
+def naval_campaign_range(player) -> int:
+    owned_zones = {
+        str(province_access_spec(p).get("sea_zone"))
+        for p in safe_list(getattr(player, "provinces", []))
+        if isinstance(p, dict) and province_access_spec(p).get("sea_zone")
+    }
+    tech_bonus = 1 if any(t in safe_list(getattr(player, "tech_researched", [])) for t in ("admiralty", "mare_nostrum")) else 0
+    return min(4, 1 + len(owned_zones) // 3 + tech_bonus)
+
+
+def province_sea_reachable(player, province_or_name: dict | str) -> bool:
+    province = province_or_name if isinstance(province_or_name, dict) else province_by_name(str(province_or_name))
+    if not isinstance(province, dict):
+        return False
+    spec = province_access_spec(province)
+    if not spec["sea_access"] or not spec["sea_zone"]:
+        return False
+    owned = _owned_province_name_set(player)
+    if str(province.get("name")) in owned:
+        return False
+    owned_zones = {
+        str(province_access_spec(p).get("sea_zone"))
+        for p in safe_list(getattr(player, "provinces", []))
+        if isinstance(p, dict) and province_access_spec(p).get("sea_zone")
+    }
+    if not owned_zones:
+        return False
+    return _sea_zone_hops(owned_zones, str(spec["sea_zone"]), naval_campaign_range(player)) is not None
+
+
+def province_attack_routes(player, province_or_name: dict | str) -> list[str]:
+    routes: list[str] = []
+    if province_land_reachable(player, province_or_name):
+        routes.append("land")
+    if province_sea_reachable(player, province_or_name):
+        routes.append("sea")
+    return routes
+
+
+def province_route_label(player, province_or_name: dict | str) -> str:
+    routes = province_attack_routes(player, province_or_name)
+    if routes == ["land"]:
+        return "🛡 суша"
+    if routes == ["sea"]:
+        return "⚓ флот"
+    if set(routes) == {"land", "sea"}:
+        return "🛡/⚓ выбор"
+    return "🔒 нет маршрута"
+
 
 def frontier_provinces(player) -> list:
-    """
-    Провинции, смежные хотя бы с одной нашей, но ещё не завоёванные —
-    то есть реально доступные для похода в этот момент.
-    """
-    owned = {p["name"] for p in player.provinces}
-    frontier_names = set()
-    for name in owned:
-        prov_def = province_by_name(name)
-        if prov_def:
-            frontier_names.update(prov_def["neighbors"])
-    frontier_names -= owned
-    return [p for p in PROVINCES_DATA if p["name"] in frontier_names]
+    """Только реальные сухопутные цели; морские цели выдаёт campaign_provinces()."""
+    return [
+        province for province in PROVINCES_DATA
+        if isinstance(province, dict) and province_land_reachable(player, province)
+    ]
+
+
+def campaign_provinces(player) -> list[dict]:
+    """Все провинции, доступные хотя бы одним маршрутом: сушей или морем."""
+    owned = _owned_province_name_set(player)
+    result = []
+    for province in PROVINCES_DATA if isinstance(PROVINCES_DATA, list) else []:
+        if not isinstance(province, dict) or str(province.get("name")) in owned:
+            continue
+        if province_attack_routes(player, province):
+            result.append(province)
+    return result
 
 
 GOVERNOR_FIRST_NAMES = ["Гай", "Марк", "Луций", "Гней", "Тит", "Публий", "Квинт", "Аппий"]
@@ -2847,11 +3076,17 @@ def province_template_copy(name: str) -> dict:
     base = province_by_name(name)
     if not base:
         return {"name": name, "wealth": 1, "unrest": 0, "cities": []}
+    route = province_access_spec(base)
     return {
         "name": base["name"],
         "wealth": base["wealth"],
         "unrest": base["unrest"],
         "cities": [c.copy() for c in base.get("cities", [])],
+        "campaign_access": route["campaign_access"],
+        "land_access": route["land_access"],
+        "sea_access": route["sea_access"],
+        "sea_zone": route["sea_zone"],
+        "landing_difficulty": route["landing_difficulty"],
         "map_data_version": MAP_DATA_VERSION,
     }
 
@@ -2894,6 +3129,15 @@ def ensure_province_details(player):
                     rebuilt.append(row)
                 prov["cities"] = rebuilt
                 prov["map_data_version"] = MAP_DATA_VERSION
+        if base:
+            route = province_access_spec(base)
+            prov["campaign_access"] = route["campaign_access"]
+            prov["land_access"] = route["land_access"]
+            prov["sea_access"] = route["sea_access"]
+            prov["sea_zone"] = route["sea_zone"]
+            prov["landing_difficulty"] = route["landing_difficulty"]
+        else:
+            _normalize_province_route_fields(prov)
         prov.setdefault("wealth", base.get("wealth", 1) if base else 1)
         prov.setdefault("unrest", base.get("unrest", 0) if base else 0)
         prov["wealth"] = safe_int(prov.get("wealth", base.get("wealth", 1) if base else 1), base.get("wealth", 1) if base else 1, 0, 99)
@@ -9742,7 +9986,7 @@ SACRED_GENERAL_EFFECTS = {
     "paganism": {"battle_attack":1,"army_morale_percent":0.04,"glory_per_turn":1},
 }
 
-def ensure_religion_state(player: "Player"):
+def _legacy_ensure_religion_state(player: "Player"):
     if not hasattr(player, "religion"):
         player.religion = None
     if not hasattr(player, "faith"):
@@ -9757,7 +10001,7 @@ def ensure_religion_state(player: "Player"):
     player.sacred_generals = [g for g in player.sacred_generals if player.religion in SACRED_GENERALS and g in SACRED_GENERALS[player.religion]] if player.religion else []
 
 
-def religion_effect(player: "Player", effect_key: str, default=0):
+def _legacy_religion_effect(player: "Player", effect_key: str, default=0):
     ensure_religion_state(player)
     total = default
     power = 1.0
@@ -9777,7 +10021,7 @@ def religion_effect(player: "Player", effect_key: str, default=0):
     return total
 
 
-def choose_religion(player: "Player"):
+def _legacy_choose_religion(player: "Player"):
     ensure_religion_state(player)
     if player.religion:
         print(clr("  Государственная религия уже выбрана и не может быть изменена.", C.RED)); pause(); return
@@ -9808,7 +10052,7 @@ def choose_religion(player: "Player"):
     pause()
 
 
-def next_religious_institute(player: "Player"):
+def _legacy_next_religious_institute(player: "Player"):
     ensure_religion_state(player)
     if not player.religion: return None
     owned = set(player.religious_institutes)
@@ -9839,7 +10083,7 @@ def show_religious_institute_card(inst: dict):
         ui_wrap(f"Эффект: {religion_effects_text(inst.get('effects', {}))}", indent="  ", subsequent="  ", color=C.GREEN)
 
 
-def unlock_next_religious_institute(player: "Player"):
+def _legacy_unlock_next_religious_institute(player: "Player"):
     ensure_religion_state(player)
     if not player.religion:
         choose_religion(player); return
@@ -9857,7 +10101,7 @@ def unlock_next_religious_institute(player: "Player"):
     pause()
 
 
-def show_religion_menu(player: "Player"):
+def _legacy_show_religion_menu(player: "Player"):
     ensure_religion_state(player)
     while True:
         rui_screen_start(); rui_header("РЕЛИГИЯ", "🕯", C.GOLD)
@@ -9893,7 +10137,7 @@ def show_religion_menu(player: "Player"):
         elif ch == "4": show_religion_event_log(player)
 
 
-def show_religious_institutes_list(player: "Player"):
+def _legacy_show_religious_institutes_list(player: "Player"):
     rui_screen_start(); info = RELIGION_CHOICES[player.religion]; rui_header(f"ИНСТИТУТЫ: {info['name'].upper()}", info["icon"], C.GOLD)
     owned = set(player.religious_institutes)
     items = sorted([x for x in RELIGIOUS_INSTITUTES.values() if x["religion"] == player.religion], key=lambda x: x["order"])
@@ -9913,7 +10157,7 @@ def show_religious_institutes_list(player: "Player"):
     pause()
 
 
-def show_sacred_generals(player: "Player"):
+def _legacy_show_sacred_generals(player: "Player"):
     rui_screen_start(); info = RELIGION_CHOICES[player.religion]; rui_header("СВЯЩЕННЫЕ ПОЛКОВОДЦЫ", info["icon"], C.GOLD)
     owned = set(player.sacred_generals)
     if RICH_AVAILABLE:
@@ -9932,7 +10176,7 @@ def show_sacred_generals(player: "Player"):
     pause()
 
 
-def show_religion_event_log(player: "Player"):
+def _legacy_show_religion_event_log(player: "Player"):
     rui_screen_start(); rui_header("РЕЛИГИОЗНЫЕ СОБЫТИЯ", "🕯", C.GOLD)
     for line in player.religion_event_log[-12:] or ["Событий ещё не было."]:
         rui_info(line, C.CYAN)
@@ -9951,7 +10195,7 @@ def apply_religion_event_reward(player: "Player", reward: dict):
         player.metals["iron"] = player.metals.get("iron", 0) + int(reward["metals_iron"])
 
 
-def maybe_religion_event(player: "Player"):
+def _legacy_maybe_religion_event(player: "Player"):
     ensure_religion_state(player)
     if not player.religion: return
     chance = SETTINGS.get("religion_event_chance", 0.08) + max(0, religion_effect(player, "event_good_chance", 0))
@@ -9967,7 +10211,7 @@ def maybe_religion_event(player: "Player"):
     add_battlepass_xp(player, 4)
 
 
-def maybe_spawn_sacred_general(player: "Player"):
+def _legacy_maybe_spawn_sacred_general(player: "Player"):
     ensure_religion_state(player)
     if not player.religion: return
     available = [g for g in SACRED_GENERALS[player.religion] if g not in player.sacred_generals]
@@ -9980,6 +10224,91 @@ def maybe_spawn_sacred_general(player: "Player"):
     print(clr(f"  Эффект добавлен навсегда: {religion_effects_text(SACRED_GENERAL_EFFECTS[player.religion])}", C.GREEN))
     log_event(player, f"Священный полководец: {name}")
     add_battlepass_xp(player, 12)
+
+
+# ─── RELIGIO PROVINCIALIS: МОСТ К НОВОМУ ВНЕШНЕМУ ЯДРУ ────────────────────
+# Старые функции остаются аварийным резервом. При наличии roma_religion.py все
+# обращения основного файла перенаправляются в новую систему без ломки меню,
+# сохранений и исторических вызовов.
+# Резервные реализации уже объявлены под именами _legacy_* выше.
+def _religion_engine_ready() -> bool:
+    if RELIGION_SYSTEM is None or not isinstance(RELIGION_CHOICES, dict):
+        return False
+    for key in ("judaism", "christianity", "paganism"):
+        row = RELIGION_CHOICES.get(key)
+        if not isinstance(row, dict):
+            return False
+        if len(row.get("tenets", [])) != 5 or len(row.get("institutes", [])) != 30:
+            return False
+        if len(row.get("doctrine_branches", [])) != 4 or len(row.get("heresies", [])) != 5:
+            return False
+    return True
+
+
+def ensure_religion_state(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.ensure_state(player, globals())
+    return _legacy_ensure_religion_state(player)
+
+
+def religion_effect(player: "Player", effect_key: str, default=0):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.effect(player, effect_key, default, globals())
+    return _legacy_religion_effect(player, effect_key, default)
+
+
+def choose_religion(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.choose_religion(player, globals())
+    return _legacy_choose_religion(player)
+
+
+def next_religious_institute(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.next_institute(player, globals())
+    return _legacy_next_religious_institute(player)
+
+
+def unlock_next_religious_institute(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.unlock_next_institute(player, globals())
+    return _legacy_unlock_next_religious_institute(player)
+
+
+def show_religion_menu(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.open_menu(player, globals())
+    return _legacy_show_religion_menu(player)
+
+
+def show_religious_institutes_list(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.show_institutes(player, globals())
+    return _legacy_show_religious_institutes_list(player)
+
+
+def show_sacred_generals(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.show_figures(player, globals())
+    return _legacy_show_sacred_generals(player)
+
+
+def show_religion_event_log(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.show_log(player, globals())
+    return _legacy_show_religion_event_log(player)
+
+
+def maybe_religion_event(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.maybe_event(player, globals())
+    return _legacy_maybe_religion_event(player)
+
+
+def maybe_spawn_sacred_general(player: "Player"):
+    if _religion_engine_ready():
+        return RELIGION_SYSTEM.maybe_spawn_sacred_figure(player, globals())
+    return _legacy_maybe_spawn_sacred_general(player)
 
 
 # ─── ЧУДЕСА СВЕТА v2.7 ──────────────────────────────────────────────────────
@@ -10246,6 +10575,7 @@ class Player:
         self.diplomatic_ai : dict[str, Any] = {}  # Orbis Politicus: цели, планы, коалиции и память держав
         self.nation_system : dict[str, Any] = {}  # Gentes et Regna: уникальные свойства и бонусы держав
         self.world_council : dict[str, Any] = {}  # Consilium Orbis: очередь многоэтапных послеходовых обсуждений
+        self.world_politics : dict[str, Any] = {}  # Res Publica Orbis: настройки и состояние единого международного фасада
         self.foreign_warfare : dict[str, Any] = {}  # Bella Regnorum: прямые войны, фронты и национальные армии
         self.diplomatic_trade : dict[str, Any] = {}  # Mercatura Gentium: контракты и торговые споры
         self.dynasty_system : dict[str, Any] = {}  # Domus et Coniugia: браки, супруга, наследники и память
@@ -10574,35 +10904,96 @@ class Player:
         return None
 
     # ── Roma Economica v2.60 ───────────────────────────────────────────────────
-    def passive_income_report(self) -> dict:
-        """Смета доходов нового макроэкономического ядра.
+    def _direct_trade_route_income(self) -> int:
+        """Доход маршрутов, который зачисляется в казну отдельным прозрачным тиком."""
+        fn = globals().get("v24_trade_income")
+        if not callable(fn):
+            return 0
+        try:
+            return max(0, safe_int(fn(self), 0))
+        except Exception as exc:
+            debug_log("Trade-route income preview failed: %s", exc, exc_info=True, level=logging.DEBUG)
+            return 0
 
-        Старый расчёт сохранён в ``_legacy_passive_income_report`` и включается
-        автоматически, если внешний модуль экономики отсутствует.
-        """
+    def passive_income_report(self) -> dict:
+        """Единая смета Roma Economica без ручных прибавок из основного файла."""
         if ADVANCED_ECONOMY is None:
             return self._legacy_passive_income_report()
-        return ADVANCED_ECONOMY.preview_turn(self, advanced_economy_context(self))
+        return dict(ADVANCED_ECONOMY.preview_turn(self, advanced_economy_context(self)))
 
     def income(self):
-        if ADVANCED_ECONOMY is None:
-            report = self._legacy_passive_income_report()
-            return report["final_gold"], report["final_grain"]
-        return ADVANCED_ECONOMY.income_tuple(self, advanced_economy_context(self))
+        report = self.passive_income_report()
+        gold_income = safe_int(report.get("final_gold", report.get("revenue_total", 0)), 0)
+        grain_income = safe_int(
+            report.get("final_grain", report.get("grain", {}).get("total_supply", 0)),
+            0,
+        )
+
+        # После первого завершённого хода HUD показывает не теоретический
+        # прогноз, а фактически реализованный регулярный баланс прошлого хода.
+        # Это устраняет ситуацию «на экране +15/ход, а казна не изменилась».
+        economy_state = safe_dict(getattr(self, "economy", {}))
+        last_processed = safe_int(economy_state.get("last_turn_processed", 0), 0)
+        if last_processed == safe_int(getattr(self, "turn", 0), 0) and hasattr(self, "gold_per_turn"):
+            upkeep_gold = safe_int(
+                report.get("upkeep_gold", report.get("expense_total", 0)),
+                0,
+            )
+            gold_income = max(0, upkeep_gold + safe_int(getattr(self, "gold_per_turn", 0), 0))
+        return gold_income, grain_income
 
     def upkeep(self):
         if ADVANCED_ECONOMY is None:
             return self._legacy_upkeep()
-        return ADVANCED_ECONOMY.upkeep_tuple(self, advanced_economy_context(self))
+        report = self.passive_income_report()
+        return (
+            safe_int(report.get("upkeep_gold", report.get("expense_total", 0)), 0),
+            safe_int(report.get("upkeep_grain", report.get("grain", {}).get("consumption", 0)), 0),
+        )
 
     def apply_turn_economics(self):
+        """Выполняет единственный регулярный денежный тик игры.
+
+        Сначала Opes Imperii обновляет только физические запасы, затем
+        рассчитываются прибывшие караваны. После этого все денежные потоки —
+        налоги, города, провинции, маршруты, редкие ресурсы и караваны — одним
+        вызовом проводит Roma Economica. Другие модули казну здесь не меняют.
+        """
         if ADVANCED_ECONOMY is None:
-            return self._legacy_apply_turn_economics()
-        self.last_passive_income_report = ADVANCED_ECONOMY.preview_turn(
-            self, advanced_economy_context(self)
-        )
-        message = ADVANCED_ECONOMY.apply_turn(self, advanced_economy_context(self))
-        if safe_int(self.last_passive_income_report.get("overall_balance", 0), 0) > 0:
+            before_gold = safe_int(getattr(self, "gold", 0), 0)
+            message = self._legacy_apply_turn_economics()
+            self._last_macro_gold_delta = safe_int(getattr(self, "gold", 0), 0) - before_gold
+            return message
+
+        resource_flow = resource_economy_turn_tick(self) if RESOURCE_ECONOMY is not None else {}
+        self._economy_resource_flow = dict(resource_flow or {})
+        caravan_flow = _collect_republic_caravan_cashflow(self)
+        self._pending_caravan_income = safe_int(caravan_flow.get("income", 0), 0, 0)
+        self._last_caravan_flow = dict(caravan_flow)
+
+        context = advanced_economy_context(self)
+        before_gold = safe_int(getattr(self, "gold", 0), 0)
+        try:
+            message = ADVANCED_ECONOMY.apply_turn(self, context)
+        finally:
+            # Караваны — разовое поступление текущего хода. После проводки они
+            # не должны попадать в следующий прогноз HUD.
+            self._pending_caravan_income = 0
+
+        after_gold = safe_int(getattr(self, "gold", 0), 0)
+        economy_state = safe_dict(getattr(self, "economy", {}))
+        statement = dict(safe_dict(economy_state.get("last_statement")))
+        self.last_passive_income_report = statement
+        revenues = safe_dict(statement.get("revenues"))
+
+        self._last_macro_gold_delta = after_gold - before_gold
+        self._last_trade_route_gold_delta = safe_int(revenues.get("trade_routes", 0), 0)
+        self._last_rare_resource_gold_delta = safe_int(revenues.get("rare_resources", 0), 0)
+        self._last_caravan_gold_delta = safe_int(revenues.get("caravans", 0), 0)
+        # HUD показывает повторяемый баланс; разовый караван из него исключён.
+        self.gold_per_turn = safe_int(statement.get("overall_balance", self._last_macro_gold_delta), self._last_macro_gold_delta) - self._last_caravan_gold_delta
+
+        if safe_int(statement.get("overall_balance", 0), 0) > 0:
             add_battlepass_xp(self, 1)
         ensure_religion_state(self)
         if self.religion:
@@ -10928,6 +11319,7 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
     embargo_level = min(0.90, hostile_relations / max(1, len(diplomatic_records)) * 0.75)
 
     special_gold = special_grain = fleet_cost = route_value = 0
+    trade_route_income = rare_resource_income = caravan_income = 0
     auxiliary_cost = artillery_cost = garrison_cost = 0
     try:
         ensure_v24_state(player)
@@ -10941,16 +11333,31 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
             fleet_cost = safe_int(NAVY.economy_snapshot(player, globals()).get("upkeep", 0), 0, 0)
         else:
             fleet_cost = v24_fleet_upkeep(player)
-        special_gold = resource_gold + trade_gold
+        # Aerarium Unicum: маршруты больше не зачисляются отдельной функцией.
+        # Их точная прибыль передаётся Roma Economica как гарантированный поток.
+        special_gold = resource_gold
         special_grain = resource_grain + sea_grain + occupation_grain
-        route_value = sum(
-            max(0, safe_int(route.get("value", 0), 0))
-            for route in player.v24.get("trade_routes", [])
-            if isinstance(route, dict) and route.get("active", True)
-        )
+        trade_route_income = max(0, safe_int(trade_gold, 0))
+        route_value = trade_route_income
     except (NameError, AttributeError, KeyError, TypeError, ValueError) as exc:
         special_grain += occupation_grain
         debug_log("Roma Economica: v2.4 context unavailable: %s", exc, exc_info=True, level=logging.DEBUG)
+
+    if RESOURCE_ECONOMY is not None:
+        try:
+            rare_resource_income = max(
+                0,
+                safe_int(
+                    RESOURCE_ECONOMY.rare_resource_income(
+                        player, resource_economy_context(player)
+                    ),
+                    0,
+                ),
+            )
+        except Exception as exc:
+            debug_log("Roma Economica: rare-resource preview failed: %s", exc, exc_info=True, level=logging.DEBUG)
+            rare_resource_income = 0
+    caravan_income = max(0, safe_int(getattr(player, "_pending_caravan_income", 0), 0))
 
     # Municipal buildings are real fiscal actors: markets and mines add cash,
     # agrarian works add grain, and every completed structure has upkeep.
@@ -11015,6 +11422,9 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         "legion_quality_index": quality_index,
         "trade_pacts": trade_pacts,
         "trade_route_value": route_value,
+        "trade_route_income": trade_route_income,
+        "rare_resource_income": rare_resource_income,
+        "caravan_income": caravan_income,
         "tribute_income": tribute_income,
         "tribute_paid": tribute_paid,
         "special_gold_income": special_gold,
@@ -11048,6 +11458,7 @@ def advanced_economy_context(player: Player) -> dict[str, Any]:
         "public_works_demand": max(0.0, float(getattr(player, "gold", 0)) * 0.0005 + reconstruction_demand),
         "occupation_income": max(0.0, domain_income),
         "reconstruction_demand": reconstruction_demand,
+        "RELIGION_SYSTEM": RELIGION_SYSTEM if _religion_engine_ready() else None,
     }
 
 
@@ -11159,6 +11570,26 @@ def advanced_buy_grain_at_game_price(player: Player, units: int = 50) -> tuple[i
         except (AttributeError, TypeError, ValueError, KeyError):
             pass
     return bought, total_cost
+
+
+def economy_cash_transaction(
+    player: Player,
+    amount: int | float,
+    label: str,
+    *,
+    category: str = "external",
+) -> dict[str, Any]:
+    """Проводит разовую операцию через единое ядро казны."""
+    if ADVANCED_ECONOMY is not None and hasattr(ADVANCED_ECONOMY, "apply_cash_transaction"):
+        return ADVANCED_ECONOMY.apply_cash_transaction(
+            player, amount, label, advanced_economy_context(player), category=category
+        )
+    delta = safe_int(amount, 0)
+    before = safe_int(getattr(player, "gold", 0), 0)
+    if delta < 0 and before < abs(delta):
+        return {"ok": False, "message": f"Недостаточно золота: требуется {abs(delta)}.", "before": before, "after": before}
+    player.gold = max(0, before + delta)
+    return {"ok": True, "applied": delta, "before": before, "after": player.gold, "message": str(label)}
 
 # ─── ЛОГ СОБЫТИЙ ──────────────────────────────────────────────────────────────
 
@@ -12175,55 +12606,111 @@ def _conquest_history_add(player, kind: str, province: str, city: str = "", **va
 
 
 def city_conquest_reward(player, province_def: dict, city: dict, *, source: str = "assault", announce: bool = True) -> dict[str, Any]:
-    """Начисляет трофеи один раз за каждый реально захваченный город."""
+    """Awards large, one-time spoils for a captured city.
+
+    With 660 cities, conquest is the active economic engine: every victory pays
+    enough to finance recruitment, infrastructure and a possible trade route.
+    """
     ensure_expansion_state(player)
     state = ensure_conquest_economy_state(player)
     province_name = str(province_def.get("name", "Provincia"))
     city_name = str(city.get("name", "Urbs"))
     claim_key = f"{province_name}::{city_name}"
     if claim_key in state["claimed_cities"]:
-        return {"gold": 0, "grain": 0, "slaves": 0.0, "metals": {}, "duplicate": True}
+        return {"gold": 0, "grain": 0, "slaves": 0.0, "metals": {}, "resources": {}, "duplicate": True}
 
     population = max(1, safe_int(city.get("population", 10), 10))
     difficulty = safe_int(city.get("difficulty", 3), 3, 1, 10)
     wealth = max(0, safe_int(province_def.get("wealth", 1), 1))
     city_type = str(city.get("type", "город")).strip().lower()
     type_mult = CITY_CONQUEST_TYPE_MULT.get(city_type, 1.0)
-    source_mult = {"assault": 1.0, "breakthrough": 0.82, "amphibious": 0.90, "diplomatic": 0.35}.get(source, 1.0)
+    source_text = str(source).lower()
+    if "diplomatic" in source_text:
+        source_mult = 0.45
+    elif "sea" in source_text or "amphib" in source_text:
+        source_mult = 0.95
+    elif "breakthrough" in source_text:
+        source_mult = 0.90
+    else:
+        source_mult = 1.0
     scale = max(0.1, float(SETTINGS.get("city_conquest_spoils_scale", 1.0)))
     nominal = conquest_price_factor(player)
-    gold = int(round((220 + population * 5.2 + difficulty * 78 + wealth * 48) * type_mult * source_mult * scale * nominal))
 
+    gold = int(round((750 + population * 14.0 + difficulty * 180 + wealth * 100) * type_mult * source_mult * scale * nominal))
     grain_types = {"земледельческий", "речной", "порт", "столица", "центр провинции"}
-    grain = int(round((18 + population * 0.55 + wealth * 4.0) * (1.45 if city_type in grain_types else 0.55) * source_mult))
+    grain_mult = 1.55 if city_type in grain_types else 0.78
+    grain = int(round((70 + population * 1.35 + wealth * 12 + difficulty * 5) * grain_mult * source_mult))
     slave_rate = 0.012 + 0.0035 * difficulty
     if city_type in {"столица", "центр провинции", "племенной"}:
         slave_rate += 0.010
     slaves = round(max(0.4, population * slave_rate * source_mult), 2)
-    capital_gain = round((2.0 + population * 0.018 + wealth * 0.35) * type_mult * source_mult, 2)
-    sector = "commerce" if city_type in {"порт", "торговый", "административный"} else "mining" if city_type == "рудники" else "manufacturing" if city_type in {"ремесленный", "военный", "осадный"} else "agriculture"
+    capital_gain = round((3.5 + population * 0.028 + wealth * 0.55) * type_mult * source_mult, 2)
+    sector = "commerce" if city_type in {"порт", "торговый", "административный"} else "mining" if city_type == "рудники" else "manufacturing" if city_type in {"ремесленный", "военный", "осадный", "крепость"} else "agriculture"
 
-    metals: dict[str, int] = {}
-    if city_type == "рудники":
-        metals = {"iron": max(1, difficulty // 2), "copper": max(1, wealth // 2)}
-    elif city_type in {"военный", "осадный", "крепость"}:
-        metals = {"iron": max(1, difficulty // 3)}
-    for metal, amount in metals.items():
-        if metal in player.metals:
-            player.metals[metal] = max(0, safe_int(player.metals.get(metal, 0), 0) + amount)
+    resources: dict[str, int] = {}
+    def add_resource(key: str, amount: int) -> None:
+        if amount > 0:
+            resources[key] = resources.get(key, 0) + int(amount)
+
+    # Universal stores recovered from granaries, workshops and arsenals.
+    add_resource("wheat", max(4, grain // 18))
+    add_resource("timber", max(2, wealth + difficulty // 2))
+    if city_type in {"земледельческий", "речной"}:
+        add_resource("wheat", 8 + population // 8)
+        add_resource("livestock", 3 + wealth)
+        add_resource("olive_oil", 2 + wealth // 2)
+    elif city_type in {"порт", "торговый"}:
+        add_resource("wine", 4 + wealth)
+        add_resource("salt", 3 + difficulty // 2)
+        add_resource("olive_oil", 3 + wealth // 2)
+        if wealth >= 5: add_resource("spices", 1 + wealth // 4)
+    elif city_type == "рудники":
+        add_resource("iron", 5 + difficulty)
+        add_resource("copper", 3 + wealth)
+        add_resource("silver", max(1, wealth // 2))
+        if wealth >= 7: add_resource("gold", 1 + wealth // 5)
+    elif city_type in {"военный", "осадный", "крепость", "пограничный"}:
+        add_resource("iron", 5 + difficulty)
+        add_resource("steel", 2 + difficulty // 2)
+        add_resource("leather", 3 + wealth)
+        add_resource("horses", 2 + difficulty // 3)
+    elif city_type in {"столица", "центр провинции", "административный"}:
+        add_resource("silver", 3 + wealth)
+        add_resource("gold", max(1, wealth // 2))
+        add_resource("papyrus", 4 + difficulty)
+    elif city_type in {"религиозный", "культурный"}:
+        add_resource("incense", 2 + wealth // 2)
+        add_resource("papyrus", 3 + population // 15)
+    elif city_type == "ремесленный":
+        add_resource("linen", 3 + wealth)
+        add_resource("leather", 3 + wealth)
+        add_resource("bronze", 2 + difficulty // 2)
+
+    legacy_map = {"grain": "wheat", "silk": "linen", "culture": "papyrus"}
+    for raw in PROVINCE_RESOURCES.get(province_name, []):
+        key = legacy_map.get(str(raw), str(raw))
+        add_resource(key, 2 + wealth // 2 + difficulty // 3)
+
+    granted = dict(resources)
+    if RESOURCE_ECONOMY is not None and hasattr(RESOURCE_ECONOMY, "grant_resources"):
+        try:
+            granted = RESOURCE_ECONOMY.grant_resources(
+                player, resources, resource_economy_context(player),
+                source="city_conquest", note=f"{province_name}: {city_name}",
+            )
+        except Exception as exc:
+            debug_log("Conquest resource grant failed: %s", exc, exc_info=True, level=logging.WARNING)
+    else:
+        # Legacy fallback for the metals still used by older military menus.
+        for key in ("iron", "copper", "silver", "gold"):
+            if key in resources and key in player.metals:
+                player.metals[key] = max(0, safe_int(player.metals.get(key, 0), 0) + resources[key])
 
     registered = False
     if ADVANCED_ECONOMY is not None and hasattr(ADVANCED_ECONOMY, "register_conquest_windfall"):
         ADVANCED_ECONOMY.register_conquest_windfall(
-            player,
-            gold=gold,
-            grain=grain,
-            slaves=slaves,
-            province=province_name,
-            city=city_name,
-            capital_gain=capital_gain,
-            sector=sector,
-            source=source,
+            player, gold=gold, grain=grain, slaves=slaves, province=province_name,
+            city=city_name, capital_gain=capital_gain, sector=sector, source=source,
         )
         registered = True
     if not registered:
@@ -12234,16 +12721,16 @@ def city_conquest_reward(player, province_def: dict, city: dict, *, source: str 
     state["city_spoils_total"] = safe_int(state.get("city_spoils_total", 0), 0) + gold
     state["grain_requisitions_total"] = safe_int(state.get("grain_requisitions_total", 0), 0) + grain
     state["captives_total"] = round(float(state.get("captives_total", 0.0) or 0.0) + slaves, 2)
-    _conquest_history_add(player, "city", province_name, city_name, gold=gold, grain=grain, slaves=slaves, source=source)
+    _conquest_history_add(player, "city", province_name, city_name, gold=gold, grain=grain, slaves=slaves, resources=dict(granted), source=source)
 
-    result = {"gold": gold, "grain": grain, "slaves": slaves, "metals": metals, "capital_gain": capital_gain, "duplicate": False}
+    result = {"gold": gold, "grain": grain, "slaves": slaves, "metals": {k: v for k, v in granted.items() if k in METAL_TYPES}, "resources": granted, "capital_gain": capital_gain, "duplicate": False}
     if announce:
-        metal_text = ", ".join(f"{METAL_NAMES.get(k, k)} +{v}" for k, v in metals.items())
+        resource_text = ", ".join(f"{RESOURCE_ECONOMY.RESOURCE_CATALOG.get(k, {}).get('name', k)} +{v}" for k, v in granted.items()) if RESOURCE_ECONOMY is not None else ", ".join(f"{k} +{v}" for k, v in granted.items())
         extras = [f"зерно +{grain}", f"пленные {slaves:.1f} тыс."]
-        if metal_text:
-            extras.append(metal_text)
+        if resource_text: extras.append(resource_text)
         print(clr(f"  💰 Военные трофеи {city_name}: +{gold} золота; " + "; ".join(extras) + ".", C.BOLD + C.GOLD))
     return result
+
 
 
 def recommend_province_economic_policy(province: dict) -> tuple[str, str]:
@@ -13138,318 +13625,280 @@ def random_event(player: Player):
         player.senate_rep = min(100, player.senate_rep + 15)
         log_event(player, "Сенат объявил диктатуру")
 
-# ─── МЕНЮ ПРОВИНЦИЙ ──────────────────────────────────────────────────────────
+# ─── МЕНЮ ПРОВИНЦИЙ 4.1: КАРТА ОПЕРАЦИЙ И УПРАВЛЕНИЯ ────────────────────────
 
-def province_menu(player: Player):
-    ensure_province_details(player)
+def _province_access_text(province: dict) -> str:
+    spec = province_access_spec(province)
+    zone_name = ""
+    if spec.get("sea_zone"):
+        zone_name = safe_dict(globals().get("SEA_ZONES", {}).get(spec["sea_zone"])).get("name", spec["sea_zone"])
+    if spec["campaign_access"] == "island":
+        return f"островная • только флот • {zone_name}"
+    if spec["campaign_access"] == "coastal":
+        return f"прибрежная • суша/флот • {zone_name}"
+    return "континентальная • только сухопутный поход"
+
+
+def _province_war_status(player: Player, province_name: str) -> tuple[int, int, bool]:
+    campaigns = 0
+    occupied = 0
+    lost = False
+    state = getattr(player, "war_director_3", {})
+    if isinstance(state, dict):
+        campaigns = sum(
+            1 for row in safe_list(state.get("campaigns"))
+            if isinstance(row, dict) and row.get("status", "active") == "active" and row.get("province") == province_name
+        )
+        occupied = len(safe_dict(safe_dict(state.get("occupied_cities")).get(province_name)))
+        lost = province_name in safe_dict(state.get("lost_provinces"))
+    return campaigns, occupied, lost
+
+
+def _select_owned_province(player: Player, prompt: str = "  Провинция: ") -> dict | None:
+    provinces = [p for p in safe_list(getattr(player, "provinces", [])) if isinstance(p, dict)]
+    if not provinces:
+        return None
+    for i, province in enumerate(provinces, 1):
+        print(f"  {i}. {province.get('name')} — {_province_access_text(province)}")
+    pick = read_choice(clr(prompt, C.CYAN), [str(i) for i in range(1, len(provinces) + 1)] + ["Q"])
+    return None if pick == "Q" else provinces[int(pick) - 1]
+
+
+def _owned_province_management_menu(player: Player, province: dict) -> None:
     while True:
+        ensure_province_details(player)
+        base = province_by_name(str(province.get("name"))) or province
+        gov = player.governors.get(province["name"])
+        policy = PROVINCE_ECONOMIC_POLICIES.get(str(province.get("economic_policy", "")), {})
+        campaigns, occupied, lost = _province_war_status(player, province["name"])
+
         rui_screen_start()
-        rui_header("УПРАВЛЕНИЕ ПРОВИНЦИЯМИ", "🗺", C.BLUE)
-        owned_map_art(player)
-
-        if player.provinces:
-            rows = []
-            for i, p in enumerate(player.provinces):
-                gov = player.governors.get(p["name"])
-                unrest_val = p["unrest"]
-                unrest_style = "red" if unrest_val >= 4 else "gold1" if unrest_val >= 2 else "green"
-                city_names = ", ".join(c["name"] for c in p.get("cities", [])) or "нет городов"
-                gov_text = gov.description() if gov else "[bright_black]не назначен[/]"
-                if RICH_AVAILABLE:
-                    rows.append((
-                        str(i + 1), f"[cyan]{p['name']}[/]", str(p["wealth"]),
-                        f"[{unrest_style}]{unrest_val}[/]", str(p.get("romanization", 0)),
-                        str(p.get("garrison", 0)),
-                        f"{PROVINCE_ECONOMIC_POLICIES.get(str(p.get('economic_policy', '')), {}).get('short', 'Ядро')} {safe_int(p.get('last_policy_income', 0), 0):+}",
-                        city_names, gov_text,
-                    ))
-                else:
-                    print(f"  {i+1}. {clr(p['name'], C.CYAN):20} Богатство: {p['wealth']}  "
-                          f"Волнения: {clr(str(unrest_val), C.RED if unrest_val>=4 else C.GOLD if unrest_val>=2 else C.GREEN)}  "
-                          f"Романизация: {p.get('romanization', 0)}  Гарнизон: {p.get('garrison', 0)}  "
-                          f"Режим: {PROVINCE_ECONOMIC_POLICIES.get(str(p.get('economic_policy', '')), {}).get('short', 'Ядро')}  "
-                          f"Доход: {safe_int(p.get('last_policy_income', 0), 0):+}/ход")
-                    print(f"      Города: {city_names}")
-                    print(f"      Управляющий: {gov.description() if gov else clr('не назначен', C.GRAY)}")
-            if RICH_AVAILABLE:
-                rui_table("🟢 Наши провинции", ["#", "Провинция", "Богатство", "Волн.", "Роман.", "Гарн.", "Режим/ход", "Города", "Управляющий"], rows, color=C.GREEN)
-        else:
-            rui_info("Нет завоёванных провинций.", C.GRAY)
-
-        available = frontier_provinces(player)
-        owned_names = {p["name"] for p in player.provinces}
-        locked = [p for p in PROVINCES_DATA if p["name"] not in owned_names and p not in available]
-
-        era = get_era(player)
-        mult = player.diff()["enemy_strength_mult"] * era["enemy_mult"]
-
-        if available:
-            rows = []
-            for i, p in enumerate(available):
-                enemy = next((e for e in ENEMY_FACTIONS if e["region"] == p["name"]), None)
-                base_str = enemy["strength"] if enemy else p.get("unrest", 2) + 2
-                shown_str = max(1, round(base_str * mult))
-                enemy_name = enemy["name"] if enemy else "Местные племена"
-                done, total = city_campaign_progress(player, p["name"])
-                next_city = next_city_to_attack(player, p)
-                if next_city:
-                    siege_damage = city_siege_damage(player, p["name"], next_city["name"])
-                    city_note = (
-                        f"след.: {next_city['name']} "
-                        f"({CITY_DIFFICULTY_LABELS.get(next_city.get('difficulty', 3), 'обычный')}, "
-                        f"ур.{next_city.get('difficulty', 3)}, оборона {CITY_SIEGE_MAX_DAMAGE - siege_damage}%)"
-                    )
-                else:
-                    city_note = "все города взяты"
-                if RICH_AVAILABLE:
-                    rows.append((str(i + 1), f"[cyan]{p['name']}[/]", str(p["wealth"]), f"{done}/{total}", city_note, f"[red]{enemy_name}[/] ~{shown_str}"))
-                else:
-                    print(f"  {i+1}. {clr(p['name'], C.CYAN):20} Богатство: {p['wealth']}  "
-                          f"Города: {done}/{total}  {city_note}  [{clr(enemy_name, C.RED)}, сила ~{shown_str}]")
-            if RICH_AVAILABLE:
-                rui_table("🟡 Доступные для похода", ["#", "Провинция", "Богатство", "Города", "Цель", "Враг"], rows, color=C.GOLD)
-        else:
-            rui_info("Нет открытых направлений — сначала расширьте границы.", C.GRAY)
-
-        if locked:
-            names = ", ".join(p["name"] for p in locked)
-            rui_info(f"🔒 Пока недосягаемы: {names}", C.GRAY)
+        rui_header(str(province["name"]).upper(), "🏛", C.BLUE, _province_access_text(base))
+        rows = [
+            ("Богатство", str(province.get("wealth", 0))),
+            ("Волнения", str(province.get("unrest", 0))),
+            ("Романизация", f"{province.get('romanization', 0)}%"),
+            ("Гарнизон", f"{province.get('garrison', 0)}/5"),
+            ("Режим", policy.get("name", "ядро Республики")),
+            ("Доход режима", f"{safe_int(province.get('last_policy_income', 0), 0):+}/ход"),
+            ("Управляющий", gov.description() if gov else "не назначен"),
+            ("Военная угроза", f"кампаний {campaigns}, оккупировано городов {occupied}" + (", провинция потеряна" if lost else "")),
+        ]
+        rui_table("Состояние провинции", ["Показатель", "Значение"], rows, color=C.BLUE)
 
         garrison_cost = game_price(player, max(5, int(round(25 * (1.0 - tech_effect(player, "garrison_discount"))))), market=True)
         romanization_cost = game_price(player, max(5, int(round(40 * (1.0 - tech_effect(player, "romanization_discount"))))), market=True)
         pacify_cost = game_price(player, SETTINGS["pacify_cost"], market=True)
         governor_cost = game_price(player, 30, market=True)
+
         rui_menu([
-            ("1-" + str(len(available)) if available else "–", "Атаковать провинцию", "выбрать направление похода", "⚔"),
-            ("U", "Усмирить волнения", f"{pacify_cost} золота, -2 к волнениям", "⚖"),
+            ("U", "Усмирить провинцию", f"{pacify_cost} золота, -2 волнения", "⚖"),
             ("G", "Назначить управляющего", f"{governor_cost} золота", "👤"),
-            ("B", "Усилить гарнизон", f"{garrison_cost} золота, -1 волнения/ход", "🛡"),
-            ("R", "Романизация провинции", f"{romanization_cost} золота, +10 роман., -1 волнения", "🏛"),
+            ("B", "Усилить гарнизон", f"{garrison_cost} золота", "🛡"),
+            ("R", "Романизация", f"{romanization_cost} золота, +10 романизации", "🏛"),
             ("E", "Экономический режим", "дань, интеграция, колония, автономия или оккупация", "💰"),
+            ("D", "Оборона и вражеские кампании", "угрозы этой провинции", "⚔"),
             ("Q", "Назад", "", "🚪"),
-        ], title="Действия")
-
-        valid = [str(i + 1) for i in range(len(available))] + ["U", "G", "B", "R", "E", "Q"]
-        ch = read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}", valid)
-
+        ], title="Управление")
+        ch = read_choice(clr("\n  Решение: ", C.CYAN), ["U", "G", "B", "R", "E", "D", "Q"])
         if ch == "Q":
             return
-
+        if ch == "D":
+            if WAR_DIRECTOR_3 is not None and hasattr(WAR_DIRECTOR_3, "open_province_menu"):
+                WAR_DIRECTOR_3.open_province_menu(player, province["name"], globals())
+            elif WAR_DIRECTOR_3 is not None:
+                WAR_DIRECTOR_3.open_menu(player, globals())
+            else:
+                print(clr("  Bellum Universale недоступен.", C.RED)); pause()
+            continue
+        if ch == "E":
+            locked_until = safe_int(province.get("policy_lock_until", 0), 0)
+            if player.turn < locked_until:
+                print(clr(f"\n  Режим закреплён до хода {locked_until}.", C.GOLD)); pause(); continue
+            configure_conquered_province_economy(player, province, initial=False)
+            pause(); continue
         if ch == "U":
-            if not player.provinces:
-                print(clr("\n  Нет провинций для усмирения.", C.GRAY))
-            elif player.gold >= pacify_cost:
-                for p in player.provinces:
-                    if p["unrest"] > 0:
-                        p["unrest"] = max(0, p["unrest"] - 2)
-                player.gold -= pacify_cost
-                print(clr("\n  Усмирение проведено. Волнения снижены.", C.GREEN))
-                log_event(player, "Проведено усмирение провинций")
-            else:
-                print(clr(f"\n  Недостаточно золота (нужно {pacify_cost}).", C.RED))
+            if player.gold < pacify_cost:
+                print(clr(f"\n  Недостаточно золота (нужно {pacify_cost}).", C.RED)); pause(); continue
+            player.gold -= pacify_cost
+            province["unrest"] = max(0, safe_int(province.get("unrest", 0), 0) - 2)
+            print(clr(f"\n  Волнения в {province['name']} снижены до {province['unrest']}.", C.GREEN))
+            log_event(player, f"Проведено усмирение в {province['name']}")
             pause(); continue
-
-        if ch in ("G", "B", "R", "E"):
-            if not player.provinces:
-                print(clr("\n  Нет провинций.", C.GRAY)); pause(); continue
-            print(f"\n{clr('  Выберите провинцию:', C.GOLD)}")
-            for i, p in enumerate(player.provinces):
-                print(f"  {i+1}. {p['name']}")
-            pi = read_choice(f"{clr('  Провинция (или Q): ', C.CYAN)}", [str(i+1) for i in range(len(player.provinces))] + ["Q"])
-            if pi == "Q":
+        if ch == "G":
+            if player.gold < governor_cost:
+                print(clr(f"\n  Недостаточно золота (нужно {governor_cost}).", C.RED)); pause(); continue
+            keys = list(GOVERNOR_TRAITS.keys())
+            print(clr("\n  Выберите тип управляющего:", C.GOLD))
+            for i, key in enumerate(keys, 1):
+                trait = GOVERNOR_TRAITS[key]
+                print(f"  {i}. {trait['name']} — {trait['desc']}")
+            gi = read_choice(clr("  Тип: ", C.CYAN), [str(i) for i in range(1, len(keys) + 1)] + ["Q"])
+            if gi == "Q":
                 continue
-            prov = player.provinces[int(pi)-1]
-
-            if ch == "E":
-                locked_until = safe_int(prov.get("policy_lock_until", 0), 0)
-                if player.turn < locked_until:
-                    print(clr(f"\n  Режим закреплён до хода {locked_until}: администрация ещё разворачивается.", C.GOLD))
-                    pause(); continue
-                configure_conquered_province_economy(player, prov, initial=False)
-                pause(); continue
-
-            if ch == "G":
-                if player.gold < governor_cost:
-                    print(clr(f"\n  Недостаточно золота (нужно {governor_cost}).", C.RED)); pause(); continue
-                print(f"\n{clr('  Выберите тип управляющего:', C.GOLD)}")
-                keys = list(GOVERNOR_TRAITS.keys())
-                for i, key in enumerate(keys):
-                    t = GOVERNOR_TRAITS[key]
-                    print(f"  {i+1}. {t['name']} — {t['desc']}")
-                gi = read_choice(f"{clr('  Тип: ', C.CYAN)}", [str(i+1) for i in range(len(keys))])
-                gov = Governor(trait_key=keys[int(gi)-1])
-                player.governors[prov["name"]] = gov
-                player.gold -= governor_cost
-                print(clr(f"\n  Назначен управляющий: {gov.description()}", C.GREEN))
-                log_event(player, f"В {prov['name']} назначен управляющий {gov.name}")
-                pause(); continue
-
-            if ch == "B":
-                if player.gold < garrison_cost:
-                    print(clr(f"\n  Недостаточно золота (нужно {garrison_cost}).", C.RED)); pause(); continue
-                prov["garrison"] = min(5, prov.get("garrison", 0) + 1)
-                player.gold -= garrison_cost
-                print(clr(f"\n  Гарнизон в {prov['name']} усилен до {prov['garrison']}/5.", C.GREEN))
-                log_event(player, f"Усилен гарнизон в {prov['name']} (-{garrison_cost} золота)")
-                pause(); continue
-
-            if ch == "R":
-                if player.gold < romanization_cost:
-                    print(clr(f"\n  Недостаточно золота (нужно {romanization_cost}).", C.RED)); pause(); continue
-                prov["romanization"] = min(100, prov.get("romanization", 0) + 10)
-                prov["unrest"] = max(0, prov.get("unrest", 0) - 1)
-                player.gold -= romanization_cost
-                print(clr(f"\n  Романизация в {prov['name']} выросла до {prov['romanization']}. Волнения снижены.", C.GREEN))
-                log_event(player, f"Проведена романизация в {prov['name']} (-{romanization_cost} золота)")
-                pause(); continue
-
-        target = available[int(ch) - 1]
-        enemy_def = next((e for e in ENEMY_FACTIONS if e["region"] == target["name"]), None)
-        target_city = next_city_to_attack(player, target)
-        if not target_city:
-            target_copy, unlocked_now = annex_province_after_campaign(player, target)
-            if unlocked_now:
-                print(clr("  Открыты местные войска: " + ", ".join(unlocked_now), C.CYAN))
-            print(clr(f"\n  {target['name']} уже фактически покорена и присоединена к Республике.", C.BOLD + C.GREEN))
+            gov = Governor(trait_key=keys[int(gi) - 1])
+            player.governors[province["name"]] = gov
+            player.gold -= governor_cost
+            print(clr(f"\n  Назначен управляющий: {gov.description()}", C.GREEN))
+            log_event(player, f"В {province['name']} назначен управляющий {gov.name}")
+            pause(); continue
+        if ch == "B":
+            if player.gold < garrison_cost:
+                print(clr(f"\n  Недостаточно золота (нужно {garrison_cost}).", C.RED)); pause(); continue
+            if safe_int(province.get("garrison", 0), 0) >= 5:
+                print(clr("\n  Гарнизон уже достиг максимума.", C.GRAY)); pause(); continue
+            province["garrison"] = min(5, safe_int(province.get("garrison", 0), 0) + 1)
+            player.gold -= garrison_cost
+            print(clr(f"\n  Гарнизон усилен до {province['garrison']}/5.", C.GREEN))
+            log_event(player, f"Усилен гарнизон в {province['name']}")
+            pause(); continue
+        if ch == "R":
+            if player.gold < romanization_cost:
+                print(clr(f"\n  Недостаточно золота (нужно {romanization_cost}).", C.RED)); pause(); continue
+            province["romanization"] = min(100, safe_int(province.get("romanization", 0), 0) + 10)
+            province["unrest"] = max(0, safe_int(province.get("unrest", 0), 0) - 1)
+            player.gold -= romanization_cost
+            print(clr(f"\n  Романизация выросла до {province['romanization']}%; волнения снижены.", C.GREEN))
+            log_event(player, f"Проведена романизация в {province['name']}")
             pause(); continue
 
-        print(clr(f"\n  Цель атаки: {target_city['name']} ({target_city.get('type', 'город')}) в {target['name']}", C.BOLD + C.GOLD))
-        print(f"  Сложность города: {target_city.get('difficulty', 3)}/10 — {CITY_DIFFICULTY_LABELS.get(target_city.get('difficulty', 3), 'обычный')}")
-        current_damage = city_siege_damage(player, target["name"], target_city["name"])
-        current_remaining = CITY_SIEGE_MAX_DAMAGE - current_damage
-        print(clr(
-            f"  Оборона города: {current_remaining}%  •  накопленный урон: {current_damage}%",
-            C.RED if current_remaining <= 25 else C.GOLD if current_remaining <= 60 else C.CYAN,
-        ))
 
-        ensure_artillery_state(player)
-        attack_options = []
-        if player.legions:
-            print("  1. Штурм легионом")
-            attack_options.append("1")
-        else:
-            print(clr("  1. Штурм легионом [нет легионов]", C.GRAY))
-        if artillery_role_power(player, "siege") > 0 and current_damage < CITY_SIEGE_MAX_DAMAGE:
-            print(f"  2. Атака артиллерией (осада {artillery_role_power(player, 'siege')}, боезапас {player.artillery_supplies})")
-            attack_options.append("2")
-        elif current_damage >= CITY_SIEGE_MAX_DAMAGE:
-            print(clr("  2. Атака артиллерией [оборона уже разрушена]", C.GRAY))
-        else:
-            print(clr("  2. Атака артиллерией [нет осадной артиллерии]", C.GRAY))
-        print("  Q. Отмена")
-        method = read_choice(f"{clr('  Способ атаки: ', C.CYAN)}", attack_options + ["Q"])
-        if method == "Q":
-            continue
-
-        if method == "2":
-            artillery_direct_province_attack(player, target, target_city, enemy_def, mult)
-            print(clr("\n  Артиллерия нанесла процентный урон, но занять город может только легион.", C.GRAY))
-            pause(); continue
-
-        print(f"\n{clr('  Выберите легион для похода:', C.GOLD)}")
-        for i, l in enumerate(player.legions):
-            print(
-                f"  {i+1}. {l.name} "
-                f"(уровень {l.quality}/10, сила {l.strength}, мораль {l.morale}, генерал {l.general.name})"
-            )
-        li_valid = [str(i + 1) for i in range(len(player.legions))] + ["Q"]
-        li = read_choice(f"{clr('  Легион (или Q — отменить): ', C.CYAN)}", li_valid)
-        if li == "Q":
-            continue
-
-        legion = player.legions[int(li) - 1]
-        base_city_strength = city_strength_for_attack(target_city, target, enemy_def, mult)
-        damage_before = city_siege_damage(player, target["name"], target_city["name"])
-        city_strength = city_effective_strength(base_city_strength, damage_before)
-        enemy_name = enemy_def["name"] if enemy_def else "Местные племена"
-        enemy = {
-            "name": f"{enemy_name}: гарнизон {target_city['name']}",
-            "strength": city_strength,
-            "region": target["name"],
-        }
-        can_attack, reason = can_legion_attack_city(legion, target_city)
-        if not can_attack:
-            print(clr(f"\n✗ {reason}", C.RED))
+def _target_province_overview(player: Player, province: dict) -> None:
+    while True:
+        city = next_city_to_attack(player, province)
+        if not city:
+            captured, unlocked = annex_province_after_campaign(player, province)
+            print(clr(f"\n  {captured.get('name', province.get('name'))} присоединена к Республике.", C.BOLD + C.GREEN))
+            if unlocked:
+                print(clr("  Открыты части: " + ", ".join(unlocked), C.CYAN))
             pause()
+            return
+        routes = province_attack_routes(player, province)
+        spec = province_access_spec(province)
+        done, total = city_campaign_progress(player, province["name"])
+        damage = city_siege_damage(player, province["name"], city["name"])
+        enemy = next((e for e in ENEMY_FACTIONS if e["region"] == province["name"]), None)
+        enemy_name = enemy["name"] if enemy else "местные силы"
+        zone_name = safe_dict(globals().get("SEA_ZONES", {}).get(spec.get("sea_zone"))).get("name", spec.get("sea_zone") or "—")
+
+        rui_screen_start()
+        rui_header(str(province["name"]).upper(), "⚔", C.RED, _province_access_text(province))
+        rui_table("Цель кампании", ["Показатель", "Значение"], [
+            ("Маршруты", province_route_label(player, province)),
+            ("Морской театр", zone_name if spec.get("sea_access") else "нет"),
+            ("Сложность переброски", str(spec.get("landing_difficulty")) if spec.get("sea_access") else "—"),
+            ("Следующий город", f"{city.get('name')} — {city.get('type', 'город')}"),
+            ("Сложность города", f"{city.get('difficulty', 3)}/10"),
+            ("Оборона", f"{100 - damage}%"),
+            ("Прогресс провинции", f"{done}/{total}"),
+            ("Противник", enemy_name),
+        ], color=C.RED)
+        if not routes:
+            rui_info("Провинция сейчас вне оперативной досягаемости.", C.GRAY)
+            pause(); return
+        rui_menu([
+            ("1", "Открыть военный штаб провинции", "выбор группы, маршрут и обычный штурм без платы золотом и зерном", "🦅"),
+            ("D", "Вражеские кампании", "Bellum Universale по этой провинции", "⚔"),
+            ("W", "Войны держав и фронты", "общая обстановка на театре", "🌍"),
+            ("Q", "Назад", "", "🚪"),
+        ], title="Действия")
+        ch = read_choice(clr("\n  Решение: ", C.CYAN), ["1", "D", "W", "Q"])
+        if ch == "Q":
+            return
+        if ch == "1":
+            if ARMY_GROUPS is None or not hasattr(ARMY_GROUPS, "open_province_operations"):
+                print(clr("  Новое управление группами армий недоступно.", C.RED))
+                if ARMY_GROUPS_IMPORT_ERROR:
+                    print(clr(f"  Причина: {ARMY_GROUPS_IMPORT_ERROR}", C.GOLD))
+                pause(); continue
+            ARMY_GROUPS.open_province_operations(player, province, globals())
+            ensure_province_details(player)
+            if any(p.get("name") == province.get("name") for p in player.provinces):
+                return
             continue
-
-        print(clr(
-            f"  Повреждения ослабили расчётную силу гарнизона: {base_city_strength} → {city_strength}.",
-            C.GRAY,
-        ))
-        won = resolve_battle(player, legion, enemy)
-        action_cost = city_action_cost(target_city)
-        spend_legion_attack_action(legion, target_city)
-        legion.location = target_city["name"]
-        print(clr(f"  Логистика: {legion.name} потратил {action_cost} ОД; осталось {legion.action_points}. Усталость: {legion.fatigue}/100.", C.CYAN))
-
-        rolled_damage = calculate_legion_city_damage(player, legion, target_city, won)
-        actual_damage, total_damage, remaining = apply_city_siege_damage(
-            player, target["name"], target_city["name"], rolled_damage
-        )
-        damage_color = C.GREEN if won else C.GOLD
-        print(clr(
-            f"  🏰 {legion.name} наносит городу {actual_damage}% урона. "
-            f"Повреждение {total_damage}%, оборона {remaining}%.",
-            C.BOLD + damage_color,
-        ))
-
-        captured_now = bool(won and total_damage >= CITY_SIEGE_MAX_DAMAGE)
-        if captured_now:
-            ensure_city_campaigns(player)
-            taken = player.city_campaigns.setdefault(target["name"], [])
-            if target_city["name"] not in taken:
-                taken.append(target_city["name"])
-            clear_city_siege_damage(player, target["name"], target_city["name"])
-            city_conquest_reward(player, target, target_city, source="assault", announce=True)
-            done, total = city_campaign_progress(player, target["name"])
-            print(clr(f"\n  Город {target_city['name']} взят! Прогресс завоевания {target['name']}: {done}/{total}.", C.BOLD + C.GREEN))
-            log_event(player, f"Взят город {target_city['name']} в провинции {target['name']} легионом {legion.name}")
-            if done < total:
-                br_ok, br_msg = try_legion_breakthrough(player, legion, target, mult)
-                if br_msg:
-                    print(clr("  " + br_msg, C.BOLD + C.GOLD if br_ok else C.GRAY))
-                    done, total = city_campaign_progress(player, target["name"])
-                    if br_ok:
-                        print(clr(f"  Прогресс завоевания {target['name']}: {done}/{total}.", C.GREEN))
-            if done >= total:
-                target_copy, unlocked_now = annex_province_after_campaign(player, target)
-                print(clr(f"\n  🏛 Все {total} городов покорены: {target['name']} присоединена к Республике! Назначен временный управляющий.", C.BOLD + C.GREEN))
-                if unlocked_now:
-                    print(clr("  🏹 Открыты местные части: " + ", ".join(unlocked_now), C.CYAN))
-                log_event(player, f"{target['name']} присоединена к Республике после покорения {total} городов")
-            pause(); continue
-
-        if won:
-            print(clr(
-                "  Легион выиграл бой у стен, но город ещё держится. "
-                "Для захвата нужно довести повреждение до 100% успешным штурмом.",
-                C.GOLD,
-            ))
-            log_event(
-                player,
-                f"Штурм {target_city['name']}: победа в бою, урон +{actual_damage}%, "
-                f"всего {total_damage}%",
-            )
-        else:
-            if total_damage >= CITY_SIEGE_MAX_DAMAGE:
-                print(clr(
-                    "  Оборона города разрушена, но штурм отбит. "
-                    "Следующий успешный удар легиона завершит захват.",
-                    C.RED,
-                ))
+        if ch == "D":
+            if WAR_DIRECTOR_3 is not None and hasattr(WAR_DIRECTOR_3, "open_province_menu"):
+                WAR_DIRECTOR_3.open_province_menu(player, province["name"], globals())
+            elif WAR_DIRECTOR_3 is not None:
+                WAR_DIRECTOR_3.open_menu(player, globals())
             else:
-                print(clr(
-                    f"  Штурм отбит, однако легион успел нанести {actual_damage}% урона укреплениям.",
-                    C.GOLD,
-                ))
-            log_event(
-                player,
-                f"Неудачный штурм {target_city['name']}: урон +{actual_damage}%, "
-                f"всего {total_damage}%",
-            )
-        pause(); continue
+                print(clr("  Bellum Universale недоступен.", C.RED)); pause()
+            continue
+        if ch == "W":
+            if WARFARE_AI is not None and hasattr(WARFARE_AI, "open_province_menu"):
+                WARFARE_AI.open_province_menu(player, province["name"], globals())
+            elif WARFARE_AI is not None:
+                WARFARE_AI.open_menu(player, globals())
+            else:
+                print(clr("  Модуль прямых войн недоступен.", C.RED)); pause()
 
+
+def province_menu(player: Player):
+    ensure_province_details(player)
+    while True:
+        ensure_province_details(player)
+        rui_screen_start()
+        rui_header("PROVINCIAE ROMANAE", "🗺", C.BLUE, "Выберите территорию — все боевые действия начинаются на карте провинций")
+        owned_map_art(player)
+
+        owned = [p for p in safe_list(player.provinces) if isinstance(p, dict)]
+        if owned:
+            rows = []
+            for i, province in enumerate(owned, 1):
+                gov = player.governors.get(province["name"])
+                campaigns, occupied, lost = _province_war_status(player, province["name"])
+                alert = "потеряна" if lost else f"угроз {campaigns}, окк. {occupied}" if campaigns or occupied else "спокойно"
+                rows.append((
+                    str(i), province["name"], province_access_spec(province)["label"],
+                    province.get("wealth", 0), province.get("unrest", 0), province.get("romanization", 0),
+                    province.get("garrison", 0), gov.name if gov else "—", alert,
+                ))
+            rui_table("Наши провинции", ["#", "Провинция", "Тип", "Бог.", "Волн.", "Роман.", "Гарн.", "Управляющий", "Угроза"], rows, color=C.GREEN)
+        else:
+            rui_info("Нет провинций под властью Рима.", C.GRAY)
+
+        available = campaign_provinces(player)
+        if available:
+            rows = []
+            era = get_era(player)
+            mult = player.diff()["enemy_strength_mult"] * era["enemy_mult"]
+            for i, province in enumerate(available, 1):
+                city = next_city_to_attack(player, province)
+                done, total = city_campaign_progress(player, province["name"])
+                damage = city_siege_damage(player, province["name"], city["name"]) if city else 100
+                enemy = next((e for e in ENEMY_FACTIONS if e["region"] == province["name"]), None)
+                strength = max(1, round((enemy["strength"] if enemy else province.get("unrest", 2) + 2) * mult))
+                rows.append((
+                    str(i), province["name"], province_access_spec(province)["label"], province_route_label(player, province),
+                    f"{done}/{total}", city["name"] if city else "присоединение", f"{100-damage}%" if city else "0%", f"~{strength}",
+                ))
+            rui_table("Направления кампании", ["#", "Провинция", "Тип", "Маршрут", "Города", "Цель", "Оборона", "Враг"], rows, color=C.GOLD)
+        else:
+            rui_info("Нет доступных направлений: расширьте сухопутную границу или захватите прибрежную базу.", C.GRAY)
+
+        rui_info(f"Морская дальность штаба: {naval_campaign_range(player)} зон. Островные провинции берутся только группой с армией и транспортной вместимостью флота.", C.CYAN)
+        rui_menu([
+            ("1-" + str(len(available)) if available else "–", "Выбрать цель кампании", "открыть карточку провинции и назначить группу армий", "⚔"),
+            ("M", "Управлять нашей провинцией", "гарнизон, управляющий, романизация и экономика", "🏛"),
+            ("D", "Общий отчёт Bellum Universale", "вражеские кампании и оккупации", "🛡"),
+            ("Q", "Назад", "", "🚪"),
+        ], title="Командование")
+        valid = [str(i) for i in range(1, len(available) + 1)] + ["M", "D", "Q"]
+        ch = read_choice(clr("\n  Ваш выбор: ", C.CYAN), valid)
+        if ch == "Q":
+            return
+        if ch == "M":
+            province = _select_owned_province(player)
+            if province:
+                _owned_province_management_menu(player, province)
+            continue
+        if ch == "D":
+            if WAR_DIRECTOR_3 is not None:
+                WAR_DIRECTOR_3.open_menu(player, globals())
+            else:
+                print(clr("  Bellum Universale недоступен.", C.RED)); pause()
+            continue
+        _target_province_overview(player, available[int(ch) - 1])
 
 def train_legion_multiple_levels(player: Player, legion: Legion, levels: int) -> int:
     """Тренирует легион сразу на несколько уровней. Возвращает число реально полученных уровней."""
@@ -13503,6 +13952,16 @@ def legion_recruitment_cost(player: Player) -> int:
         factor *= 0.8
     if ADVANCED_ECONOMY is not None:
         factor *= economy_price_multiplier(player)
+    if _religion_engine_ready() and getattr(player, "religion", None):
+        try:
+            levy_multiplier = float(
+                RELIGION_SYSTEM.economy_modifiers(player, globals()).get("levy_multiplier", 1.0)
+            )
+            # Низкая лояльность религиозных меньшинств делает набор дороже;
+            # высокая интеграция, напротив, облегчает пополнение легионов.
+            factor /= max(0.50, min(1.25, levy_multiplier))
+        except Exception:
+            pass
     return max(base, int(round(base * factor)))
 
 
@@ -15038,7 +15497,7 @@ def ai_diplomacy_tick(player: "Player"):
     return foreign_policy_end_turn(player)
 
 
-def external_policy_menu(player: Player):
+def _legacy_external_policy_menu(player: Player):
     ensure_external_policy_state(player)
     while True:
         rui_screen_start()
@@ -15910,32 +16369,63 @@ def update_trade_market(player):
         state["trade_market"][res] = max(55, min(170, state["trade_market"].get(res, 100) + drift))
 
 
-def process_republic_caravans(player):
+def _collect_republic_caravan_cashflow(player) -> dict[str, Any]:
+    """Разрешает караваны без прямого изменения казны.
+
+    Возвращённый доход включается в контекст Roma Economica текущего хода.
+    Повторный вызов на том же ходу безопасен и не уменьшает срок второй раз.
+    """
     state = ensure_republic_overhaul_state(player)
-    if not state["caravans"]:
-        update_trade_market(player); return
-    arrived = []
-    lost = []
-    for c in list(state["caravans"]):
-        c["turns"] = max(0, safe_int(c.get("turns", 1), 1) - 1)
-        if c["turns"] > 0:
+    turn = safe_int(getattr(player, "turn", 1), 1, 1)
+    if safe_int(state.get("last_caravan_processed_turn", 0), 0) == turn:
+        return dict(safe_dict(state.get("last_caravan_flow")))
+
+    arrived: list[dict[str, Any]] = []
+    lost: list[dict[str, Any]] = []
+    for caravan in list(state.get("caravans", [])):
+        if not isinstance(caravan, dict):
+            state["caravans"].remove(caravan)
             continue
-        risk = safe_int(c.get("risk", 20), 20, 0, 95)
+        caravan["turns"] = max(0, safe_int(caravan.get("turns", 1), 1) - 1)
+        if caravan["turns"] > 0:
+            continue
+        risk = safe_int(caravan.get("risk", 20), 20, 0, 95)
         if random.randint(1, 100) <= risk:
-            lost.append(c)
+            lost.append(caravan)
         else:
-            player.gold += safe_int(c.get("value", 0), 0)
-            arrived.append(c)
-        state["caravans"].remove(c)
+            arrived.append(caravan)
+        state["caravans"].remove(caravan)
+
+    income = sum(max(0, safe_int(row.get("value", 0), 0)) for row in arrived)
     if arrived:
-        total = sum(c["value"] for c in arrived)
-        print(clr(f"\n  🐎 Караваны прибыли: +{total} золота.", C.GREEN))
-        log_event(player, f"Караваны прибыли: +{total} золота")
+        print(clr(f"\n  🐎 Караваны прибыли: {income} золота внесено в единую бюджетную ведомость.", C.GREEN))
+        log_event(player, f"Караваны прибыли: {income} золота передано в Aerarium")
     if lost:
         print(clr(f"\n  ☠ Потеряны караваны: {len(lost)}. Разбойники и пираты богатеют.", C.RED))
         player.v24["fleet"]["pirate_threat"] = min(100, player.v24["fleet"].get("pirate_threat", 20) + 3 * len(lost))
         log_event(player, f"Караваны потеряны: {len(lost)}")
     update_trade_market(player)
+
+    flow = {
+        "turn": turn,
+        "income": income,
+        "arrived": len(arrived),
+        "lost": len(lost),
+        "arrived_routes": [f"{row.get('origin', 'Roma')} → {row.get('dest', '?')}" for row in arrived],
+    }
+    state["last_caravan_processed_turn"] = turn
+    state["last_caravan_flow"] = dict(flow)
+    return flow
+
+
+def process_republic_caravans(player):
+    # Основной цикл вызывает функцию после экономического тика по историческим
+    # причинам. В новой архитектуре фактическая обработка уже выполнена внутри
+    # Player.apply_turn_economics(), поэтому здесь возвращается кэш.
+    if getattr(player, "_defer_republic_caravans", False):
+        state = ensure_republic_overhaul_state(player)
+        return dict(safe_dict(state.get("last_caravan_flow")))
+    return _collect_republic_caravan_cashflow(player)
 
 
 def _available_trade_goods(player) -> list[tuple[str, str, int]]:
@@ -16005,6 +16495,59 @@ def send_trade_caravan(player):
     log_event(player, f"Караван Roma → {dest}: {label} ×{amount}")
     pause()
 
+
+
+def city_trade_route_terms(player, province_def: dict, city: dict) -> dict[str, int]:
+    """Price and permanent income of a route built immediately after conquest."""
+    population = max(1, safe_int(city.get("population", 10), 10))
+    difficulty = safe_int(city.get("difficulty", 3), 3, 1, 10)
+    wealth = max(0, safe_int(province_def.get("wealth", 1), 1))
+    city_type = str(city.get("type", "город")).strip().lower()
+    commercial = 1.35 if city_type in {"порт", "торговый", "столица", "центр провинции"} else 1.15 if city_type in {"речной", "административный", "ремесленный"} else 1.0
+    cost = int(round((650 + population * 7 + difficulty * 70 + wealth * 55) * conquest_price_factor(player)))
+    income = int(round((32 + population * 0.48 + difficulty * 3 + wealth * 6) * commercial))
+    return {"cost": max(350, cost), "income": max(25, income)}
+
+
+def offer_city_trade_route(player, province_def: dict, city: dict, *, interactive: bool = True) -> dict[str, Any]:
+    """Offers a one-click permanent trade route for a freshly captured city."""
+    ensure_v24_state(player)
+    province_name = str(province_def.get("name", "Provincia"))
+    city_name = str(city.get("name", "Urbs"))
+    route_id = f"city::{province_name}::{city_name}"
+    routes = player.v24.setdefault("trade_routes", [])
+    existing = next((r for r in routes if isinstance(r, dict) and (str(r.get("id", "")) == route_id or (str(r.get("kind", "")) == "city" and str(r.get("province", "")) == province_name and str(r.get("city", "")) == city_name))), None)
+    if existing:
+        return {"built": False, "existing": True, "cost": 0, "income": safe_int(existing.get("value", 0), 0), "route": existing}
+    terms = city_trade_route_terms(player, province_def, city)
+    cost, income = terms["cost"], terms["income"]
+    if interactive:
+        print(clr(f"\n  🛣 Построить торговый путь Roma ↔ {city_name} за {cost} золота?", C.BOLD + C.CYAN))
+        print(clr(f"     Постоянный доход: +{income} золота за ход.", C.GREEN))
+        choice = read_choice(f"{clr('  Решение (Y/N): ', C.CYAN)}", ["Y", "N"])
+        if choice != "Y":
+            return {"built": False, "declined": True, "cost": cost, "income": income}
+    if player.gold < cost:
+        if interactive:
+            print(clr(f"  Недостаточно золота: нужно {cost}, в казне {player.gold}.", C.RED))
+        return {"built": False, "insufficient": True, "cost": cost, "income": income}
+    player.gold -= cost
+    route = {
+        "id": route_id,
+        "name": f"Roma ↔ {city_name}",
+        "value": income,
+        "active": True,
+        "kind": "city",
+        "province": province_name,
+        "city": city_name,
+        "cost": cost,
+        "created_turn": safe_int(getattr(player, "turn", 1), 1),
+    }
+    routes.append(route)
+    log_event(player, f"Построен торговый путь Roma ↔ {city_name}: +{income} золота/ход")
+    if interactive:
+        print(clr(f"  ✓ Торговый путь построен. Казна -{cost}; доход +{income} золота/ход.", C.BOLD + C.GREEN))
+    return {"built": True, "cost": cost, "income": income, "route": route}
 
 def found_trade_route(player):
     ensure_republic_overhaul_state(player)
@@ -16192,9 +16735,12 @@ def _legacy_show_economy_v24_menu(player):
 
 SEA_ZONES = {
     "tyrrhenian": {"name":"Тирренское море", "difficulty":22, "base_pirates":14, "trade_value":18, "weather":"calm", "neighbors":["ligurian","sicilian","ionian"], "ports":["ostia","misenum","neapolis"], "provinces":["Latium","Campania","Etruria","Bruttium"], "islands":["Capreae","Aenaria"]},
-    "ligurian": {"name":"Лигурийское море", "difficulty":28, "base_pirates":18, "trade_value":20, "weather":"calm", "neighbors":["tyrrhenian","western_med"], "ports":["genua","massilia"], "provinces":["Liguria","Gallia Narbonensis","Gallia"], "islands":[]},
+    "ligurian": {"name":"Лигурийское море", "difficulty":28, "base_pirates":18, "trade_value":20, "weather":"calm", "neighbors":["tyrrhenian","western_med","atlantic"], "ports":["genua","massilia"], "provinces":["Liguria","Gallia Narbonensis","Gallia"], "islands":[]},
     "sicilian": {"name":"Сицилийские проливы", "difficulty":36, "base_pirates":28, "trade_value":28, "weather":"windy", "neighbors":["tyrrhenian","western_med","african","ionian"], "ports":["syracusae","lilybaeum","rhegium"], "provinces":["Sicilia","Sardinia et Corsica","Bruttium","Carthago"], "islands":["Melita","Lipara","Gaulos"]},
-    "western_med": {"name":"Западное Средиземное море", "difficulty":42, "base_pirates":30, "trade_value":34, "weather":"windy", "neighbors":["ligurian","sicilian","african"], "ports":["tarraco","carthago_nova","caralis"], "provinces":["Hispania","Baetica","Lusitania","Sardinia et Corsica","Mauretania"], "islands":["Cercina"]},
+    "western_med": {"name":"Западное Средиземное море", "difficulty":42, "base_pirates":30, "trade_value":34, "weather":"windy", "neighbors":["ligurian","sicilian","african","atlantic"], "ports":["tarraco","carthago_nova","caralis"], "provinces":["Hispania","Baetica","Sardinia et Corsica","Mauretania"], "islands":["Cercina"]},
+    "atlantic": {"name":"Атлантическое побережье", "difficulty":54, "base_pirates":34, "trade_value":32, "weather":"storm", "neighbors":["western_med","ligurian","britannic"], "ports":["olisipo","burdigala"], "provinces":["Lusitania","Aquitania","Hispania","Gallia"], "islands":[]},
+    "britannic": {"name":"Британские моря", "difficulty":64, "base_pirates":38, "trade_value":30, "weather":"storm", "neighbors":["atlantic","northern"], "ports":["londinium","eblana"], "provinces":["Britannia","Hibernia","Caledonia","Belgica"], "islands":[]},
+    "northern": {"name":"Северное море", "difficulty":68, "base_pirates":42, "trade_value":28, "weather":"storm", "neighbors":["britannic"], "ports":["colonia_agrippina","traiectum"], "provinces":["Belgica","Germania Inferior"], "islands":[]},
     "african": {"name":"Африканское побережье", "difficulty":48, "base_pirates":34, "trade_value":38, "weather":"calm", "neighbors":["western_med","sicilian","eastern_med"], "ports":["carthago","utica","leptis_magna"], "provinces":["Carthago","Numidia","Mauretania","Cyrenaica"], "islands":["Meninx"]},
     "ionian": {"name":"Ионическое море", "difficulty":44, "base_pirates":26, "trade_value":30, "weather":"windy", "neighbors":["tyrrhenian","sicilian","adriatic","aegean","eastern_med"], "ports":["tarentum","brundisium","corcyra"], "provinces":["Apulia","Bruttium","Epirus","Achaea","Macedonia"], "islands":[]},
     "adriatic": {"name":"Адриатика", "difficulty":38, "base_pirates":24, "trade_value":26, "weather":"storm", "neighbors":["ionian","aegean"], "ports":["ravenna","brundisium","salona"], "provinces":["Apulia","Illyricum","Epirus","Dacia"], "islands":[]},
@@ -16241,6 +16787,12 @@ PORTS_DATA = {
     "carthago":{"name":"Carthago","zone":"african","province":"Carthago","cost":150,"desc":"пунийские верфи"},
     "massilia":{"name":"Massilia","zone":"ligurian","province":"Gallia Narbonensis","cost":125,"desc":"торговый порт Галлии"},
     "tarraco":{"name":"Tarraco","zone":"western_med","province":"Hispania","cost":125,"desc":"испанский морской узел"},
+    "olisipo":{"name":"Olisipo","zone":"atlantic","province":"Lusitania","cost":135,"desc":"атлантические ворота Иберии"},
+    "burdigala":{"name":"Burdigala","zone":"atlantic","province":"Aquitania","cost":145,"desc":"галльская гавань океанского пути"},
+    "londinium":{"name":"Londinium","zone":"britannic","province":"Britannia","cost":170,"desc":"главная база Британских морей"},
+    "eblana":{"name":"Eblana","zone":"britannic","province":"Hibernia","cost":185,"desc":"дальний островной причал"},
+    "colonia_agrippina":{"name":"Colonia Agrippina","zone":"northern","province":"Germania Inferior","cost":180,"desc":"база рейнско-северного театра"},
+    "traiectum":{"name":"Traiectum","zone":"northern","province":"Germania Inferior","cost":165,"desc":"передовая гавань Северного моря"},
     "athenae":{"name":"Athenae","zone":"aegean","province":"Achaea","cost":135,"desc":"порт знания и торговли"},
     "alexandria":{"name":"Alexandria","zone":"eastern_med","province":"Aegyptus","cost":180,"desc":"зерновой ключ к Риму"},
     "antiochia":{"name":"Antiochia","zone":"levant","province":"Syria","cost":150,"desc":"левантийская база"},
@@ -16258,7 +16810,7 @@ SEA_TRADE_ROUTES = {
     "pontic_grain":{"name":"Byzantium → Aegean → Roma", "zones":["black_sea","aegean","ionian"], "required":["Thracia"], "gold":26, "grain":24, "cost":140},
 }
 
-MARITIME_LANDING_TARGETS = {"Sicilia":{"zone":"sicilian","difficulty":32}, "Sardinia et Corsica":{"zone":"sicilian","difficulty":30}, "Carthago":{"zone":"african","difficulty":48}, "Mauretania":{"zone":"western_med","difficulty":42}, "Achaea":{"zone":"ionian","difficulty":44}, "Macedonia":{"zone":"ionian","difficulty":46}, "Asia Minor":{"zone":"aegean","difficulty":54}, "Bithynia":{"zone":"aegean","difficulty":56}, "Aegyptus":{"zone":"eastern_med","difficulty":60}, "Cyrenaica":{"zone":"eastern_med","difficulty":48}, "Syria":{"zone":"levant","difficulty":64}, "Judaea":{"zone":"levant","difficulty":58}, "Pontus":{"zone":"black_sea","difficulty":62}, "Britannia":{"zone":"ligurian","difficulty":58}}
+MARITIME_LANDING_TARGETS = {"Sicilia":{"zone":"sicilian","difficulty":32}, "Sardinia et Corsica":{"zone":"sicilian","difficulty":30}, "Carthago":{"zone":"african","difficulty":48}, "Mauretania":{"zone":"western_med","difficulty":42}, "Achaea":{"zone":"ionian","difficulty":44}, "Macedonia":{"zone":"ionian","difficulty":46}, "Asia Minor":{"zone":"aegean","difficulty":54}, "Bithynia":{"zone":"aegean","difficulty":56}, "Aegyptus":{"zone":"eastern_med","difficulty":60}, "Cyrenaica":{"zone":"eastern_med","difficulty":48}, "Syria":{"zone":"levant","difficulty":64}, "Judaea":{"zone":"levant","difficulty":58}, "Pontus":{"zone":"black_sea","difficulty":62}, "Britannia":{"zone":"britannic","difficulty":60}}
 
 NAVAL_ORDERS = {"reserve":{"name":"Резерв в гавани","desc":"медленный ремонт"}, "patrol":{"name":"Патруль","desc":"+контроль, -пираты"}, "hunt_pirates":{"name":"Охота на пиратов","desc":"рискованный бой"}, "convoy":{"name":"Конвой","desc":"защита торговли и зерна"}, "blockade":{"name":"Блокада","desc":"давление на побережье"}, "escort_landing":{"name":"Прикрытие десанта","desc":"готовит высадку"}, "refit":{"name":"Ремонт","desc":"быстрый ремонт в порту"}}
 
@@ -17376,26 +17928,21 @@ if TEXTUAL_AVAILABLE:
         """
         BINDINGS = [
             ("1", "choose('1')", "Провинции"),
-            ("2", "choose('2')", "Легионы"),
+            ("2", "choose('2')", "Армии Рима"),
             ("4", "choose('4')", "Ход"),
             ("5", "choose('5')", "Экономика"),
-            ("6", "choose('6')", "Внешняя политика"),
+            ("6", "choose('6')", "Мировая политика"),
             ("7", "choose('7')", "Наука"),
             ("8", "choose('8')", "Лог"),
             ("9", "choose('9')", "Пасс"),
-            ("a", "choose('A')", "Ауксилия"),
-            ("b", "choose('B')", "Варвары"),
             ("c", "choose('C')", "Советник"),
             ("d", "choose('D')", "Религия"),
-            ("f", "choose('F')", "Флот"),
             ("l", "choose('L')", "Люди"),
             ("p", "choose('P')", "Политика"),
             ("s", "choose('S')", "Сохранить"),
             ("v", "choose('V')", "Победа"),
             ("w", "choose('W')", "Чудеса"),
             ("y", "choose('Y')", "Пророчества"),
-            ("z", "choose('Z')", "Вражеский штаб"),
-            ("t", "choose('T')", "Артиллерия"),
             ("q", "choose('Q')", "Выход"),
             ("escape", "choose('Q')", "Выход"),
         ]
@@ -17423,7 +17970,7 @@ if TEXTUAL_AVAILABLE:
             dashboard = (
                 f"{player_status_display(player)}  •  {player.year} AUC  •  Ход {player.turn}  •  {era['name']}  •  {diff_label}\n"
                 f"💰 Казна {player.gold} ({net_gold:+}/ход)   🌾 Зерно {player.grain} ({net_grain:+}/ход)   🏆 Слава {player.glory}\n"
-                f"🗺 Провинции {len(player.provinces)}/{len(PROVINCES_DATA)}   ⚔ Легионы {len(player.legions)}   🔬 Технологии {len(player.tech_researched)}/{len(TECH_TREE)}\n"
+                f"🗺 Провинции {len(player.provinces)}/{len(PROVINCES_DATA)}   🦅 Группы армий {len(safe_list(getattr(player, "army_group_system", {}).get("groups", [])))}   🔬 Технологии {len(player.tech_researched)}/{len(TECH_TREE)}\n"
                 f"🕯 Религия: {rel_name}   ✨ Вера: {player.faith}   ☠ Угроза: {threat_text}"
             )
             narrow = os.get_terminal_size().columns < 95
@@ -17437,7 +17984,7 @@ if TEXTUAL_AVAILABLE:
                     Vertical(
                         Static("⚔ Кампания", classes="panel-title"),
                         Button("1  Провинции", id="menu_1"),
-                        Button("2  Легионы", id="menu_2"),
+                        Button("2  Армии Рима", id="menu_2"),
                         Button("4  Завершить ход", id="menu_4"),
                         Button("V  Условия победы", id="V"),
                         classes=panel_class,
@@ -17452,20 +17999,15 @@ if TEXTUAL_AVAILABLE:
                     Vertical(
                         Static("💰 Экономика", classes="panel-title"),
                         Button("5  Экономика", id="menu_5"),
-                        Button("F  Флот", id="F"),
                         classes=panel_class,
                     ),
                     Vertical(
                         Static("⭐ Развитие", classes="panel-title"),
-                        Button("6  Внешняя политика", id="menu_6"),
+                        Button("6  Мировая политика", id="menu_6"),
                         Button("7  Наука и стройки", id="menu_7"),
                         Button("9  Баттл-пасс", id="menu_9"),
-                        Button("A  Ауксилия", id="A"),
-                        Button("B  Варварские племена", id="B"),
-                        Button("T  Магазин артиллерии", id="T"),
                         Button("L  Великие люди", id="L"),
                         Button("W  Чудеса света", id="W"),
-                        Button("Z  Вражеский штаб", id="Z"),
                         classes=panel_class,
                     ),
                     Vertical(
@@ -17533,6 +18075,12 @@ SAVE_SIGNATURE_VERSION = 2
 # Новые сохранения всегда используют текущую GAME_VERSION.
 SAVE_KEY_COMPAT_VERSIONS = (
     GAME_VERSION,
+    "4.2.1-aerarium-realized",
+    "4.2.0-bellum-celer",
+    "4.1.1-assaultus-ordinarius",
+    "4.1.0-provinciae-et-exercitus",
+    "4.0.0-exercitus-universalis",
+    "3.7.0-res-publica-orbis",
     "2.29.6-imperial-onefile",
     "2.29.5-imperial-ui",
     "2.29.4-runtime-guard",
@@ -21779,15 +22327,51 @@ def process_pending_interactions(player) -> None:
 _end_turn_v240_original = end_turn
 
 def end_turn(player: Player):
-    # v2.24.4: сначала последствия хода, затем сводка и интерактив,
-    # и только после решений игрока — финальное сохранение.
+    """Финальная обёртка Aerarium Unicum: один регулярный денежный тик."""
     player.turn_summary = []
     player.pending_interactions = []
+    gold_at_turn_start = safe_int(getattr(player, "gold", 0), 0)
+    player._last_macro_gold_delta = 0
+    player._last_trade_route_gold_delta = 0
+    player._last_rare_resource_gold_delta = 0
+    player._last_caravan_gold_delta = 0
+    player._economy_resource_flow = {}
+    player._defer_republic_caravans = True
 
-    _end_turn_v240_original(player)
+    try:
+        _end_turn_v240_original(player)
+    finally:
+        if hasattr(player, "_defer_republic_caravans"):
+            delattr(player, "_defer_republic_caravans")
 
+    # При активной Roma Economica функция является безопасным no-op; fallback
+    # старого режима сохранён внутри самой функции.
     apply_siege_arsenal_upkeep(player)
-    resource_flow = resource_economy_turn_tick(player)
+
+    resource_flow = dict(safe_dict(getattr(player, "_economy_resource_flow", {})))
+    macro_delta = safe_int(getattr(player, "_last_macro_gold_delta", 0), 0)
+    route_income = safe_int(getattr(player, "_last_trade_route_gold_delta", 0), 0)
+    rare_income = safe_int(getattr(player, "_last_rare_resource_gold_delta", 0), 0)
+    caravan_income = safe_int(getattr(player, "_last_caravan_gold_delta", 0), 0)
+    total_delta = safe_int(getattr(player, "gold", 0), 0) - gold_at_turn_start
+    other_delta = total_delta - macro_delta
+    core_budget = macro_delta - route_income - rare_income - caravan_income
+
+    pieces = [
+        f"основной бюджет {core_budget:+}",
+        f"маршруты {route_income:+}",
+        f"редкие ресурсы {rare_income:+}",
+    ]
+    if caravan_income:
+        pieces.append(f"караваны {caravan_income:+}")
+    if other_delta:
+        pieces.append(f"события и решения {other_delta:+}")
+    turn_summary_add(
+        player,
+        f"Казна: {gold_at_turn_start}→{safe_int(getattr(player, 'gold', 0), 0)} "
+        f"({total_delta:+}); " + ", ".join(pieces),
+    )
+
     show_turn_summary(player)
     show_imperial_resource_report(player, resource_flow)
     process_pending_interactions(player)
@@ -25461,9 +26045,12 @@ def science_menu(player: Player):
 
 SEA_ZONES = {
     "tyrrhenian": {"name":"Тирренское море", "difficulty":22, "base_pirates":14, "trade_value":18, "weather":"calm", "neighbors":["ligurian","sicilian","ionian"], "ports":["ostia","misenum","neapolis"], "provinces":["Latium","Campania","Etruria","Bruttium"], "islands":["Capreae","Aenaria"]},
-    "ligurian": {"name":"Лигурийское море", "difficulty":28, "base_pirates":18, "trade_value":20, "weather":"calm", "neighbors":["tyrrhenian","western_med"], "ports":["genua","massilia"], "provinces":["Liguria","Gallia Narbonensis","Gallia"], "islands":[]},
+    "ligurian": {"name":"Лигурийское море", "difficulty":28, "base_pirates":18, "trade_value":20, "weather":"calm", "neighbors":["tyrrhenian","western_med","atlantic"], "ports":["genua","massilia"], "provinces":["Liguria","Gallia Narbonensis","Gallia"], "islands":[]},
     "sicilian": {"name":"Сицилийские проливы", "difficulty":36, "base_pirates":28, "trade_value":28, "weather":"windy", "neighbors":["tyrrhenian","western_med","african","ionian"], "ports":["syracusae","lilybaeum","rhegium"], "provinces":["Sicilia","Sardinia et Corsica","Bruttium","Carthago"], "islands":["Melita","Lipara","Gaulos"]},
-    "western_med": {"name":"Западное Средиземное море", "difficulty":42, "base_pirates":30, "trade_value":34, "weather":"windy", "neighbors":["ligurian","sicilian","african"], "ports":["tarraco","carthago_nova","caralis"], "provinces":["Hispania","Baetica","Lusitania","Sardinia et Corsica","Mauretania"], "islands":["Cercina"]},
+    "western_med": {"name":"Западное Средиземное море", "difficulty":42, "base_pirates":30, "trade_value":34, "weather":"windy", "neighbors":["ligurian","sicilian","african","atlantic"], "ports":["tarraco","carthago_nova","caralis"], "provinces":["Hispania","Baetica","Sardinia et Corsica","Mauretania"], "islands":["Cercina"]},
+    "atlantic": {"name":"Атлантическое побережье", "difficulty":54, "base_pirates":34, "trade_value":32, "weather":"storm", "neighbors":["western_med","ligurian","britannic"], "ports":["olisipo","burdigala"], "provinces":["Lusitania","Aquitania","Hispania","Gallia"], "islands":[]},
+    "britannic": {"name":"Британские моря", "difficulty":64, "base_pirates":38, "trade_value":30, "weather":"storm", "neighbors":["atlantic","northern"], "ports":["londinium","eblana"], "provinces":["Britannia","Hibernia","Caledonia","Belgica"], "islands":[]},
+    "northern": {"name":"Северное море", "difficulty":68, "base_pirates":42, "trade_value":28, "weather":"storm", "neighbors":["britannic"], "ports":["colonia_agrippina","traiectum"], "provinces":["Belgica","Germania Inferior"], "islands":[]},
     "african": {"name":"Африканское побережье", "difficulty":48, "base_pirates":34, "trade_value":38, "weather":"calm", "neighbors":["western_med","sicilian","eastern_med"], "ports":["carthago","utica","leptis_magna"], "provinces":["Carthago","Numidia","Mauretania","Cyrenaica"], "islands":["Meninx"]},
     "ionian": {"name":"Ионическое море", "difficulty":44, "base_pirates":26, "trade_value":30, "weather":"windy", "neighbors":["tyrrhenian","sicilian","adriatic","aegean","eastern_med"], "ports":["tarentum","brundisium","corcyra"], "provinces":["Apulia","Bruttium","Epirus","Achaea","Macedonia"], "islands":[]},
     "adriatic": {"name":"Адриатика", "difficulty":38, "base_pirates":24, "trade_value":26, "weather":"storm", "neighbors":["ionian","aegean"], "ports":["ravenna","brundisium","salona"], "provinces":["Apulia","Illyricum","Epirus","Dacia"], "islands":[]},
@@ -25518,6 +26105,12 @@ PORTS_DATA = {
     "carthago":{"name":"Carthago","zone":"african","province":"Carthago","cost":150,"desc":"пунийские верфи"},
     "massilia":{"name":"Massilia","zone":"ligurian","province":"Gallia Narbonensis","cost":125,"desc":"торговый порт Галлии"},
     "tarraco":{"name":"Tarraco","zone":"western_med","province":"Hispania","cost":125,"desc":"испанский морской узел"},
+    "olisipo":{"name":"Olisipo","zone":"atlantic","province":"Lusitania","cost":135,"desc":"атлантические ворота Иберии"},
+    "burdigala":{"name":"Burdigala","zone":"atlantic","province":"Aquitania","cost":145,"desc":"галльская гавань океанского пути"},
+    "londinium":{"name":"Londinium","zone":"britannic","province":"Britannia","cost":170,"desc":"главная база Британских морей"},
+    "eblana":{"name":"Eblana","zone":"britannic","province":"Hibernia","cost":185,"desc":"дальний островной причал"},
+    "colonia_agrippina":{"name":"Colonia Agrippina","zone":"northern","province":"Germania Inferior","cost":180,"desc":"база рейнско-северного театра"},
+    "traiectum":{"name":"Traiectum","zone":"northern","province":"Germania Inferior","cost":165,"desc":"передовая гавань Северного моря"},
     "athenae":{"name":"Athenae","zone":"aegean","province":"Achaea","cost":135,"desc":"порт знания и торговли"},
     "alexandria":{"name":"Alexandria","zone":"eastern_med","province":"Aegyptus","cost":180,"desc":"зерновой ключ к Риму"},
     "antiochia":{"name":"Antiochia","zone":"levant","province":"Syria","cost":150,"desc":"левантийская база"},
@@ -25535,7 +26128,7 @@ SEA_TRADE_ROUTES = {
     "pontic_grain":{"name":"Byzantium → Aegean → Roma", "zones":["black_sea","aegean","ionian"], "required":["Thracia"], "gold":26, "grain":24, "cost":140},
 }
 
-MARITIME_LANDING_TARGETS = {"Sicilia":{"zone":"sicilian","difficulty":32}, "Sardinia et Corsica":{"zone":"sicilian","difficulty":30}, "Carthago":{"zone":"african","difficulty":48}, "Mauretania":{"zone":"western_med","difficulty":42}, "Achaea":{"zone":"ionian","difficulty":44}, "Macedonia":{"zone":"ionian","difficulty":46}, "Asia Minor":{"zone":"aegean","difficulty":54}, "Bithynia":{"zone":"aegean","difficulty":56}, "Aegyptus":{"zone":"eastern_med","difficulty":60}, "Cyrenaica":{"zone":"eastern_med","difficulty":48}, "Syria":{"zone":"levant","difficulty":64}, "Judaea":{"zone":"levant","difficulty":58}, "Pontus":{"zone":"black_sea","difficulty":62}, "Britannia":{"zone":"ligurian","difficulty":58}}
+MARITIME_LANDING_TARGETS = {"Sicilia":{"zone":"sicilian","difficulty":32}, "Sardinia et Corsica":{"zone":"sicilian","difficulty":30}, "Carthago":{"zone":"african","difficulty":48}, "Mauretania":{"zone":"western_med","difficulty":42}, "Achaea":{"zone":"ionian","difficulty":44}, "Macedonia":{"zone":"ionian","difficulty":46}, "Asia Minor":{"zone":"aegean","difficulty":54}, "Bithynia":{"zone":"aegean","difficulty":56}, "Aegyptus":{"zone":"eastern_med","difficulty":60}, "Cyrenaica":{"zone":"eastern_med","difficulty":48}, "Syria":{"zone":"levant","difficulty":64}, "Judaea":{"zone":"levant","difficulty":58}, "Pontus":{"zone":"black_sea","difficulty":62}, "Britannia":{"zone":"britannic","difficulty":60}}
 
 NAVAL_ORDERS = {"reserve":{"name":"Резерв в гавани","desc":"медленный ремонт"}, "patrol":{"name":"Патруль","desc":"+контроль, -пираты"}, "hunt_pirates":{"name":"Охота на пиратов","desc":"рискованный бой"}, "convoy":{"name":"Конвой","desc":"защита торговли и зерна"}, "blockade":{"name":"Блокада","desc":"давление на побережье"}, "escort_landing":{"name":"Прикрытие десанта","desc":"готовит высадку"}, "refit":{"name":"Ремонт","desc":"быстрый ремонт в порту"}}
 
@@ -25592,11 +26185,27 @@ def ensure_v24_state(player):
     for k,v in SENATE_PARTIES.items():
         row = parties.get(k) if isinstance(parties.get(k), dict) else v.copy(); row["name"]=v["name"]; row["influence"]=_v24_clamp(row.get("influence",v["influence"]),v["influence"],5,70); parties[k]=row
     state["senate_parties"] = parties
-    state["trade_routes"] = [{"name":str(r.get("name") or ""), "value":safe_int(r.get("value",0),0,0), "active":bool(r.get("active",True))} for r in safe_list(state.get("trade_routes")) if isinstance(r, dict) and str(r.get("name") or "")]
+    # Preserve the extended city-route metadata. The old normalizer silently
+    # discarded id/province/city fields on every call, making duplicates possible.
+    normalized_routes = []
+    for raw in safe_list(state.get("trade_routes")):
+        if not isinstance(raw, dict) or not str(raw.get("name") or ""):
+            continue
+        route = {
+            "name": str(raw.get("name") or ""),
+            "value": safe_int(raw.get("value", 0), 0, 0),
+            "active": bool(raw.get("active", True)),
+        }
+        for key in ("id", "kind", "province", "city"):
+            if raw.get(key) not in (None, ""):
+                route[key] = str(raw.get(key))
+        for key in ("cost", "created_turn"):
+            if key in raw:
+                route[key] = safe_int(raw.get(key, 0), 0, 0)
+        normalized_routes.append(route)
+    state["trade_routes"] = normalized_routes
     old = state.get("fleet") if isinstance(state.get("fleet"), dict) else {}
     if NAVY is not None:
-        # Начиная с 3.0.1 состояние флота принадлежит roma_navy. Старый
-        # player.v24["fleet"] остаётся тем же объектом для совместимости.
         fleet = NAVY.ensure_state(player, globals(), legacy_fleet=old)
         for pid in PORTS_DATA:
             if _port_available_v25(player, pid):
@@ -25629,13 +26238,9 @@ def ensure_v24_state(player):
         for z in SEA_ZONES: base["landing_preparations"][z] = _v24_clamp(old["landing_preparations"].get(z,0),0,0,100)
     base["last_naval_report"] = safe_list(old.get("last_naval_report"))[-8:]
     old.clear(); old.update(base)
-    if NAVY is not None:
-        # Единый объект хранится в player.navy_system, а player.v24["fleet"]
-        # остаётся alias для старых экранов и сохранений.
-        state["fleet"] = NAVY.ensure_state(player, globals(), legacy_fleet=old)
-    else:
-        state["fleet"] = old
+    state["fleet"] = old
     state["resources"] = calculate_resources(player)
+
 
 def _squadron_value_v25(sq, key):
     data=FLEET_SQUADRON_TYPES.get(sq.get("type"),{}); raw=safe_int(data.get(key,0),0); dmg=_v24_clamp(sq.get("damage",0),0,0,100); morale=_v24_clamp(sq.get("morale",70),70,0,100); xp=safe_int(sq.get("xp",0),0,0)
@@ -25858,11 +26463,10 @@ def v24_tick_trade_and_fleet(player):
     for line in report[-3:]: log_event(player,"Флот: "+line[:90])
 
 def v24_end_turn_tick(player):
-    """Обрабатывает флот и старые торговые состояния без двойного начисления.
+    """Обновляет флот и Сенат; казну при Roma Economica не изменяет.
 
-    Roma Economica уже включает торговые маршруты, морское зерно и содержание
-    флота в общей ведомости. В этом режиме старый тик меняет только состояние
-    Сената, эскадр, пиратства и морских приказов.
+    Торговые пути, морское зерно и содержание флота уже вошли в единую
+    экономическую ведомость через ``advanced_economy_context``.
     """
     ensure_v24_state(player)
     res_gold, res_grain = v24_resource_income(player)
@@ -25873,21 +26477,16 @@ def v24_end_turn_tick(player):
     if ADVANCED_ECONOMY is None:
         player.gold += res_gold + trade_gold - fleet_cost
         player.grain += res_grain + sea_grain
-
+        player._last_trade_route_gold_delta = trade_gold
+    # При активной Roma Economica здесь нет ни одной денежной проводки.
     v24_tick_senate(player)
     v24_tick_trade_and_fleet(player)
 
     if res_gold or res_grain or trade_gold or sea_grain or fleet_cost:
         if ADVANCED_ECONOMY is None:
-            text = (
-                f"Mare Nostrum: +{res_gold + trade_gold - fleet_cost} золота, "
-                f"+{res_grain + sea_grain} зерна"
-            )
+            text = f"Mare Nostrum: +{res_gold + trade_gold - fleet_cost} золота, +{res_grain + sea_grain} зерна"
         else:
-            text = (
-                "Mare Nostrum: торговля, зерно и содержание флота "
-                "учтены в единой бюджетной ведомости"
-            )
+            text = f"Mare Nostrum обновлён; торговые пути {trade_gold} золота уже учтены Roma Economica"
         log_event(player, text)
 
 def _print_lines_v25(lines, success=None):
@@ -26387,9 +26986,9 @@ def show_enemy_ai_report(player: "Player"):
 def _main_menu_sections_v2257() -> list[MenuSection]:
     return [
         MenuSection("Кампания", "⚔", C.RED, (
-            MenuItem("1", "Провинции", "захват, гарнизоны, романизация", "🗺"),
+            MenuItem("1", "Провинции", "карта походов, маршруты вторжения и управление", "🗺"),
             MenuItem("M", "Города и муниципии", "население, порядок, здоровье и городские события", "🏙"),
-            MenuItem("2", "Армии и соединения", "легионы, ауксилии, артиллерия и флот", "🦅"),
+            MenuItem("2", "Армии Рима", "штаб, состав групп, магазин, развитие и снабжение", "🦅"),
             MenuItem("4", "Завершить ход", "следующий год и события", "⏭"),
             MenuItem("V", "Условия победы", "прогресс кампании", "🏆"),
             # Летопись является базовым пунктом меню, а не поздней опцией
@@ -26399,26 +26998,19 @@ def _main_menu_sections_v2257() -> list[MenuSection]:
         )),
         MenuSection("Государство", "🏛", C.GOLD, (
             MenuItem("P", "Сенат и роды", "партии, роды, реформы", "🏛"),
-            MenuItem("D", "Религия", "институты, вера, события", "🕯"),
+            MenuItem("D", "Религия", "догматы, доктрины, провинции и святыни", "🕯"),
             MenuItem("C", "Советник Республики", "экономика, война, победа", "🦉"),
         )),
         MenuSection("Экономика", "💰", C.GREEN, (
             MenuItem("5", "Экономика", "рынок, караваны, ресурсы, ведомость", "💰"),
-            MenuItem("F", "Флот", "корабли, пираты, море", "⛵"),
         )),
         MenuSection("Развитие и события", "⭐", C.CYAN, (
-            MenuItem("6", "Внешняя политика", "доктрина, миссии, кризисы, договоры", "🌍"),
-            MenuItem("I", "Стратегический ИИ держав", "цели, планы, коалиции, войны и контрразведка", "🕸"),
-            MenuItem("G", "Державы, войны и династии", "уникальные страны, торговля, браки и послеходовый совет", "👑"),
+            MenuItem("6", "Мировая политика", "державы, дипломатия, разведка, войны, торговля и династии", "🌍"),
             MenuItem("7", "Наука и стройки", "технологии и исследования", "🔬"),
             MenuItem("9", "Баттл-пасс", "уровни и награды", "🎖"),
-            MenuItem("A", "Ауксилия", "вспомогательные войска", "🏹"),
-            MenuItem("B", "Варварский мир", "племена, миграции, лагеря, федераты", "🐺"),
-            MenuItem("T", "Магазин артиллерии", "осадные орудия", "🏹"),
             MenuItem("L", "Великие люди", "коллекция, цитаты и баффы", "⭐"),
             MenuItem("W", "Чудеса света", "постройки, экран и баффы", "🏗"),
             MenuItem("Y", "Пророчества", "знамения каждые 10 ходов", "🔮"),
-            MenuItem("Z", "Вражеский штаб", "разведка, осады, рейды", "☠"),
         )),
         MenuSection("Система", "💾", C.PURPLE, (
             MenuItem("8", "Лог событий", "последние известия", "📜"),
@@ -26529,8 +27121,14 @@ def _lua_table_to_python(value, _depth: int = 0):
 
 
 def _load_lua_content_file(lua, filename: str):
-    path = os.path.join(LUA_CONTENT_DIR, filename)
-    if not os.path.exists(path):
+    # Актуальные справочники лежат рядом с roma_aeterna.py. mods/core остаётся
+    # запасным путём для старых установок и пользовательских модов.
+    candidates = (
+        os.path.join(SCRIPT_DIR, filename),
+        os.path.join(LUA_CONTENT_DIR, filename),
+    )
+    path = next((candidate for candidate in candidates if os.path.exists(candidate)), None)
+    if path is None:
         return None
     with open(path, "r", encoding="utf-8") as f:
         return _lua_table_to_python(lua.execute(f.read()))
@@ -26640,6 +27238,7 @@ def load_lua_content_mods(strict: bool = False) -> bool:
         provinces = _load_lua_content_file(lua, LUA_CONTENT_FILES["PROVINCES_DATA"])
         if isinstance(provinces, list) and provinces:
             PROVINCES_DATA = provinces
+            normalize_province_route_data()
             loaded_any = True
 
         religions = _load_lua_content_file(lua, LUA_CONTENT_FILES["RELIGION_CHOICES"])
@@ -26662,8 +27261,10 @@ def load_lua_content_mods(strict: bool = False) -> bool:
             loaded_any = True
 
         errors = validate_runtime_content()
+        if RELIGION_SYSTEM is not None and hasattr(RELIGION_SYSTEM, "audit_content"):
+            errors.extend(RELIGION_SYSTEM.audit_content(globals()))
         if errors:
-            raise ValueError("; ".join(errors[:8]))
+            raise ValueError("; ".join(errors[:12]))
     except Exception as exc:
         (
             PROVINCES_DATA,
@@ -26973,6 +27574,11 @@ def ensure_all_states(player):
             CITY_EVENTS.ensure_state(player, globals())
         except Exception as exc:
             debug_log("City system state migration failed: %s", exc, exc_info=True, level=logging.WARNING)
+    if _religion_engine_ready():
+        try:
+            RELIGION_SYSTEM.ensure_state(player, globals())
+        except Exception as exc:
+            debug_log("Religion system state migration failed: %s", exc, exc_info=True, level=logging.WARNING)
     if DIPLOMACY_AI is not None:
         try:
             DIPLOMACY_AI.ensure_state(player, globals())
@@ -26981,6 +27587,7 @@ def ensure_all_states(player):
     for module, label in (
         (NATIONS, "Nation system"),
         (WORLD_COUNCIL, "World council"),
+        (WORLD_POLITICS, "Unified world politics"),
         (WARFARE_AI, "Foreign warfare compatibility"),
         (DIPLOMATIC_TRADE, "Diplomatic trade"),
         (DYNASTIES, "Dynasty system"),
@@ -27004,15 +27611,35 @@ def ensure_all_states(player):
 # следуют городские события и прежние локальные интеракции.
 _process_pending_interactions_civitates_base = process_pending_interactions
 def process_pending_interactions(player) -> None:
+    # Вся мировая политика обновляется одним оркестратором. Это устраняет
+    # разный порядок тиков дипломатии, держав, войн, торговли и династий.
+    if WORLD_POLITICS is not None and hasattr(WORLD_POLITICS, "process_turn"):
+        try:
+            WORLD_POLITICS.process_turn(player, globals())
+        except Exception as exc:
+            debug_log("Unified world politics turn failed: %s", exc, exc_info=True, level=logging.ERROR)
+    else:
+        # Совместимость с установками без roma_world_politics.py.
+        for module, label in (
+            (DIPLOMACY_AI, "Strategic diplomacy AI"),
+            (NATIONS, "Unique nations"),
+            (WARFARE_AI, "Foreign warfare"),
+            (DIPLOMATIC_TRADE, "Diplomatic trade"),
+            (DYNASTIES, "Dynasties"),
+        ):
+            if module is not None and hasattr(module, "process_turn"):
+                try:
+                    module.process_turn(player, globals())
+                except Exception as exc:
+                    debug_log(f"{label} turn failed: %s", exc, exc_info=True, level=logging.ERROR)
+
+    # Военные, морские и цивилизационные системы не относятся к дипломатическому
+    # фасаду и продолжают обновляться своими ядрами.
     modules = (
-        (DIPLOMACY_AI, "Strategic diplomacy AI"),
-        (NATIONS, "Unique nations"),
         (AI_CIVILIZATION, "AI economy, science, religion and armed forces"),
         (NAVY, "Roman navy core"),
         (ARMY_GROUPS, "Roman operational armies"),
         (WAR_DIRECTOR_3, "Autonomous land and naval campaigns"),
-        (DIPLOMATIC_TRADE, "Diplomatic trade"),
-        (DYNASTIES, "Dynasties"),
     )
     for module, label in modules:
         if module is not None and hasattr(module, "process_turn"):
@@ -27026,6 +27653,12 @@ def process_pending_interactions(player) -> None:
         except Exception as exc:
             debug_log("World council failed: %s", exc, exc_info=True, level=logging.ERROR)
             print(clr(f"  ⚠ Consilium Orbis не завершил заседание: {exc}", C.RED))
+    if _religion_engine_ready():
+        try:
+            RELIGION_SYSTEM.process_turn(player, globals(), interactive=True)
+        except Exception as exc:
+            debug_log("Religion system turn failed: %s", exc, exc_info=True, level=logging.ERROR)
+            print(clr(f"  ⚠ Религиозная система не завершила обработку хода: {exc}", C.RED))
     if CITY_EVENTS is not None:
         try:
             CITY_EVENTS.process_turn(player, globals(), interactive=True)
@@ -28045,6 +28678,18 @@ def resource_economy_context(player: Player) -> dict[str, Any]:
         except Exception as exc:
             debug_log("Opera Publica resource snapshot failed: %s", exc, exc_info=True, level=logging.WARNING)
 
+    religion_economy = {
+        "tax_multiplier": 1.0,
+        "levy_multiplier": 1.0,
+        "trade_multiplier": 1.0,
+        "minority_provinces": 0,
+    }
+    if _religion_engine_ready():
+        try:
+            religion_economy.update(RELIGION_SYSTEM.economy_modifiers(player, globals()))
+        except Exception as exc:
+            debug_log("Religion resource context failed: %s", exc, exc_info=True, level=logging.DEBUG)
+
     return {
         "turn": safe_int(getattr(player, "turn", 1), 1, 1),
         "provinces": provinces,
@@ -28069,13 +28714,28 @@ def resource_economy_context(player: Player) -> dict[str, Any]:
         "building_resource_output": safe_dict(building_snapshot.get("resource_output")),
         "building_resource_input": safe_dict(building_snapshot.get("resource_input")),
         "building_count": safe_int(building_snapshot.get("building_count", 0), 0, 0),
+        # roma_resources.py может использовать эти поля для цен, караванов и
+        # доступности рабочей силы; старые версии модуля просто их игнорируют.
+        "religion_economy": religion_economy,
+        "religion_trade_multiplier": float(religion_economy.get("trade_multiplier", 1.0) or 1.0),
+        "religion_tax_multiplier": float(religion_economy.get("tax_multiplier", 1.0) or 1.0),
+        "religion_levy_multiplier": float(religion_economy.get("levy_multiplier", 1.0) or 1.0),
+        "religious_minority_provinces": safe_int(religion_economy.get("minority_provinces", 0), 0, 0),
     }
 
 
 def ensure_resource_economy_state(player: Player) -> dict[str, Any]:
     if RESOURCE_ECONOMY is None:
         return {}
-    return RESOURCE_ECONOMY.ensure_state(player, resource_economy_context(player))
+    state = RESOURCE_ECONOMY.ensure_state(player, resource_economy_context(player))
+
+    # Aerarium Unicum: Opes Imperii управляет только физическими товарами.
+    # Любое старое сохранение с включённой скрытой закупкой жёстко мигрирует
+    # на нулевой денежный доступ; менять казну может только Roma Economica.
+    state["auto_buy_shortages"] = False
+    state["auto_purchase_budget_share"] = 0.0
+    state["_aerarium_unicum_treasury_isolated"] = True
+    return state
 
 
 if RESOURCE_ECONOMY is not None:
@@ -28094,6 +28754,7 @@ def resource_economy_turn_tick(player: Player) -> dict[str, Any]:
     if RESOURCE_ECONOMY is None:
         return {}
     try:
+        ensure_resource_economy_state(player)
         flow = RESOURCE_ECONOMY.apply_turn(player, resource_economy_context(player))
     except Exception as exc:
         debug_log("Resource economy turn failed: %s", exc, exc_info=True, level=logging.ERROR)
@@ -28106,12 +28767,12 @@ def resource_economy_turn_tick(player: Player) -> dict[str, Any]:
         top.append(f"{spec.get('icon', '•')} {spec.get('name', key)} +{amount:g}")
     if top:
         turn_summary_add(player, "Автодобыча: " + ", ".join(top))
-    purchase_cost = safe_int(flow.get("auto_purchase_cost", 0), 0, 0)
-    if purchase_cost:
-        turn_summary_add(player, f"Автоснабжение закупило дефицитные ресурсы: -{purchase_cost} золота")
+    recommended = safe_int(flow.get("recommended_purchase_cost", 0), 0, 0)
+    if recommended and flow.get("shortages"):
+        turn_summary_add(player, f"Дефицит ресурсов оценивается в {recommended} золота; скрытая закупка запрещена")
     rare_income = safe_int(flow.get("rare_resource_income", 0), 0, 0)
     if rare_income:
-        turn_summary_add(player, f"Редкие ресурсы принесли в казну: +{rare_income} золота")
+        turn_summary_add(player, f"Редкие ресурсы переданы в единую ведомость: +{rare_income} золота")
     for note in safe_list(flow.get("notes"))[:3]:
         turn_summary_add(player, "Ресурсы: " + str(note))
     return flow
@@ -28199,17 +28860,31 @@ def process_resource_economy_interactions(player: Player) -> None:
             f"уровень {investment.get('current_level', 1.0)}.",
             C.CYAN,
         ))
-        for tier in safe_list(investment.get("tiers")):
-            print(
-                f"  {tier.get('key')}. {tier.get('label')} — {tier.get('cost')} золота; "
-                f"ориентировочно +{tier.get('yield_bonus')}% к производственной мощности"
-            )
+        tiers = safe_list(investment.get("tiers"))
+        for tier in tiers:
+            print(f"  {tier.get('key')}. {tier.get('label')} — {tier.get('cost')} золота; ориентировочно +{tier.get('yield_bonus')}% к производственной мощности")
         print("  Q. Отложить вложение")
-        choice = read_choice(
-            f"\n{clr('  Решение: ', C.CYAN)}",
-            [str(row.get("key")) for row in safe_list(investment.get("tiers"))] + ["Q"],
-        )
-        result = RESOURCE_ECONOMY.resolve_investment_offer(player, choice, context)
+        choice = read_choice(f"\n{clr('  Решение: ', C.CYAN)}", [str(row.get("key")) for row in tiers] + ["Q"])
+        if choice == "Q":
+            result = RESOURCE_ECONOMY.resolve_investment_offer(player, choice, context)
+        else:
+            tier = next((row for row in tiers if str(row.get("key")) == choice), None)
+            cost = max(0, safe_int((tier or {}).get("cost", 0), 0))
+            if safe_int(getattr(player, "gold", 0), 0) < cost:
+                result = {"ok": False, "message": f"Недостаточно золота: требуется {cost}."}
+            else:
+                authorized = dict(context)
+                authorized["treasury_authorized"] = True
+                result = RESOURCE_ECONOMY.resolve_investment_offer(player, choice, authorized)
+                if result.get("ok") and safe_int(result.get("gold_delta", 0), 0):
+                    cash = economy_cash_transaction(
+                        player,
+                        safe_int(result.get("gold_delta", 0), 0),
+                        str(result.get("label", "Инвестиция в ресурсы")),
+                        category=str(result.get("category", "resource_investment")),
+                    )
+                    if not cash.get("ok"):
+                        result = cash
         print(clr("  " + str(result.get("message", "")), C.GREEN if result.get("ok") else C.RED))
         if result.get("ok"):
             log_event(player, str(result.get("message", "Инвестиция в ресурсы")))
@@ -28219,7 +28894,29 @@ def process_resource_economy_interactions(player: Player) -> None:
         print(clr("\n  ⚖ ТОРГОВОЕ ПОСОЛЬСТВО", C.BOLD + C.PURPLE))
         print(clr("  " + RESOURCE_ECONOMY.trade_offer_text(trade), C.CYAN))
         answer = read_choice(f"{clr('  Принять предложение? (Y/N): ', C.CYAN)}", ["Y", "N"])
-        result = RESOURCE_ECONOMY.resolve_trade_offer(player, answer == "Y", context)
+        if answer != "Y":
+            result = RESOURCE_ECONOMY.resolve_trade_offer(player, False, context)
+        else:
+            expected_delta = 0
+            if trade.get("kind") == "import":
+                expected_delta = -max(0, safe_int(trade.get("pay_gold", 0), 0))
+            elif trade.get("kind") == "export":
+                expected_delta = max(0, safe_int(trade.get("receive_gold", 0), 0))
+            if expected_delta < 0 and safe_int(getattr(player, "gold", 0), 0) < abs(expected_delta):
+                result = {"ok": False, "message": f"Недостаточно золота: требуется {abs(expected_delta)}."}
+            else:
+                authorized = dict(context)
+                authorized["treasury_authorized"] = True
+                result = RESOURCE_ECONOMY.resolve_trade_offer(player, True, authorized)
+                if result.get("ok") and safe_int(result.get("gold_delta", 0), 0):
+                    cash = economy_cash_transaction(
+                        player,
+                        safe_int(result.get("gold_delta", 0), 0),
+                        str(result.get("label", "Торговая сделка ресурсами")),
+                        category=str(result.get("category", "resource_trade")),
+                    )
+                    if not cash.get("ok"):
+                        result = cash
         print(clr("  " + str(result.get("message", "")), C.GREEN if result.get("ok") else C.RED))
         if result.get("ok"):
             log_event(player, str(result.get("message", "Торговое предложение")))
@@ -28234,55 +28931,33 @@ def show_resource_economy_menu(player: Player) -> None:
         return
     while True:
         context = resource_economy_context(player)
-        state = RESOURCE_ECONOMY.ensure_state(player, context)
+        state = ensure_resource_economy_state(player)
         rows = RESOURCE_ECONOMY.category_report(player, context)
         rui_screen_start()
         rui_header("OPES IMPERII — РЕСУРСЫ И АВТОДОБЫЧА", "⛏", C.GOLD)
         rui_info(
-            f"Все ресурсы добываются и расходуются автоматически. Стоимость запасов: "
+            f"Ресурсы добываются и расходуются физически. Стоимость запасов: "
             f"{int(round(RESOURCE_ECONOMY.stockpile_value(player, context)))} золота.",
             C.CYAN,
         )
+        recommended = safe_int(state.get("last_flow", {}).get("recommended_purchase_cost", 0), 0)
         rui_info(
-            f"Автозакупка критического дефицита: {'включена' if state.get('auto_buy_shortages', True) else 'выключена'} • "
-            f"прошлый расход на закупки: {safe_int(state.get('last_flow', {}).get('auto_purchase_cost', 0), 0)}",
-            C.GREEN if state.get("auto_buy_shortages", True) else C.GOLD,
+            "Казна изолирована: Opes Imperii не списывает и не начисляет золото. "
+            + (f"Ориентировочная цена текущего дефицита: {recommended}." if recommended else "Скрытых закупок нет."),
+            C.GOLD,
         )
         for category in RESOURCE_ECONOMY.CATEGORY_ORDER:
             category_rows = [row for row in rows if row.get("category") == category]
-            table_rows = [
-                (
-                    f"{row['icon']} {row['name']}",
-                    f"{row['stock']:.1f}",
-                    f"+{row['production']:.1f}",
-                    f"-{row['consumption']:.1f}",
-                    f"{row['level']:.2f}",
-                    f"{row['price']:.1f}",
-                    "ДЕФИЦИТ" if row["shortage"] > 0 else "—",
-                )
-                for row in category_rows
-            ]
-            rui_table(
-                RESOURCE_ECONOMY.CATEGORY_LABELS[category],
-                ["Ресурс", "Запас", "Добыча", "Расход", "Уров.", "Цена", "Состояние"],
-                table_rows,
-                color=C.CYAN if category != "luxury" else C.PURPLE,
-            )
+            table_rows = [(f"{row['icon']} {row['name']}", f"{row['stock']:.1f}", f"+{row['production']:.1f}", f"-{row['consumption']:.1f}", f"{row['level']:.2f}", f"{row['price']:.1f}", "ДЕФИЦИТ" if row["shortage"] > 0 else "—") for row in category_rows]
+            rui_table(RESOURCE_ECONOMY.CATEGORY_LABELS[category], ["Ресурс", "Запас", "Добыча", "Расход", "Уров.", "Цена", "Состояние"], table_rows, color=C.CYAN if category != "luxury" else C.PURPLE)
         offers = RESOURCE_ECONOMY.pending_offers(player, context)
         if offers.get("investment"):
             rui_info("Ожидает решения инвестиционное предложение.", C.GOLD)
         if offers.get("trade"):
             rui_info(RESOURCE_ECONOMY.trade_offer_text(offers["trade"]), C.PURPLE)
-        rui_menu([
-            ("A", "Автозакупка дефицита", "переключить закупку жизненно важных товаров", "⚙"),
-            ("Q", "Назад", "", "↩"),
-        ])
-        choice = read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}", ["A", "Q"])
-        if choice == "Q":
-            return
-        enabled = RESOURCE_ECONOMY.set_auto_buy(player, not state.get("auto_buy_shortages", True), context)
-        print(clr(f"  ✓ Автозакупка {'включена' if enabled else 'выключена'}.", C.GREEN))
-        pause()
+        rui_menu([("Q", "Назад", "", "↩")])
+        read_choice(f"\n{clr('  Ваш выбор: ', C.CYAN)}", ["Q"])
+        return
 
 
 
@@ -28576,18 +29251,29 @@ def show_economy_v24_menu(player):
         elif choice == "P": _economy_automation_menu(player)
         elif choice == "H": _economy_magic_help(player)
 
+# ─── RES PUBLICA ORBIS: единый вход вместо трёх разрозненных меню ──────────
+
+def open_world_politics(player: "Player", start_section: str | None = None) -> None:
+    if WORLD_POLITICS is not None and hasattr(WORLD_POLITICS, "open_menu"):
+        WORLD_POLITICS.open_menu(player, globals(), start_section=start_section)
+        return
+    print(clr("  Единый центр мировой политики недоступен; открыта старая канцелярия.", C.RED))
+    if WORLD_POLITICS_IMPORT_ERROR:
+        print(clr(f"  Причина: {WORLD_POLITICS_IMPORT_ERROR}", C.GOLD))
+    pause()
+    _legacy_external_policy_menu(player)
+
+def external_policy_menu(player: "Player"):
+    """Совместимый старый вход теперь ведёт в единый центр мировой политики."""
+    return open_world_politics(player, start_section="diplomacy")
+
+
 def dispatch_main_choice(player, choice) -> bool:
     """Выполняет приказ меню. False означает завершение игрового цикла."""
     if choice == "G":
-        if WORLD_COUNCIL is not None:
-            WORLD_COUNCIL.open_menu(player, globals())
-        else:
-            print(clr("  Система Gentes et Regna недоступна.", C.RED))
-            errors = [NATIONS_IMPORT_ERROR, WORLD_COUNCIL_IMPORT_ERROR, WARFARE_AI_IMPORT_ERROR, DIPLOMATIC_TRADE_IMPORT_ERROR, DYNASTIES_IMPORT_ERROR, NAVY_IMPORT_ERROR, ARMY_GROUPS_IMPORT_ERROR, AI_CIVILIZATION_IMPORT_ERROR, WAR_DIRECTOR_3_IMPORT_ERROR]
-            for error in errors:
-                if error:
-                    print(clr(f"  Причина: {error}", C.GOLD))
-            pause()
+        # Старый скрытый ключ сохранён для сейвов/макросов, но отдельного
+        # Gentes et Regna больше нет.
+        open_world_politics(player, start_section="dossiers")
     elif choice == "M":
         if CITY_EVENTS is not None:
             CITY_EVENTS.open_menu(player, globals())
@@ -28597,13 +29283,9 @@ def dispatch_main_choice(player, choice) -> bool:
                 print(clr(f"  Причина: {CITY_EVENTS_IMPORT_ERROR}", C.GOLD))
             pause()
     elif choice == "I":
-        if DIPLOMACY_AI is not None:
-            DIPLOMACY_AI.open_menu(player, globals())
-        else:
-            print(clr("  Стратегический дипломатический ИИ недоступен.", C.RED))
-            if DIPLOMACY_AI_IMPORT_ERROR:
-                print(clr(f"  Причина: {DIPLOMACY_AI_IMPORT_ERROR}", C.GOLD))
-            pause()
+        # Стратегический ИИ работает в фоне; старый ключ открывает его
+        # разведывательное представление внутри единого центра.
+        open_world_politics(player, start_section="intelligence")
     elif choice == "1":
         if roma_map_textual and getattr(roma_map_textual, "TEXTUAL_MAP_AVAILABLE", False):
             map_choice = roma_map_textual.run_textual_map(
@@ -28628,8 +29310,11 @@ def dispatch_main_choice(player, choice) -> bool:
             return False
     elif choice == "5":
         show_economy_v24_menu(player)
-    elif choice in ("6", "E"):
-        external_policy_menu(player)
+    elif choice == "6":
+        open_world_politics(player)
+    elif choice == "E":
+        # Старый скрытый ключ внешней политики.
+        open_world_politics(player, start_section="diplomacy")
     elif choice in ("7", "R"):
         science_menu(player)
     elif choice in ("8", "H"):

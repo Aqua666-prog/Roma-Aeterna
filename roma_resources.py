@@ -19,7 +19,7 @@ import math
 import random
 from typing import Any
 
-RESOURCE_ECONOMY_VERSION = 3
+RESOURCE_ECONOMY_VERSION = 5
 
 CATEGORY_ORDER = (
     "food",
@@ -266,8 +266,11 @@ def ensure_state(player: Any, context: dict[str, Any] | None = None) -> dict[str
         "invested_gold": {key: 0.0 for key in RESOURCE_CATALOG},
         "market_prices": {key: float(spec["base_price"]) for key, spec in RESOURCE_CATALOG.items()},
         "reserve_targets": {key: float(spec["reserve"]) for key, spec in RESOURCE_CATALOG.items()},
-        "auto_buy_shortages": True,
-        "auto_purchase_budget_share": 0.08,
+        # Aerarium Unicum: ресурсный модуль не имеет права менять казну.
+        # Дефицит лишь фиксируется; закупки проводятся отдельной казначейской
+        # операцией через roma_economy.apply_cash_transaction().
+        "auto_buy_shortages": False,
+        "auto_purchase_budget_share": 0.0,
         "auto_process_materials": True,
         "pending_investment_offer": None,
         "pending_trade_offer": None,
@@ -279,6 +282,8 @@ def ensure_state(player: Any, context: dict[str, Any] | None = None) -> dict[str
         "total_auto_purchase_cost": 0.0,
         "total_trade_gold": 0.0,
         "total_investment": 0.0,
+        "total_granted_resources": {},
+        "resource_grant_history": [],
         "last_rare_resource_income": 0,
         "total_rare_resource_income": 0.0,
         "last_processed_turn": 0,
@@ -313,6 +318,10 @@ def ensure_state(player: Any, context: dict[str, Any] | None = None) -> dict[str
         state["offer_history"] = []
     if not isinstance(state.get("last_flow"), dict):
         state["last_flow"] = {}
+    if not isinstance(state.get("total_granted_resources"), dict):
+        state["total_granted_resources"] = {}
+    if not isinstance(state.get("resource_grant_history"), list):
+        state["resource_grant_history"] = []
 
     _pull_legacy_metals(player, state)
     _push_legacy_metals(player, state)
@@ -339,6 +348,49 @@ def _push_legacy_metals(player: Any, state: dict[str, Any]) -> None:
     stock = state["stockpiles"]
     for old_key, new_key in LEGACY_METAL_MAP.items():
         metals[old_key] = max(0, int(round(stock.get(new_key, 0.0))))
+
+
+def grant_resources(
+    player: Any,
+    rewards: dict[str, Any],
+    context: dict[str, Any] | None = None,
+    *,
+    source: str = "grant",
+    note: str = "",
+) -> dict[str, int]:
+    """Safely adds a bundle of strategic resources to the imperial stockpile.
+
+    This is the public bridge used by conquest, events and future modules.
+    Unknown resources and non-positive amounts are ignored. Legacy metal wallets
+    are synchronised immediately so old army and construction menus see the loot.
+    """
+    state = ensure_state(player, context or {})
+    stock = state["stockpiles"]
+    applied: dict[str, int] = {}
+    if not isinstance(rewards, dict):
+        return applied
+    for key, raw in rewards.items():
+        key = str(key)
+        if key not in RESOURCE_CATALOG:
+            continue
+        amount = max(0, int(round(finite(raw, 0.0))))
+        if amount <= 0:
+            continue
+        stock[key] = clamp(finite(stock.get(key, 0.0)) + amount, 0.0, 10_000_000.0)
+        applied[key] = amount
+        totals = state.setdefault("total_granted_resources", {})
+        totals[key] = max(0, int(round(finite(totals.get(key, 0.0)) + amount)))
+    if applied:
+        history = state.setdefault("resource_grant_history", [])
+        history.append({
+            "turn": max(1, int(getattr(player, "turn", 1) or 1)),
+            "source": str(source),
+            "note": str(note),
+            "resources": dict(applied),
+        })
+        del history[:-160]
+        _push_legacy_metals(player, state)
+    return applied
 
 
 def _province_efficiency(province: dict[str, Any], context: dict[str, Any]) -> float:
@@ -536,51 +588,37 @@ def _update_market_prices(player: Any, state: dict[str, Any], demand: dict[str, 
 
 
 def _consume_and_autobuy(player: Any, context: dict[str, Any], state: dict[str, Any], demand: dict[str, float]) -> tuple[dict[str, float], dict[str, float], float]:
+    """Расходует физические запасы, но никогда не касается казны.
+
+    Имя сохранено ради совместимости старых сохранений и внешних вызовов.
+    Третий элемент результата теперь всегда равен нулю; ориентировочная цена
+    покрытия дефицита хранится в ``last_recommended_purchase_cost`` и может
+    быть использована основным файлом для явной казначейской закупки.
+    """
+    del player  # Казна и другие денежные поля принципиально не используются.
     stock = state["stockpiles"]
     consumed: dict[str, float] = {}
     shortages: dict[str, float] = {}
-    purchase_cost = 0.0
     price_level = clamp(finite(context.get("price_level", 1.0), 1.0), 0.20, 100.0)
     game_multiplier = clamp(finite(context.get("price_multiplier", 1.0), 1.0), 0.20, 20.0)
+    recommended_cost = 0.0
 
-    essential_auto_buy = {"salt", "timber", "iron", "steel", "leather", "horses", "papyrus"}
-    initial_gold = max(0.0, finite(getattr(player, "gold", 0.0)))
-    purchase_budget = min(
-        initial_gold * state.get("auto_purchase_budget_share", 0.08),
-        (85.0 + 12.0 * max(0, int(context.get("legion_count", 0)))) * game_multiplier,
-    )
-
-    # Сначала жизненно важные позиции, затем всё остальное без автоматической закупки.
-    ordered_keys = sorted(demand, key=lambda k: (k not in essential_auto_buy, -demand.get(k, 0.0)))
-    for key in ordered_keys:
-        required = max(0.0, demand.get(key, 0.0))
-        available = max(0.0, stock.get(key, 0.0))
+    for key, required_raw in demand.items():
+        required = max(0.0, finite(required_raw))
+        available = max(0.0, finite(stock.get(key, 0.0)))
         direct = min(available, required)
         stock[key] = available - direct
         consumed[key] = direct
         missing = required - direct
         if missing <= 1e-6:
             continue
-        if state.get("auto_buy_shortages", True) and key in essential_auto_buy and purchase_cost < purchase_budget:
-            unit_price = state["market_prices"].get(key, RESOURCE_CATALOG[key]["base_price"])
-            # Оптовая закупка дешевле розницы, но ограничена годовым бюджетом снабжения.
-            unit_price *= price_level * game_multiplier * 0.42
-            budget_left = max(0.0, purchase_budget - purchase_cost)
-            affordable = min(
-                max(0.0, finite(getattr(player, "gold", 0.0))) / max(0.01, unit_price),
-                budget_left / max(0.01, unit_price),
-            )
-            bought = min(missing, affordable)
-            if bought > 1e-6:
-                cost = bought * unit_price
-                player.gold = max(0, int(round(finite(getattr(player, "gold", 0.0)) - cost)))
-                purchase_cost += cost
-                consumed[key] += bought
-                missing -= bought
-        if missing > 1e-6:
-            shortages[key] = missing
-    state["total_auto_purchase_cost"] = finite(state.get("total_auto_purchase_cost", 0.0)) + purchase_cost
-    return consumed, shortages, purchase_cost
+        shortages[key] = missing
+        unit_price = state["market_prices"].get(key, RESOURCE_CATALOG[key]["base_price"])
+        recommended_cost += missing * unit_price * price_level * game_multiplier * 0.42
+
+    state["last_recommended_purchase_cost"] = max(0.0, recommended_cost)
+    state["total_auto_purchase_cost"] = finite(state.get("total_auto_purchase_cost", 0.0))
+    return consumed, shortages, 0.0
 
 
 def _apply_shortage_effects(player: Any, shortages: dict[str, float], demand: dict[str, float]) -> list[str]:
@@ -672,7 +710,14 @@ def _maybe_create_investment_offer(player: Any, context: dict[str, Any], state: 
 
 
 def resolve_investment_offer(player: Any, choice: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
-    state = ensure_state(player, context or {})
+    """Применяет физическое расширение, возвращая денежную проводку вызывающему коду.
+
+    Сам модуль ресурсов не читает и не изменяет ``player.gold``. Для принятия
+    платного варианта основной файл должен передать ``treasury_authorized=True``
+    и затем провести возвращённый ``gold_delta`` через Roma Economica.
+    """
+    context = context or {}
+    state = ensure_state(player, context)
     offer = state.get("pending_investment_offer")
     if not isinstance(offer, dict):
         return {"ok": False, "message": "Нет действующего инвестиционного предложения."}
@@ -680,15 +725,14 @@ def resolve_investment_offer(player: Any, choice: str, context: dict[str, Any] |
         state["pending_investment_offer"] = None
         state["offer_history"].append({"turn": int(getattr(player, "turn", 1)), "kind": "investment", "result": "declined", "resource": offer.get("resource")})
         state["offer_history"] = state["offer_history"][-80:]
-        return {"ok": True, "message": f"Расширение производства: {offer.get('name', 'ресурс')} — отложено."}
+        return {"ok": True, "message": f"Расширение производства: {offer.get('name', 'ресурс')} — отложено.", "gold_delta": 0}
     tier = next((row for row in offer.get("tiers", []) if str(row.get("key")) == str(choice)), None)
     if not isinstance(tier, dict):
         return {"ok": False, "message": "Неизвестный вариант вложения."}
     cost = max(0, int(tier.get("cost", 0)))
-    if int(getattr(player, "gold", 0)) < cost:
-        return {"ok": False, "message": f"Недостаточно золота: требуется {cost}."}
+    if not bool(context.get("treasury_authorized", False)):
+        return {"ok": False, "requires_treasury": True, "cost": cost, "gold_delta": -cost, "message": f"Требуется казначейская проводка на {cost} золота."}
     resource = str(offer.get("resource"))
-    player.gold -= cost
     state["production_levels"][resource] = clamp(state["production_levels"].get(resource, 1.0) + finite(tier.get("level_gain", 0.0)), 0.25, 25.0)
     state["invested_gold"][resource] = finite(state["invested_gold"].get(resource, 0.0)) + cost
     state["total_investment"] = finite(state.get("total_investment", 0.0)) + cost
@@ -700,10 +744,7 @@ def resolve_investment_offer(player: Any, choice: str, context: dict[str, Any] |
     state["pending_investment_offer"] = None
     state["offer_history"].append({"turn": int(getattr(player, "turn", 1)), "kind": "investment", "result": "accepted", "resource": resource, "cost": cost})
     state["offer_history"] = state["offer_history"][-80:]
-    return {
-        "ok": True,
-        "message": f"{offer.get('icon', '')} {offer.get('name', resource)}: вложено {cost} золота; производственная мощность выросла примерно на {tier.get('yield_bonus', 0)}%.",
-    }
+    return {"ok": True, "cost": cost, "gold_delta": -cost, "category": "resource_investment", "label": f"Расширение производства: {offer.get('name', resource)}", "message": f"{offer.get('icon', '')} {offer.get('name', resource)}: производственная мощность выросла примерно на {tier.get('yield_bonus', 0)}%."}
 
 
 def _partner_specialties(identifier: str) -> list[str]:
@@ -830,7 +871,9 @@ def trade_offer_text(offer: dict[str, Any]) -> str:
 
 
 def resolve_trade_offer(player: Any, accept: bool, context: dict[str, Any] | None = None) -> dict[str, Any]:
-    state = ensure_state(player, context or {})
+    """Меняет только товары и возвращает ``gold_delta`` для Roma Economica."""
+    context = context or {}
+    state = ensure_state(player, context)
     offer = state.get("pending_trade_offer")
     if not isinstance(offer, dict):
         return {"ok": False, "message": "Нет действующего торгового предложения."}
@@ -838,29 +881,30 @@ def resolve_trade_offer(player: Any, accept: bool, context: dict[str, Any] | Non
         state["pending_trade_offer"] = None
         state["offer_history"].append({"turn": int(getattr(player, "turn", 1)), "kind": "trade", "result": "declined", "partner": offer.get("partner_name")})
         state["offer_history"] = state["offer_history"][-80:]
-        return {"ok": True, "message": f"Предложение от {offer.get('partner_name', 'партнёра')} отклонено."}
-
-    stock = state["stockpiles"]
+        return {"ok": True, "message": f"Предложение от {offer.get('partner_name', 'партнёра')} отклонено.", "gold_delta": 0}
     kind = offer.get("kind")
     if kind == "import":
-        cost = max(0, int(offer.get("pay_gold", 0)))
-        if int(getattr(player, "gold", 0)) < cost:
-            return {"ok": False, "message": f"Недостаточно золота: требуется {cost}."}
+        gold_delta = -max(0, int(offer.get("pay_gold", 0)))
+    elif kind == "export":
+        gold_delta = max(0, int(offer.get("receive_gold", 0)))
+    elif kind == "barter":
+        gold_delta = 0
+    else:
+        return {"ok": False, "message": "Неизвестный тип торгового предложения."}
+    if gold_delta and not bool(context.get("treasury_authorized", False)):
+        return {"ok": False, "requires_treasury": True, "gold_delta": gold_delta, "cost": abs(min(0, gold_delta)), "message": "Требуется казначейская проводка через Roma Economica."}
+    stock = state["stockpiles"]
+    if kind == "import":
         resource = str(offer.get("resource"))
         amount = max(0.0, finite(offer.get("amount", 0.0)))
-        player.gold -= cost
         stock[resource] = stock.get(resource, 0.0) + amount
-        gold_delta = -cost
     elif kind == "export":
         resource = str(offer.get("resource"))
         amount = max(0.0, finite(offer.get("amount", 0.0)))
         if stock.get(resource, 0.0) + 1e-6 < amount:
             return {"ok": False, "message": f"Недостаточно товара: {RESOURCE_CATALOG.get(resource, {}).get('name', resource)}."}
-        revenue = max(0, int(offer.get("receive_gold", 0)))
         stock[resource] -= amount
-        player.gold = int(getattr(player, "gold", 0)) + revenue
-        gold_delta = revenue
-    elif kind == "barter":
+    else:
         give = str(offer.get("give_resource"))
         receive = str(offer.get("receive_resource"))
         give_amount = max(0.0, finite(offer.get("give_amount", 0.0)))
@@ -869,16 +913,12 @@ def resolve_trade_offer(player: Any, accept: bool, context: dict[str, Any] | Non
             return {"ok": False, "message": f"Недостаточно товара: {RESOURCE_CATALOG.get(give, {}).get('name', give)}."}
         stock[give] -= give_amount
         stock[receive] = stock.get(receive, 0.0) + receive_amount
-        gold_delta = 0
-    else:
-        return {"ok": False, "message": "Неизвестный тип торгового предложения."}
-
     state["total_trade_gold"] = finite(state.get("total_trade_gold", 0.0)) + gold_delta
     state["pending_trade_offer"] = None
     state["offer_history"].append({"turn": int(getattr(player, "turn", 1)), "kind": "trade", "result": "accepted", "partner": offer.get("partner_name"), "gold_delta": gold_delta})
     state["offer_history"] = state["offer_history"][-80:]
     _push_legacy_metals(player, state)
-    return {"ok": True, "message": "Сделка заключена: " + trade_offer_text(offer)}
+    return {"ok": True, "gold_delta": gold_delta, "category": "resource_trade", "label": f"Торговая сделка с {offer.get('partner_name', 'партнёром')}", "message": "Сделка заключена: " + trade_offer_text(offer)}
 
 
 def rare_resource_income_breakdown(
@@ -937,12 +977,8 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
 
     rare_income_rows = rare_resource_income_breakdown(player, context, state)
     rare_income = sum(row["income"] for row in rare_income_rows)
-    if rare_income:
-        player.gold = max(0, int(getattr(player, "gold", 0))) + rare_income
-        # Roma Economica уже записала обычный бюджетный итог раньше в этом ходе.
-        # Добавляем прямой ресурсный доход к итоговым показателям, не подменяя их.
-        player.gold_income_last_turn = int(getattr(player, "gold_income_last_turn", 0)) + rare_income
-        player.gold_per_turn = int(getattr(player, "gold_per_turn", 0)) + rare_income
+    # Доход только сообщается главному экономическому ядру. Казна здесь не
+    # меняется: Roma Economica включит эту сумму в единую ведомость хода.
     player.rare_resource_income_last_turn = rare_income
     state["last_rare_resource_income"] = rare_income
     state["total_rare_resource_income"] = finite(state.get("total_rare_resource_income", 0.0)) + rare_income
@@ -961,7 +997,8 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "consumption": {key: round(value, 3) for key, value in consumed.items() if value > 1e-6},
         "demand": {key: round(value, 3) for key, value in demand.items() if value > 1e-6},
         "shortages": {key: round(value, 3) for key, value in shortages.items() if value > 1e-6},
-        "auto_purchase_cost": int(round(purchase_cost)),
+        "auto_purchase_cost": 0,
+        "recommended_purchase_cost": int(round(finite(state.get("last_recommended_purchase_cost", 0.0)))),
         "rare_resource_income": rare_income,
         "rare_resource_income_breakdown": rare_income_rows,
         "produced_total": round(produced_total, 2),
@@ -974,7 +1011,8 @@ def apply_turn(player: Any, context: dict[str, Any]) -> dict[str, Any]:
         "turn": turn,
         "produced": round(produced_total, 2),
         "consumed": round(consumed_total, 2),
-        "auto_purchase_cost": int(round(purchase_cost)),
+        "auto_purchase_cost": 0,
+        "recommended_purchase_cost": int(round(finite(state.get("last_recommended_purchase_cost", 0.0)))),
         "rare_resource_income": rare_income,
         "shortages": len(shortages),
         "stock_value": round(stockpile_value(player, context), 2),
@@ -1032,9 +1070,12 @@ def pending_offers(player: Any, context: dict[str, Any] | None = None) -> dict[s
 
 
 def set_auto_buy(player: Any, enabled: bool, context: dict[str, Any] | None = None) -> bool:
+    """Совместимый API: скрытые покупки запрещены архитектурой Aerarium Unicum."""
+    del enabled
     state = ensure_state(player, context or {})
-    state["auto_buy_shortages"] = bool(enabled)
-    return state["auto_buy_shortages"]
+    state["auto_buy_shortages"] = False
+    state["auto_purchase_budget_share"] = 0.0
+    return False
 
 
 def audit_invariants(player: Any, context: dict[str, Any] | None = None) -> list[str]:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Roma Aeterna — BELLA REGNORUM.
+"""Roma Aeterna 1.1 — BELLA REGNORUM PROVINCIALIA.
 
 Прямые войны Рима с иностранными государствами. Каждая держава выставляет
 собственные армии из национального ростера, воюет по уникальной доктрине,
@@ -14,6 +14,7 @@ Consilium Orbis и проходят в несколько стадий.
     declare_war(player, power_key, ctx=None, reason='roman_declaration')
     handle_council_event(player, event, ctx, ui)
     expire_council_event(player, event, ctx)
+    open_province_menu(player, province_name, ctx=None)
     open_menu(player, ctx=None)
 """
 from __future__ import annotations
@@ -25,7 +26,7 @@ import textwrap
 import uuid
 from typing import Any
 
-MODULE_VERSION = "1.0.0-bella-regnorum"
+MODULE_VERSION = "1.1.0-provincial-fronts"
 SCHEMA_VERSION = 1
 MAX_HISTORY = 260
 
@@ -590,6 +591,107 @@ def expire_council_event(player: Any, event: dict, ctx: dict) -> None:
         player.gold = max(0, _i(getattr(player, "gold", 0), 0) - 12)
         _record(player, ctx, "Противник захватил инициативу", "Рим не принял своевременного решения по кампании; враг разорил коммуникации.", key, 4)
 
+
+
+def _province_record(ctx: dict, province_name: str) -> dict:
+    lookup = ctx.get("province_by_name")
+    if callable(lookup):
+        try:
+            row = lookup(province_name)
+            if isinstance(row, dict):
+                return row
+        except Exception:
+            pass
+    direct = _dict(ctx.get("PROVINCE_BY_NAME"))
+    if province_name in direct:
+        return _dict(direct.get(province_name))
+    for row in _list(ctx.get("PROVINCES_DATA")):
+        if isinstance(row, dict) and str(row.get("name", "")) == province_name:
+            return row
+    return {}
+
+
+def _war_relevant_to_province(key: str, war: dict, province_name: str) -> bool:
+    names = {str(war.get("front", ""))}
+    names.update(str(x) for x in FRONTS.get(str(key), []))
+    for army in _list(war.get("enemy_armies")):
+        if isinstance(army, dict):
+            names.add(str(army.get("front", "")))
+    aliases = {
+        "Sardinia et Corsica": {"Sardinia"},
+        "Gallia Cisalpina": {"Cisalpine Gaul"},
+        "Africa Proconsularis": {"Carthago"},
+    }
+    names.update(aliases.get(province_name, set()))
+    return province_name in names or bool(set(aliases.get(province_name, set())) & names)
+
+
+def open_province_menu(player: Any, province_name: str, ctx: dict | None = None) -> None:
+    """Показывает прямые войны, чьи фронты связаны с выбранной провинцией."""
+    ctx = _ctx(ctx)
+    ui = UI(ctx)
+    state = ensure_state(player, ctx)
+    _sync_wars(player, ctx, state)
+    province_name = str(province_name or "").strip() or "Latium"
+    province = _province_record(ctx, province_name)
+    sea_zone = str(province.get("sea_zone", "") or "")
+    access = str(province.get("campaign_access", "land") or "land")
+
+    while True:
+        wars = {
+            key: war for key, war in _dict(state.get("wars")).items()
+            if isinstance(war, dict)
+            and war.get("status", "active") == "active"
+            and _war_relevant_to_province(str(key), war, province_name)
+        }
+        ui.screen()
+        ui.header(
+            f"FRONS: {province_name.upper()}",
+            "🌍",
+            "Прямые войны держав, способные затронуть выбранную провинцию",
+        )
+        ui.table("Театр", ["Показатель", "Значение"], [
+            ("Провинция", province_name),
+            ("Тип доступа", access),
+            ("Морская зона", sea_zone or "нет"),
+            ("Связанных войн", len(wars)),
+        ], "GOLD")
+
+        if wars:
+            ordered = list(wars.items())
+            ui.table("Войны на театре", ["#", "Держава", "Фронт", "Счёт", "Уст. Рим/враг", "Армии", "Итог"], [
+                (
+                    index,
+                    _nation(ctx, key).get("name", key),
+                    war.get("front", "—"),
+                    war.get("war_score", 0),
+                    f"{war.get('roman_weariness', 0)}/{war.get('enemy_weariness', 0)}",
+                    len([a for a in _list(war.get("enemy_armies")) if isinstance(a, dict) and a.get("strength", 0) > 0]),
+                    war.get("last_result", "—"),
+                )
+                for index, (key, war) in enumerate(ordered, 1)
+            ], "RED")
+            ui.section("Действия", "GOLD")
+            print("  1-N. Созвать внеочередной военный совет по выбранной войне")
+            print("  Q. Назад")
+            choice = ui.choice("\n  Выбор: ", [str(i) for i in range(1, len(ordered) + 1)] + ["Q"])
+            if choice == "Q":
+                return
+            key, war = ordered[int(choice) - 1]
+            if _queue_campaign(player, key, war, ctx):
+                ui.info("Военный совет созван и помещён в Consilium Orbis.", "GREEN")
+            else:
+                ui.info("Совет по этой войне уже ожидает решения.", "GOLD")
+            ui.pause()
+        else:
+            ui.info("На этом театре нет активной прямой войны держав.", "GRAY")
+            ui.wrap(
+                "Это не исключает местных защитников, варварские отряды или автономную кампанию "
+                "Bellum Provinciale: они учитываются другими подсистемами.",
+                "CYAN",
+            )
+            ui.pause()
+            return
 
 def open_menu(player: Any, ctx: dict | None = None) -> None:
     ctx = _ctx(ctx); ui = UI(ctx); state = ensure_state(player, ctx); _sync_wars(player, ctx, state)

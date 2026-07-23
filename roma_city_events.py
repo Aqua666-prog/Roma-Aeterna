@@ -25,8 +25,8 @@ import re
 import textwrap
 from typing import Any
 
-MODULE_VERSION = "1.0.1-civitates-project-fallback"
-SCHEMA_VERSION = 1
+MODULE_VERSION = "1.1.0-religious-events"
+SCHEMA_VERSION = 2
 MAX_HISTORY = 240
 MAX_PENDING = 12
 
@@ -213,6 +213,10 @@ CITY_EVENT_CATALOG: list[dict[str, Any]] = [
     {"id": "citizenship_debate", "title": "Спор о римском гражданстве", "category": "culture", "icon": "🦅", "weight": 6, "condition": "culture_mid"},
     {"id": "religious_procession", "title": "Торжественная процессия", "category": "religion", "icon": "🕯", "weight": 7, "condition": "religious"},
     {"id": "cult_conflict", "title": "Столкновение культовых общин", "category": "religion", "icon": "⚡", "weight": 5, "condition": "culture_low"},
+    {"id": "pilgrimage_wave", "title": "Поток паломников", "category": "religion", "icon": "🛕", "weight": 5, "condition": "holy_city"},
+    {"id": "heresy_preaching", "title": "Проповедь спорного учения", "category": "religion", "icon": "📖", "weight": 4, "condition": "heresy"},
+    {"id": "relic_theft", "title": "Заговор вокруг реликвии", "category": "religion", "icon": "🗝", "weight": 3, "condition": "relic_risk"},
+    {"id": "temple_dedication", "title": "Освящение нового святилища", "category": "religion", "icon": "🏛", "weight": 5, "condition": "religious"},
     {"id": "philosopher_school", "title": "Школа философа", "category": "science", "icon": "📚", "weight": 6, "condition": "cultural"},
     {"id": "engineering_breakthrough", "title": "Предложение городских инженеров", "category": "science", "icon": "🏗", "weight": 5, "condition": "infrastructure_mid"},
     {"id": "port_congestion", "title": "Затор в гавани", "category": "trade", "icon": "⚓", "weight": 7, "condition": "port"},
@@ -399,6 +403,30 @@ def _eligible(condition: str, player: Any, province: dict, city: dict, ctx: dict
     if condition == "military": return any(x in ctype for x in ("воен", "креп", "осад", "погранич")) or city.get("defense", 0) >= 55
     if condition == "culture_mid": return 20 <= city.get("culture", 0) <= 75
     if condition == "religious": return any(x in ctype for x in ("религ", "свящ", "культ")) or bool(getattr(player, "religion", None))
+    if condition == "holy_city":
+        system = _dict(getattr(player, "religion_system", {}))
+        holy = _dict(system.get("holy_cities"))
+        return any(
+            _dict(entry).get("controlled")
+            and str(_dict(entry).get("province", "")) == str(province.get("name", ""))
+            for entry in holy.values()
+        )
+    if condition == "heresy":
+        system = _dict(getattr(player, "religion_system", {}))
+        return any(
+            _dict(entry).get("status") == "active"
+            and str(_dict(entry).get("province", "")) == str(province.get("name", ""))
+            for entry in _dict(system.get("heresies")).values()
+        )
+    if condition == "relic_risk":
+        system = _dict(getattr(player, "religion_system", {}))
+        province_name = str(province.get("name", ""))
+        has_relic = any(
+            _dict(entry).get("status") == "owned"
+            and str(_dict(entry).get("location", "")) in {province_name, str(city.get("name", ""))}
+            for entry in _dict(system.get("relics")).values()
+        )
+        return has_relic and _i(province.get("unrest", 0), 0) >= 4
     if condition == "culture_low": return city.get("culture", 50) <= 48 or city.get("loyalty", 50) <= 50
     if condition == "cultural": return any(x in ctype for x in ("культур", "религ", "администр")) or city.get("culture", 0) >= 45
     if condition == "infrastructure_mid": return 30 <= city.get("infrastructure", 0) <= 75
@@ -421,6 +449,9 @@ def _effect_text(effects: dict) -> str:
         "population": "население", "prosperity": "процветание", "order": "порядок", "health": "здоровье",
         "infrastructure": "инфраструктура", "culture": "культура", "loyalty": "лояльность", "food": "продовольствие",
         "defense": "оборона", "trade": "торговля", "pollution": "загрязнение",
+        "religion_pressure": "давление официальной религии", "conversion_progress": "обращение",
+        "religious_integrity": "религиозная целостность", "heresy_risk": "риск ереси",
+        "relic_security": "защита реликвий",
     }
     parts = []
     for key, amount in effects.items():
@@ -528,14 +559,34 @@ def _build_options(event_id: str, player: Any, province: dict, city: dict) -> li
             _option("3", "Сохранить прежний статус", "Консервативная политика нравится части Сената.", {"senate_rep": 2, "culture": -3, "loyalty": -5}, ai=38),
         ],
         "religious_procession": [
-            _option("1", "Оплатить торжества", "Пышная церемония укрепляет согласие и престиж.", {"gold": -costs["medium"], "faith": 8, "order": 5, "loyalty": 5, "glory": 1}, gold=costs["medium"], ai=78),
-            _option("2", "Разрешить процессии за счёт общин", "Рим признаёт обычаи, не расходуя казну.", {"faith": 4, "loyalty": 3, "culture": 2}, ai=75),
-            _option("3", "Ограничить церемонии", "Порядок формально усилен, но верующие возмущены.", {"order": 3, "faith": -3, "loyalty": -7}, ai=30),
+            _option("1", "Оплатить торжества", "Пышная церемония укрепляет согласие и престиж.", {"gold": -costs["medium"], "faith": 8, "order": 5, "loyalty": 5, "glory": 1, "religion_pressure": 6, "religious_integrity": 4}, gold=costs["medium"], ai=78),
+            _option("2", "Разрешить процессии за счёт общин", "Рим признаёт обычаи, не расходуя казну.", {"faith": 4, "loyalty": 3, "culture": 2, "religion_pressure": 3, "religious_integrity": 2}, ai=75),
+            _option("3", "Ограничить церемонии", "Порядок формально усилен, но верующие возмущены.", {"order": 3, "faith": -3, "loyalty": -7, "religious_integrity": -5, "heresy_risk": 4}, ai=30),
         ],
         "cult_conflict": [
-            _option("1", "Созвать совет жрецов и старейшин", "Переговоры снижают напряжение.", {"gold": -costs["small"], "order": 7, "loyalty": 4, "culture": 3}, gold=costs["small"], ai=84),
-            _option("2", "Поддержать официальный культ", "Власть демонстрирует силу, но меньшинства отчуждаются.", {"faith": 6, "order": 3, "loyalty": -5, "culture": -3}, ai=51),
-            _option("3", "Не вмешиваться", "Уличное противостояние может разрастись.", {"order": -8, "health": -2, "province_unrest": 1}, ai=20),
+            _option("1", "Созвать совет жрецов и старейшин", "Переговоры снижают напряжение.", {"gold": -costs["small"], "order": 7, "loyalty": 4, "culture": 3, "religious_integrity": 5, "heresy_risk": -4}, gold=costs["small"], ai=84),
+            _option("2", "Поддержать официальный культ", "Власть демонстрирует силу, но меньшинства отчуждаются.", {"faith": 6, "order": 3, "loyalty": -5, "culture": -3, "religion_pressure": 9, "conversion_progress": 7, "province_unrest": 1}, ai=51),
+            _option("3", "Не вмешиваться", "Уличное противостояние может разрастись.", {"order": -8, "health": -2, "province_unrest": 1, "religious_integrity": -6, "heresy_risk": 6}, ai=20),
+        ],
+        "pilgrimage_wave": [
+            _option("1", "Охранять дороги и принять паломников", "Паломничество укрепляет святой город и местную торговлю.", {"gold": -costs["medium"], "faith": 12, "trade": 8, "prosperity": 6, "religion_pressure": 8, "religious_integrity": 6}, gold=costs["medium"], ai=86),
+            _option("2", "Взять паломнический сбор", "Казна получает доход, но священнослужители недовольны.", {"gold": 55, "faith": 4, "trade": 4, "religious_integrity": -2}, ai=64),
+            _option("3", "Ограничить наплыв", "Порядок сохранён ценой престижа святого места.", {"order": 5, "trade": -5, "faith": -5, "religious_integrity": -4}, ai=35),
+        ],
+        "heresy_preaching": [
+            _option("1", "Провести публичный диспут", "Учение проверяется спором, а не насилием.", {"gold": -costs["small"], "science": 6, "religious_integrity": 5, "heresy_risk": -8, "loyalty": 3}, gold=costs["small"], ai=82),
+            _option("2", "Арестовать проповедников", "Раскол временно подавлен, но община озлоблена.", {"faith": -8, "order": 6, "conversion_progress": 5, "religious_integrity": 2, "province_unrest": 2, "heresy_risk": -12}, ai=47),
+            _option("3", "Разрешить свободную проповедь", "Город сохраняет мир, но течение усиливается.", {"trade": 3, "loyalty": 2, "religious_integrity": -5, "heresy_risk": 10}, ai=52),
+        ],
+        "relic_theft": [
+            _option("1", "Развернуть расследование и охрану", "Реликвия остаётся под защитой государства.", {"gold": -costs["medium"], "order": 7, "religious_integrity": 6, "relic_security": 10}, gold=costs["medium"], ai=88),
+            _option("2", "Передать охрану общине", "Дешевле, но риск полностью не исчезает.", {"faith": 4, "loyalty": 4, "relic_security": 4}, ai=67),
+            _option("3", "Скрыть происшествие", "Скандала нет, однако воры получают шанс.", {"order": -3, "religious_integrity": -7, "relic_security": -8}, ai=22),
+        ],
+        "temple_dedication": [
+            _option("1", "Даровать храму землю и иммунитет", "Святилище становится сильным центром официальной веры.", {"gold": -costs["large"], "faith": 10, "religion_pressure": 12, "religious_integrity": 7, "loyalty": 5}, gold=costs["large"], ai=84),
+            _option("2", "Признать храм без привилегий", "Умеренное усиление культа без нагрузки на казну.", {"faith": 5, "religion_pressure": 6, "religious_integrity": 3}, ai=73),
+            _option("3", "Отказать в освящении", "Казна не тратится, но община оскорблена.", {"faith": -4, "loyalty": -6, "religious_integrity": -5, "heresy_risk": 5}, ai=30),
         ],
         "philosopher_school": [
             _option("1", "Учредить публичную школу", "Рим финансирует преподавание и библиотеку.", {"gold": -costs["medium"], "science": 16, "culture": 9, "glory": 1}, gold=costs["medium"], ai=86),
@@ -658,6 +709,28 @@ def _apply_effects(player: Any, province: dict, city: dict, effects: dict) -> di
         amount = _i(effects.get(key, 0), 0)
         if amount:
             province[field] = max(low, min(high, _i(province.get(field, 0), 0) + amount))
+
+    official = str(getattr(player, "religion", "") or "")
+    pressure_delta = _f(effects.get("religion_pressure", 0.0), 0.0)
+    if official and pressure_delta:
+        pressure = _dict(province.get("religion_pressure"))
+        pressure[official] = max(0.0, _f(pressure.get(official, 0.0)) + pressure_delta)
+        province["religion_pressure"] = pressure
+    if effects.get("conversion_progress"):
+        province["conversion_progress"] = _clamp(
+            _f(province.get("conversion_progress", 0.0)) + _f(effects.get("conversion_progress", 0.0)),
+            0, 100, 0,
+        )
+    if effects.get("religious_integrity"):
+        province["religious_integrity"] = _clamp(
+            _f(province.get("religious_integrity", 50.0)) + _f(effects.get("religious_integrity", 0.0)),
+            0, 100, 50,
+        )
+    system = _dict(getattr(player, "religion_system", {}))
+    if effects.get("heresy_risk") and system:
+        system["event_heresy_pressure"] = _f(system.get("event_heresy_pressure", 0.0)) + _f(effects.get("heresy_risk", 0.0)) / 100.0
+    if effects.get("relic_security") and system:
+        system["event_relic_security"] = _f(system.get("event_relic_security", 0.0)) + _f(effects.get("relic_security", 0.0)) / 100.0
 
     city_fields = ("prosperity", "order", "health", "infrastructure", "culture", "loyalty", "food", "defense", "trade", "pollution")
     for key in city_fields:
@@ -832,6 +905,10 @@ def _generate_event(player: Any, province: dict, city: dict, ctx: dict, excluded
         "citizenship_debate": "Муниципий расколот спором: кому должны принадлежать римские права.",
         "religious_procession": "Жрецы и общины готовят церемонию, способную собрать весь город.",
         "cult_conflict": "Соперничающие культовые общины обвиняют друг друга в святотатстве.",
+        "pilgrimage_wave": "Тысячи паломников направляются к святому месту, перегружая дороги и рынки.",
+        "heresy_preaching": "В городе распространяется учение, которое официальные наставники называют опасным расколом.",
+        "relic_theft": "Слухи о заговоре и подкупе стражи угрожают хранящейся здесь реликвии.",
+        "temple_dedication": "Община завершила святилище и просит государство признать его особый статус.",
         "philosopher_school": "Известный наставник предлагает основать школу и библиотеку.",
         "engineering_breakthrough": "Местные инженеры представили новый способ строительства и просят покровительства.",
         "port_congestion": "Суда неделями ждут разгрузки, товары портятся, портовые сборщики спорят о порядке.",
